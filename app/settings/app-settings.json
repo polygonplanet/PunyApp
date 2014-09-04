@@ -1,0 +1,19 @@
+{
+  "system": {
+    "debug": true,
+    "lang": "ja",
+    "charset": "utf-8",
+    "timezone": "Asia/Tokyo",
+    "salt": "ZQJaiPPYn6Tldb2gottKwIDmGiatuSnV"
+  },
+  "database": {
+    "engine": "sqlite",
+    "user": "",
+    "pass": ""
+  },
+  "session": {
+    "engine": "sqlite",
+    "name": "sessid",
+    "expirationDate": 365
+  }
+}
