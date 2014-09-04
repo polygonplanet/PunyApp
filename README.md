@@ -8,5 +8,8 @@ The puny PHP framework for rapid compiling.
 
 PunyApp requires PHP 5.2.0 or newer.
 
+### License
+
+MIT
 
 
