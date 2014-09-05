@@ -12,7 +12,7 @@ It does not require the external PHP extensions.
 
 * MySQL
 * SQLite
-* [Posql](https://github.com/polygonplanet/Posql)
+* Posql *[GitHub](https://github.com/polygonplanet/Posql) [(English)](http://feel.happy.nu/doc/posql/en/)
 
 
 ### Tutorial
@@ -55,7 +55,7 @@ Application directory layout:
     "salt": "ZQJaiPPYn6Tldb2gottKwIDmGiatuSnV"
   },
   "database": {
-    "engine": "sqlite", // or "mysql"
+    "engine": "sqlite", // or "mysql", "posql"
     "encoding": "utf8",
     "user": "",
     "pass": "",
@@ -64,7 +64,7 @@ Application directory layout:
     "port": ""
   },
   "session": {
-    "engine": "sqlite", // or "mysql"
+    "engine": "sqlite", // or "mysql", "posql"
     "name": "sessid", // PHPSESSID
     "expirationDate": 365
   }
@@ -80,7 +80,9 @@ For SQLite, set to writable following files.
 
 * There is a sample login form in `/sample/`.
 
-### Use Posql
+----
+
+#### Use Posql
 
 Posql documents [(Japanese)](http://feel.happy.nu/doc/posql/) [(English)](http://feel.happy.nu/doc/posql/en/)  
 
