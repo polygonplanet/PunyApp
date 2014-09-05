@@ -7,11 +7,19 @@ PunyApp is a lightweight MVC PHP framework.
 PunyApp requires PHP 5.2.0 or newer.  
 It does not require the external PHP extensions.  
 
+
+### Supported Databases
+
+* MySQL
+* SQLite
+* [Posql](https://github.com/polygonplanet/Posql)
+
+
 ### Tutorial
 
 #### layout
 
-Application directory layout:
+Application directory layout:  
 
     /app                  -> Application
       /controllers        -> App controllers
@@ -70,9 +78,52 @@ For SQLite, set to writable following files.
 
 ### Sample
 
-There is a sample login form in `/sample/`.
+* There is a sample login form in `/sample/`.
+
+### Use Posql
+
+Posql documents [(Japanese)](http://feel.happy.nu/doc/posql/) [(English)](http://feel.happy.nu/doc/posql/en/)  
+
+1. [Download](https://github.com/polygonplanet/Posql/tree/master/posql-2.18a) latest `posql.php`
+
+2. Put `posql.php` in `/vendors` directory.
+3. Requires posql in `app/settings/app-initialize.php`
+
+```php
+PunyApp::uses('posql', 'vendors');
+```
+
+4. Settings `app/settings/app-settings.json`  
+
+```javascript
+{
+  ...
+  "database": {
+    "engine": "posql",
+    ...
+  },
+  "session": {
+    "engine": "posql",
+    ...
+  }
+}
+```
+
+After accessed to the application `/sample/`, set to writable following files.  
+
+ * app/storage/databases/app-database.posql.php
+ * app/storage/sessions/app-session.posql.php
+
+#### posqladmin
+
+1. Download latest posqladmin [(Japanese)](https://github.com/polygonplanet/Posql/tree/master/posql-2.18a) [(English)](http://feel.happy.nu/doc/posql/en/)
+2. Put `posqladmin.php` in public directory.
+3. Set to writable `posqladmin.php` (e.g., `0666` permissions).
+4. Access `posqladmin.php`.
+5. Set id and pass in settings.
 
 ### License
 
 The PunyApp is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+
 
