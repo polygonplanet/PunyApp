@@ -27,6 +27,21 @@ class PunyApp_Session_Posql extends PunyApp_Session_Common {
   protected $_db = null;
 
   /**
+   * @var bool maintains whether the database is able to vacuum
+   */
+  protected $_vacuumble = true;
+
+  /**
+   * @var string database creation scheme
+   */
+  protected $_scheme = "CREATE TABLE IF NOT EXISTS %s (
+    id       varchar(255) NOT NULL default '',
+    data     text,
+    expire   integer default NULL,
+    updateAt integer default NULL
+  )";
+
+  /**
    * Create Database instance
    *
    * @return Posql

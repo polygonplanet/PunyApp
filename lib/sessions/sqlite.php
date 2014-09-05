@@ -27,6 +27,11 @@ class PunyApp_Session_SQLite extends PunyApp_Session_Common {
   protected $_db = null;
 
   /**
+   * @var bool maintains whether the database is able to vacuum
+   */
+  protected $_vacuumble = true;
+
+  /**
    * Create Database instance
    *
    * @return PDO

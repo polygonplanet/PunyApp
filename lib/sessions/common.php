@@ -51,6 +51,11 @@ class PunyApp_Session_Common {
   protected $_vacuumed = false;
 
   /**
+   * @var bool maintains whether the database is able to vacuum
+   */
+  protected $_vacuumble = false;
+
+  /**
    * @var bool maintains whether the instance is initialized
    */
   protected $_initialized = false;
@@ -451,7 +456,7 @@ class PunyApp_Session_Common {
     $stmt = $self->_db->prepare($sql);
     $stmt->execute(array(time() - $sec));
 
-    if (empty($self->_vacuumed) && mt_rand(1, 100) === 1) {
+    if ($self->_vacuumble && empty($self->_vacuumed) && mt_rand(1, 100) === 1) {
       $self->_db->exec('VACUUM');
       $self->_vacuumed = true;
     }
