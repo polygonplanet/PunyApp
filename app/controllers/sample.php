@@ -32,8 +32,13 @@ class SampleController extends PunyApp_Controller {
 
 
   public function beforeFilter() {
-    $this->sendContentType('text/html');
     $this->view->set('title', 'PunyApp - Sample');
+  }
+
+
+  public function beforeRender() {
+    $this->sendContentType('text/html');
+    $this->app->removePoweredByHeader();
   }
 
 
@@ -41,36 +46,58 @@ class SampleController extends PunyApp_Controller {
   }
 
 
-  public function index() {
-    $this->home();
+  /**
+   * any /index
+   */
+  public function anyIndex() {
+    $this->getHome();
   }
 
 
-  public function login() {
+  /**
+   * Before /login
+   */
+  public function beforeLogin() {
     if (!empty($this->session->userId)) {
-      return $this->home();
+      $this->redirect('home');
+    }
+
+    $this->view->set('error', null);
+  }
+
+  /**
+   * GET /login
+   */
+  public function getLogin() {
+    $this->view->set('error', null);
+    $this->view->render('sample/login');
+  }
+
+  /**
+   * POST /login
+   */
+  public function postLogin() {
+    if (!empty($this->session->userId)) {
+      $this->redirect('home');
     }
 
     $error = null;
+    $this->_validateToken();
 
-    if ($this->request->method === 'POST') {
-      $this->_validateToken();
+    if (!$this->validate(array('id', 'pass'))) {
+      $error = $this->view->getLastValidationError();
+    } else {
+      $is_user = $this->models->sample->isUser(
+        $this->request->params->id,
+        $this->request->params->pass
+      );
 
-      if (!$this->validate(array('id', 'pass'))) {
-        $error = $this->view->getLastValidationError();
-      } else {
-        $is_user = $this->models->sample->isUser(
-          $this->request->params->id,
-          $this->request->params->pass
-        );
-
-        if ($is_user) {
-          $this->session->userId = $this->request->params->id;
-          return $this->home();
-        }
-
-        $error = 'Missing id or pass';
+      if ($is_user) {
+        $this->session->userId = $this->request->params->id;
+        $this->redirect('home');
       }
+
+      $error = 'Missing id or pass';
     }
 
     $this->view->set('error', $error);
@@ -78,20 +105,39 @@ class SampleController extends PunyApp_Controller {
   }
 
 
-  public function logout() {
+  public function getLogout() {
     unset($this->session->userId);
-    $this->login();
+    $this->redirect('login');
   }
 
 
-  public function register() {
-    if ($this->request->method === 'POST') {
-      $this->_validateToken();
+  /**
+   * Before /register
+   */
+  public function beforeRegister() {
+    $this->view->set(array(
+      'id' => null,
+      'email' => null,
+      'pass' => null
+    ));
+  }
 
-      if ($this->validate()) {
-        $this->_registerUser();
-        return $this->home();
-      }
+  /**
+   * GET /register
+   */
+  public function getRegister() {
+    $this->view->render('sample/register');
+  }
+
+  /**
+   * POST /register
+   */
+  public function postRegister() {
+    $this->_validateToken();
+
+    if ($this->validate()) {
+      $this->_registerUser();
+      $this->redirect('home');
     }
 
     $this->view->set(array(
@@ -104,9 +150,12 @@ class SampleController extends PunyApp_Controller {
   }
 
 
-  public function home() {
+  /**
+   * GET /home
+   */
+  public function getHome() {
     if (empty($this->session->userId)) {
-      return $this->login();
+      $this->redirect('login');
     }
 
     $user = $this->models->sample->getUser($this->session->userId);

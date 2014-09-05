@@ -19,7 +19,7 @@ body {
   </p>
 
   <p>
-    <a href="./sample/login">Sample login form</a>
+    <a href="<?php echo $base_uri . 'sample/login' ?>">Sample login form</a>
   </p>
 </body>
 </html>

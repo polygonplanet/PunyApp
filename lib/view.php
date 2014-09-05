@@ -56,18 +56,42 @@ class PunyApp_View {
   /**
    * Set template vars
    *
-   * @param mixed $key
+   * @param mixed $name
    * @param mixed $value
    */
-  public function set($key, $value = null) {
-    $vars = $key;
+  public function set($name, $value = null) {
+    $vars = $name;
     if (!is_array($vars)) {
-      $vars = array($key => $value);
+      $vars = array($name => $value);
     }
 
-    foreach ($vars as $name => $val) {
-      self::$_vars[$name] = $val;
+    foreach ($vars as $key => $val) {
+      self::$_vars[$key] = $val;
     }
+  }
+
+  /**
+   * Check the template variable name is exists
+   *
+   * @param string $name
+   * @return bool
+   */
+  public function has($name) {
+    return array_key_exists($name, self::$_vars);
+  }
+
+  /**
+   * Delete a template variable
+   *
+   * @param string $name
+   * @return bool
+   */
+  public function delete($name) {
+    if ($this->has($name)) {
+      unset(self::$_vars[$name]);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -86,6 +110,16 @@ class PunyApp_View {
    * @param string $template
    */
   public function render($template = null) {
+    static $called = false;
+
+    if ($called) {
+      return;
+    }
+    $called = true;
+
+    $args = func_get_args();
+    $this->_beforeRender($args);
+
     if ($template == null) {
       $template = $this->template;
     }
@@ -106,10 +140,17 @@ class PunyApp_View {
    * @param int $code
    */
   public function renderError($code) {
-    //TODO: error code
-    if ((int)$code === 404 && !headers_sent()) {
-      header('HTTP/1.0 404 Not Found', true, 404);
+    static $called = false;
+
+    if ($called) {
+      return;
     }
+    $called = true;
+
+    $args = func_get_args();
+    $this->_beforeRender($args);
+
+    $this->app->sendResponseCode($code);
     $this->app->sendContentType('text/html');
 
     self::$_template = (string)$code;
@@ -216,6 +257,20 @@ class PunyApp_View {
   }
 
   /**
+   * Before render
+   *
+   * @param array $args
+   */
+  private function _beforeRender($args) {
+    if (isset($this->app->controller) &&
+        is_callable(array($this->app->controller, 'beforeRender'))) {
+      call_user_func_array(array($this->app->controller, 'beforeRender'), $args);
+    }
+
+    return PunyApp::header('send');
+  }
+
+  /**
    * Render template contents
    */
   private function _render() {
@@ -238,5 +293,6 @@ class PunyApp_View {
    */
   private function _setDefaultVars() {
     self::$_vars['charset'] = $this->app->getCharset();
+    self::$_vars['base_uri'] = $this->app->getBaseURI();
   }
 }

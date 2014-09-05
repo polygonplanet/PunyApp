@@ -85,6 +85,11 @@ class PunyApp_Controller {
   public $name = null;
 
   /**
+   * @var string method name
+   */
+  public $methodName = null;
+
+  /**
    * @var array methods
    */
   public $methods = array();
@@ -118,6 +123,17 @@ class PunyApp_Controller {
     $parent_methods = get_class_methods('PunyApp_Controller');
 
     $this->methods = array_values(array_diff($child_methods, $parent_methods));
+  }
+
+  /**
+   * Set header
+   *
+   * @param string $name header name
+   * @param string $value header value
+   * @return bool
+   */
+  protected function header($name, $value = null) {
+    return PunyApp::header('set', $name, $value);
   }
 
   /**
@@ -188,12 +204,18 @@ class PunyApp_Controller {
   /**
    * Called before the controller action
    */
-  protected function beforeFilter() {
+  public function beforeFilter() {
   }
 
   /**
    * Called after the controller action is run and rendered
    */
-  protected function afterFilter() {
+  public function afterFilter() {
+  }
+
+  /**
+   * Called before the render action
+   */
+  public function beforeRender() {
   }
 }

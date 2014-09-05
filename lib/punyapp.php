@@ -12,7 +12,7 @@
  * @link       http://polygonpla.net/
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
- * @version    1.0.7
+ * @version    1.0.8
  */
 
 /**
@@ -156,7 +156,6 @@ class PunyApp extends PunyApp_Settings {
     $this->cookie = new PunyApp_Cookie($this);
 
     $this->_executeUserScheme();
-    $this->removePoweredByHeader();
     $this->event->trigger('app-initialize');
   }
 
@@ -241,7 +240,7 @@ class PunyApp extends PunyApp_Settings {
    *
    * @param string $name
    * @param string $path
-   * @return boolean
+   * @return bool
    */
   public static function uses($name, $path) {
     $filename = self::getLibPath($name, $path);
@@ -388,27 +387,6 @@ class PunyApp extends PunyApp_Settings {
 
 
   /**
-   * Returns whether the server is secure by https
-   *
-   * @param  void
-   * @return bool  whether the server is secure by https
-   */
-  public function isHTTPS() {
-    static $is_https = null;
-
-    if ($is_https === null) {
-      $is_https = false;
-      $https = $this->env->HTTPS;
-      if ($https !== null && 0 !== strcasecmp($https, 'off')) {
-        $is_https = true;
-      } else if (strpos($this->env->SCRIPT_URI, 'https://') === 0) {
-        $is_https = true;
-      }
-    }
-    return $is_https;
-  }
-
-  /**
    * Get the base URI that is able to use in cookie path etc.
    *
    * @param  void
@@ -468,26 +446,94 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
+   * header
+   *
+   * @param string $action
+   * @param string $name
+   * @param string $value
+   * @param bool $replace
+   * @param int $code
+   * @return bool
+   */
+  public static function header($action, $name = null, $value = null,
+                                $replace = true, $code = null) {
+    static $headers = array();
+
+    switch (strtolower($action)) {
+      case 'set':
+        if (!$replace && array_key_exists($name, $headers)) {
+          return false;
+        }
+
+        $headers[$name] = array($name . ': ' . $value, $replace, $code);
+        if ($code === null) {
+          array_pop($headers[$name]);
+        }
+        return true;
+      case 'send':
+        if (headers_sent()) {
+          return false;
+        }
+
+        foreach ($headers as $key => $args) {
+          call_user_func_array('header', $args);
+          unset($headers[$key]);
+        }
+        $headers = array();
+        return true;
+      case 'delete':
+        unset($headers[$name]);
+        return true;
+    }
+  }
+
+
+  /**
+   * Send HTTP response code
+   *
+   * @param int $code
+   * @return bool
+   */
+  public static function sendResponseCode($code) {
+    if (headers_sent()) {
+      return false;
+    }
+
+    $code = (int)$code;
+    $response = null;
+    switch ($code) {
+      case 404:
+        $response = 'Not Found';
+        break;
+      case 500:
+        $response = 'Internal Server Error';
+        break;
+    }
+
+    if ($response) {
+      header(sprintf('HTTP/1.0 %d %s', $code, $response), true, $code);
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Send Content-type states header
    *
    * @param  string $type content-type
    * @return void
    */
   public function sendContentType($type = null) {
-    if (!headers_sent()) {
-      $this->removePoweredByHeader();
+    if ($type === null) {
+      $type = $this->_mimeType;
+    }
 
-      if ($type === null) {
-        $type = $this->_mimeType;
+    if ($type != null) {
+      $header = $type;
+      if ($this->_charset != null) {
+        $header .= sprintf('; charset=%s', $this->_charset);
       }
-
-      if ($type != null) {
-        $header = sprintf('Content-Type: %s', $type);
-        if ($this->_charset != null) {
-          $header .= sprintf('; charset=%s', $this->_charset);
-        }
-        header($header);
-      }
+      self::header('set', 'Content-Type', $header);
     }
   }
 
@@ -495,17 +541,8 @@ class PunyApp extends PunyApp_Settings {
   /**
    * Remove X-Powered-By: PHP x.x.x header
    */
-  public function removePoweredByHeader() {
-    static $removed = false;
-
-    if (!$removed && !headers_sent()) {
-      if (function_exists('header_remove')) {
-        header_remove('X-Powered-By');
-      } else {
-        header('X-Powered-By: ');
-      }
-      $removed = true;
-    }
+  public static function removePoweredByHeader() {
+    self::header('set', 'X-Powered-By', null);
   }
 
   /**
@@ -518,7 +555,6 @@ class PunyApp extends PunyApp_Settings {
     $url = trim($url);
 
     if (!headers_sent()) {
-      $this->removePoweredByHeader();
       header('Location: ' . $url);
       exit;
     }

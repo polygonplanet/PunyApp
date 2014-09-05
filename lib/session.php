@@ -101,7 +101,7 @@ class PunyApp_Session implements Iterator {
       null,
       $this->_sessionMaxLifeTime,
       $this->_app->getBaseURI(),
-      $this->_app->isHTTPS()
+      $this->_app->request->isSSL()
     );
 
     call_user_func(array($this->_sessionClassName, 'start'));

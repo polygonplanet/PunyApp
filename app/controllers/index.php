@@ -9,16 +9,23 @@ class IndexController extends PunyApp_Controller {
   public $models = array();
 
 
-  public function beforeFilter() {
+  public function beforeRender() {
     $this->sendContentType('text/html');
+    $this->app->removePoweredByHeader();
+  }
+
+
+  public function beforeFilter() {
   }
 
 
   public function afterFilter() {
   }
 
-
-  public function index() {
+  /**
+   * any /index
+   */
+  public function anyIndex() {
     $this->view->set('title', 'PunyApp');
     $this->view->set('description', 'The puny developer framework for rapid compiling.');
     $this->view->render();

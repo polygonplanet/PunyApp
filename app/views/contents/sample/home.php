@@ -24,7 +24,7 @@ body {
   </div>
 
   <p>
-    <a href="./logout">logout</a>
+    <a href="<?php echo $base_uri . 'sample/logout' ?>">logout</a>
   </p>
 </body>
 </html>

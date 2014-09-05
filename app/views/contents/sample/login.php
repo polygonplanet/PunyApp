@@ -55,7 +55,7 @@ body {
     <p class="error"><?php echo $this->escapeHTML($error) ?></p>
   <?php endif ?>
 
-  <form action="./login" method="post" class="validation-test-form">
+  <form action="<?php echo $base_uri . 'sample/login' ?>" method="post" class="validation-test-form">
     <input type="hidden" name="token" value="<?php echo $this->generateToken() ?>">
 
     <fieldset>
@@ -81,7 +81,7 @@ body {
   </form>
 
   <p>
-    <a href="./register">register</a>
+    <a href="<?php echo $base_uri . 'sample/register' ?>">register</a>
   </p>
 </body>
 </html>

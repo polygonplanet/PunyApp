@@ -109,7 +109,7 @@ class PunyApp_Session_Common {
    * @param  string   session table name
    * @param  number   session lifetime (e.g. (60 * 60 * 24 * 365) = 1 year)
    * @param  string   session cookie path (e.g. '/path/to/myproject/')
-   * @param  bool  whether connected with HTTPS (use PunyApp::isHTTPS)
+   * @param  bool  whether connected with HTTPS
    */
   public static function init($sess_name,
                               $save_path,
@@ -214,7 +214,7 @@ class PunyApp_Session_Common {
         // ADM : admin
         // COM : computer
         // OUR : ours
-        header("P3P: CP='UNI ADM COM OUR'");
+        PunyApp::header('set', 'P3P', "CP='UNI ADM COM OUR'");
 
         if (!is_array($_SESSION)) {
           $_SESSION = array();

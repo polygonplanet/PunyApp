@@ -30,6 +30,14 @@ class PunyApp_Request {
   public $method = null;
 
   /**
+   * @var array request methods
+   */
+  public $methods = array(
+    'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS',
+    'TRACE','PATCH','LINK','UNLINK','CONNECT'
+  );
+
+  /**
    * @var PunyApp_Request_Files request files
    */
   public $files = null;
@@ -66,6 +74,155 @@ class PunyApp_Request {
     $this->app = $app;
     $this->_setRequestVars();
   }
+
+  /**
+   * Check whether argument is request method
+   *
+   * @param string $method
+   * @return bool
+   */
+  public function isRequestMethod($method) {
+    return in_array(strtoupper($method), $this->methods, true);
+  }
+
+  /**
+   * Check whether is request method is GET
+   *
+   * @return bool
+   */
+  public function isGET() {
+    return $this->method === 'GET';
+  }
+
+  /**
+   * Check whether is request method is POST
+   *
+   * @return bool
+   */
+  public function isPOST() {
+    return $this->method === 'POST';
+  }
+
+  /**
+   * Check whether is request method is PUT
+   *
+   * @return bool
+   */
+  public function isPUT() {
+    return $this->method === 'PUT';
+  }
+
+  /**
+   * Check whether is request method is DELETE
+   *
+   * @return bool
+   */
+  public function isDELETE() {
+    return $this->method === 'DELETE';
+  }
+
+  /**
+   * Check whether is request method is HEAD
+   *
+   * @return bool
+   */
+  public function isHEAD() {
+    return $this->method === 'HEAD';
+  }
+
+  /**
+   * Check whether is request method is OPTIONS
+   *
+   * @return bool
+   */
+  public function isOPTIONS() {
+    return $this->method === 'OPTIONS';
+  }
+
+  /**
+   * Check whether is request method is TRACE
+   *
+   * @return bool
+   */
+  public function isTRACE() {
+    return $this->method === 'TRACE';
+  }
+
+  /**
+   * Check whether is request method is PATCH
+   *
+   * @return bool
+   */
+  public function isPATCH() {
+    return $this->method === 'PATCH';
+  }
+
+  /**
+   * Check whether is request method is LINK
+   *
+   * @return bool
+   */
+  public function isLINK() {
+    return $this->method === 'LINK';
+  }
+
+  /**
+   * Check whether is request method is UNLINK
+   *
+   * @return bool
+   */
+  public function isUNLINK() {
+    return $this->method === 'UNLINK';
+  }
+
+  /**
+   * Check whether is request method is CONNECT
+   *
+   * @return bool
+   */
+  public function isCONNECT() {
+    return $this->method === 'CONNECT';
+  }
+
+  /**
+   * Returns whether the server is secure by https
+   *
+   * @return bool
+   */
+  public function isSSL() {
+    static $ssl = null;
+
+    if ($ssl === null) {
+      $ssl = false;
+      $https = $this->app->env->HTTPS;
+      if ($https !== null && 0 !== strcasecmp($https, 'off')) {
+        $ssl = true;
+      } else if (strpos($this->app->env->SCRIPT_URI, 'https://') === 0) {
+        $ssl = true;
+      }
+    }
+    return $ssl;
+  }
+
+  /**
+   * Check whether is requested device is mobile
+   *
+   * pattern from CakePHP
+   *
+   * @return bool
+   */
+  public function isMobile() {
+    $agents = array(
+      'Android', 'AvantGo', 'BlackBerry', 'DoCoMo', 'Fennec', 'iPod', 'iPhone',
+      'iPad', 'J2ME', 'MIDP', 'NetFront', 'Nokia', 'Opera Mini', 'Opera Mobi',
+      'PalmOS', 'PalmSource', 'portalmmm', 'Plucker', 'ReqwirelessWeb',
+      'SonyEricsson', 'Symbian', 'UP[.]Browser', 'webOS', 'Windows CE',
+      'Windows Phone OS', 'Xiino'
+    );
+    $pattern = '/' . implode('|', $agents) . '/i';
+    return (bool)preg_match($pattern, $this->app->env->HTTP_USER_AGENT);
+  }
+
 
   /**
    * Parse request URI
