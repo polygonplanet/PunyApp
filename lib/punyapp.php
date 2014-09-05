@@ -12,7 +12,7 @@
  * @link       http://polygonpla.net/
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
- * @version    1.0.8
+ * @version    1.0.9
  */
 
 /**
