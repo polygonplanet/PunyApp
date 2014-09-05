@@ -70,13 +70,14 @@ class PunyApp_Session implements Iterator {
 
     if (isset($this->_app->sessionSettings->engine) &&
         $this->_app->sessionSettings->engine != null) {
-      $common = PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR . 'common.php';
+      $session_dir = PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'sessions';
+      $common = $session_dir . DIRECTORY_SEPARATOR . 'common.php';
       require_once $common;
 
       $engine = strtolower($this->_app->sessionSettings->engine);
-      $driver = PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'session' . DIRECTORY_SEPARATOR . $engine . '.php';
-
+      $driver = $session_dir . DIRECTORY_SEPARATOR . $engine . '.php';
       require_once $driver;
+
       $this->_sessionClassName = 'PunyApp_Session_' . ucfirst($engine);
       $this->_sessionFileName .= '.' . preg_replace('/\W+/', '', $engine);
 
