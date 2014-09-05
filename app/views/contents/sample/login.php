@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
+<meta charset="<?php echo $this->escapeHTML($charset) ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= $this->escapeHTML($title) ?></title>
+<title><?php echo $this->escapeHTML($title) ?></title>
 <style>
 body {
   font-family: tahoma, sans-serif;
@@ -48,15 +48,15 @@ body {
 </style>
 </head>
 <body>
-  <h1><?= $this->escapeHTML($title) ?></h1>
+  <h1><?php echo $this->escapeHTML($title) ?></h1>
 
   <?php if ($error): ?>
 
-    <p class="error"><?= $this->escapeHTML($error) ?></p>
+    <p class="error"><?php echo $this->escapeHTML($error) ?></p>
   <?php endif ?>
 
   <form action="./login" method="post" class="validation-test-form">
-    <input type="hidden" name="token" value="<?= $this->generateToken() ?>">
+    <input type="hidden" name="token" value="<?php echo $this->generateToken() ?>">
 
     <fieldset>
       <legend>Login</legend>
@@ -67,10 +67,10 @@ body {
 
           <div class="field clearfix">
             <div class="field-name">
-              <?= $name ?>:
+              <?php echo $name ?>:
             </div>
             <div class="field-input">
-              <input type="<?= $field['type'] ?>" name="<?= $name ?>" value="">
+              <input type="<?php echo $field['type'] ?>" name="<?php echo $name ?>" value="">
             </div>
           </div>
         <?php endforeach ?>

@@ -20,7 +20,7 @@
 class PunyApp_Settings {
 
   /**
-   * @var boolean whether application run for debug or release
+   * @var bool whether application run for debug or release
    */
   protected $_debug = true;
 
@@ -144,7 +144,7 @@ class PunyApp_Settings {
   /**
    * Gets the debug mode
    *
-   * @return boolean  return TRUE if run as the debug mode
+   * @return bool  return TRUE if run as the debug mode
    */
   public function getDebug() {
     return $this->_debug;
@@ -153,7 +153,7 @@ class PunyApp_Settings {
   /**
    * Sets the debug mode
    *
-   * @param  boolean $debug give TRUE if run as the debug mode
+   * @param  bool $debug give TRUE if run as the debug mode
    */
   public function setDebug($debug) {
     $this->_debug = (bool)$debug;
@@ -309,7 +309,7 @@ class PunyApp_Settings {
   /**
    * Gets the implicit flush mode
    *
-   * @return boolean  whether flush the output buffering as implicit
+   * @return bool  whether flush the output buffering as implicit
    */
   public function getImplicitFlush() {
     return $this->_implicitFlush;
@@ -318,7 +318,7 @@ class PunyApp_Settings {
   /**
    * Sets the implicit flush mode
    *
-   * @param  boolean $implicit_flush whether flush the output buffering as implicit
+   * @param  bool $implicit_flush whether flush the output buffering as implicit
    */
   public function setImplicitFlush($implicit_flush) {
     $this->_implicitFlush = (bool)$implicit_flush;

@@ -26,7 +26,7 @@ class SampleController extends PunyApp_Controller {
         array('maxLength', 20),
         array('regex', '/^[a-zA-Z0-9_.!?@=+-]{4,20}$/')
       ),
-      'message' => 'Min 4 characters, max 20 characters, enabled [a-zA-Z0-9_.!?@=+-].'
+      'message' => 'Min 4 characters, max 20 characters, enables [a-zA-Z0-9_.!?@=+-].'
     )
   );
 

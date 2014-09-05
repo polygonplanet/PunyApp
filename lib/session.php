@@ -64,7 +64,6 @@ class PunyApp_Session implements Iterator {
     if ($initialized) {
       return;
     }
-
     $initialized = true;
 
     $this->_sessionFileName = PUNYAPP_SESSIONS_DIR . DIRECTORY_SEPARATOR . self::SESSION_FILENAME;

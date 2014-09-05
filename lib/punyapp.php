@@ -12,7 +12,7 @@
  * @link       http://polygonpla.net/
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
- * @version    1.0.5
+ * @version    1.0.7
  */
 
 /**
@@ -124,7 +124,6 @@ class PunyApp extends PunyApp_Settings {
     if ($initialized) {
       return;
     }
-
     $initialized = true;
 
     if ($this->_debug) {
@@ -140,25 +139,48 @@ class PunyApp extends PunyApp_Settings {
     $this->databaseSettings = new PunyApp_Database_Settings();
     $this->sessionSettings = new PunyApp_Session_Settings();
 
-    $settings = file_get_contents(
-      PunyApp_Util::fullPath(
-        PUNYAPP_SETTINGS_DIR . DIRECTORY_SEPARATOR . self::SETTINGS_FILENAME
-      )
-    );
+    $this->_parseSettings();
+    $this->_updateTimezone();
+    $this->_updateSettings();
+    $this->_executeUserInitialization();
 
-    $settings_data = json_decode($settings);
-    if (!$settings_data) {
+    $this->cipher = new PunyApp_Security_Cipher($this->_generateKey());
+    $this->arcfour = new PunyApp_Security_Arcfour($this->_generateKey());
+    $this->token = new PunyApp_Security_Token($this);
+    $this->view = new PunyApp_View($this);
+    $this->database = new PunyApp_Database($this);
+    $this->model = new PunyApp_Model($this);
+    $this->validator = new PunyApp_Validator($this);
+    $this->session = new PunyApp_Session($this);
+    $this->session->start();
+    $this->cookie = new PunyApp_Cookie($this);
+
+    $this->_executeUserScheme();
+    $this->removePoweredByHeader();
+    $this->event->trigger('app-initialize');
+  }
+
+
+  /**
+   * Parse settings file
+   */
+  private function _parseSettings() {
+    $filename = PunyApp_Util::fullPath(
+      PUNYAPP_SETTINGS_DIR . DIRECTORY_SEPARATOR . self::SETTINGS_FILENAME
+    );
+    $settings = file_get_contents($filename);
+    $data = json_decode($settings);
+    if (!$data) {
       throw new PunyApp_Error('Invalid JSON format');
     }
 
-    foreach ($settings_data as $cat => $values) {
+    foreach ($data as $cat => $values) {
       switch ($cat) {
         case 'system':
           foreach ($values as $key => $val) {
             $method = 'set' . ucfirst($key);
             $func = array($this, $method);
-            if (method_exists('PunyApp_Settings', $method)
-                && is_callable($func)) {
+            if (method_exists('PunyApp_Settings', $method) && is_callable($func)) {
               call_user_func($func, $val);
             }
           }
@@ -173,48 +195,35 @@ class PunyApp extends PunyApp_Settings {
             $this->sessionSettings->{$key} = $val;
           }
           break;
-        default:
-          break;
       }
     }
+  }
 
-    $this->_updateTimezone();
-    $this->_updateSettings();
-
-    $init_filename = PunyApp_Util::fullPath(
+  /**
+   * Execute user initialize file
+   */
+  private function _executeUserInitialization() {
+    require_once PunyApp_Util::fullPath(
       PUNYAPP_SETTINGS_DIR . DIRECTORY_SEPARATOR . self::INITIALIZE_FILENAME
     );
-    require_once $init_filename;
+  }
 
-    $this->cipher = new PunyApp_Security_Cipher($this->_generateKey());
-    $this->arcfour = new PunyApp_Security_Arcfour($this->_generateKey());
-    $this->token = new PunyApp_Security_Token($this);
-    $this->view = new PunyApp_View($this);
-    $this->database = new PunyApp_Database($this->databaseSettings);
-    $this->model = new PunyApp_Model($this);
-    $this->validator = new PunyApp_Validator($this);
-    $this->session = new PunyApp_Session($this);
-    $this->session->start();
-    $this->cookie = new PunyApp_Cookie($this);
-
-    $schema_filename = PunyApp_Util::fullPath(
+  /**
+   * Execute user scheme
+   */
+  private function _executeUserScheme() {
+    require_once PunyApp_Util::fullPath(
       PUNYAPP_SETTINGS_DIR . DIRECTORY_SEPARATOR . self::SCHEMA_FILENAME
     );
-
-    require_once $schema_filename;
 
     if (isset($schema)) {
       foreach ((array)$schema as $def) {
         $this->database->exec($def);
-      }
-
-      if ($this->database->isError()) {
-        throw new PunyApp_Database_Error($this->database->getLastError());
+        if ($this->database->isError()) {
+          throw new PunyApp_Database_Error($this->database->getLastError());
+        }
       }
     }
-
-    $this->removePoweredByHeader();
-    $this->event->trigger('app-initialize');
   }
 
 
@@ -252,34 +261,36 @@ class PunyApp extends PunyApp_Settings {
    */
   public static function getLibPath($name, $path) {
     $filename = null;
+    $sep = DIRECTORY_SEPARATOR;
+    $sep_hex = '\\x' . dechex(ord($sep));
+    $split_re = sprintf('{[%s/]+}', $sep_hex);
 
     if (strpos($name, '/') !== false ||
-        strpos($name, DIRECTORY_SEPARATOR) !== false) {
-      $parts = preg_split('{[\x5c/]+}', $name, -1, PREG_SPLIT_NO_EMPTY);
+        strpos($name, $sep) !== false) {
+      $parts = preg_split($split_re, $name, -1, PREG_SPLIT_NO_EMPTY);
       $name = array_pop($parts);
       return self::getLibPath(
         $name,
-        empty($parts) ? $path :
-          $path . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $parts)
+        empty($parts) ? $path : $path . $sep . implode($sep, $parts)
       );
     }
 
     $name = PunyApp_Util::underscore(basename($name)) . '.php';
-    $parts = preg_split('{[\x5c/]+}', $path, -1, PREG_SPLIT_NO_EMPTY);
+    $parts = preg_split($split_re, $path, -1, PREG_SPLIT_NO_EMPTY);
     $const = sprintf('PUNYAPP_%s_DIR', strtoupper(array_shift($parts)));
 
     if (!defined($const)) {
-      $filename = PunyApp_Util::fullPath($path . DIRECTORY_SEPARATOR . $name);
+      $filename = PunyApp_Util::fullPath($path . $sep . $name);
     } else {
       $dir = constant($const);
       if (!empty($parts)) {
-        $dir .= DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $parts);
+        $dir .= $sep . implode($sep, $parts);
       }
 
-      $filename = PunyApp_Util::fullPath($dir . DIRECTORY_SEPARATOR . $name);
+      $filename = PunyApp_Util::fullPath($dir . $sep . $name);
       if (!@file_exists($filename)) {
-        $dir .= DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $parts);
-        $filename = PunyApp_Util::fullPath($dir . DIRECTORY_SEPARATOR . $name);
+        $dir .= $sep . implode($sep, $parts);
+        $filename = PunyApp_Util::fullPath($dir . $sep . $name);
       }
 
       if ($filename != null && @file_exists($filename)) {
@@ -291,18 +302,21 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * Get class instance
+   * Get/Create class instance
    *
-   * @param  void
+   * @param string $classname
    * @return object
    */
-  public static function getInstance($className) {
+  public static function getInstance($classname) {
     static $instances = array();
 
-    if (!isset($instances[$className])) {
-      $instances[$className] = new $className();
+    if (!isset($instances[$classname])) {
+      $args = array_slice(func_get_args(), 1);
+      $reflection = new ReflectionClass($classname);
+      $instance = $reflection->newInstanceArgs($args);
+      $instances[$classname] = $instance;
     }
-    return $instances[$className];
+    return $instances[$classname];
   }
 
   /**
@@ -317,17 +331,14 @@ class PunyApp extends PunyApp_Settings {
   public static function cache($action, $name, $value = null, $secret_key = null) {
     static $cache = array(), $secrets = array();
 
+    $num_args = func_num_args();
     switch (strtolower($action)) {
       case 'get':
-        if (func_num_args() === 3) {
+        if ($num_args === 3) {
           $secret_key = $value;
         }
 
-        if ($name == null) {
-          return null;
-        }
-
-        if (!array_key_exists($name, $cache)) {
+        if ($name == null || !array_key_exists($name, $cache)) {
           return null;
         }
 
@@ -338,25 +349,19 @@ class PunyApp extends PunyApp_Settings {
           return $cache[$name];
         }
 
-        if (!array_key_exists($name, $secrets)) {
-          return null;
-        }
-
-        if ($secrets[$name] !== $secret_key) {
+        if (!array_key_exists($name, $secrets) || $secrets[$name] !== $secret_key) {
           return null;
         }
 
         return $cache[$name];
-        break;
       case 'set':
         $cache[$name] = $value;
         if ($secret_key != null) {
           $secrets[$name] = $secret_key;
         }
         return true;
-        break;
       case 'delete':
-        if (func_num_args() === 3) {
+        if ($num_args === 3) {
           $secret_key = $value;
         }
 
@@ -371,15 +376,11 @@ class PunyApp extends PunyApp_Settings {
         if (!array_key_exists($name, $secrets)) {
           return false;
         }
-
         if ($secrets[$name] === $secret_key) {
           unset($cache[$name], $secrets[$name]);
           return true;
         }
         return false;
-        break;
-      default:
-        break;
     }
 
     return null;
@@ -390,7 +391,7 @@ class PunyApp extends PunyApp_Settings {
    * Returns whether the server is secure by https
    *
    * @param  void
-   * @return boolean  whether the server is secure by https
+   * @return bool  whether the server is secure by https
    */
   public function isHTTPS() {
     static $is_https = null;
@@ -552,6 +553,7 @@ class PunyApp extends PunyApp_Settings {
   public function decrypt($data) {
     return $this->arcfour->decrypt(PunyApp_Util::base64URLDecode($data));
   }
+
 
   /**
    * Generate key

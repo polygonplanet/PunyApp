@@ -8,8 +8,12 @@
   },
   "database": {
     "engine": "sqlite",
+    "encoding": "utf8",
     "user": "",
-    "pass": ""
+    "pass": "",
+    "dbname": "database_name",
+    "host": "localhost",
+    "port": ""
   },
   "session": {
     "engine": "sqlite",

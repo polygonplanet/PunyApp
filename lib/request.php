@@ -103,16 +103,16 @@ class PunyApp_Request {
       $this->actionName = 'index';
     }
 
-    if (!empty($paths)) {
-      foreach ($paths as $key => $val) {
-        $this->params->{$key} = $val;
+    if (empty($paths)) {
+      return;
+    }
 
-        if (strpos($val, ':') !== false) {
-          $items = explode(':', $val, 2);
-          if (count($items) >= 2) {
-            $this->params->{$items[0]} = $items[1];
-          }
-        }
+    foreach ($paths as $key => $val) {
+      $this->params->{$key} = $val;
+
+      if (strpos($val, ':') !== false) {
+        $items = explode(':', $val, 2);
+        $this->params->{$items[0]} = $items[1];
       }
     }
   }
@@ -120,8 +120,7 @@ class PunyApp_Request {
   /**
    * Refer the request variable
    *
-   * @param  void
-   * @return array    the reference of request variable
+   * @return array the reference of request variable
    */
   private function _setRequestVars() {
     $this->_normalizeVariables();
@@ -204,7 +203,6 @@ class PunyApp_Request {
     if ($initialized) {
       return;
     }
-
     $initialized = true;
 
     if (isset($_GET)) {

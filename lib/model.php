@@ -180,7 +180,7 @@ class PunyApp_Model {
     );
 
     if ($extra != null) {
-      $sql .= $extra;
+      $sql .= ' ' . $extra;
     }
 
     $stmt = $this->database->prepare($sql);

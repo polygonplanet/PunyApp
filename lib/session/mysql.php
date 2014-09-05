@@ -15,11 +15,11 @@
  */
 
 /**
- * @name PunyApp_Session_SQLite
+ * @name PunyApp_Session_MySQL
  *
- * Session storage class with SQLite.
+ * Session storage class with MySQL.
  */
-class PunyApp_Session_SQLite extends PunyApp_Session_Common {
+class PunyApp_Session_MySQL extends PunyApp_Session_Common {
 
   /**
    * @var PDO database
@@ -27,11 +27,23 @@ class PunyApp_Session_SQLite extends PunyApp_Session_Common {
   protected $_db = null;
 
   /**
+   * @var string database creation scheme
+   */
+  protected $_scheme = "CREATE TABLE IF NOT EXISTS %s (
+    id       varchar(128) NOT NULL default '',
+    data     text,
+    expire   int(11) default NULL,
+    updateAt int(11) default NULL,
+    PRIMARY KEY (id)
+  )";
+
+  /**
    * Create Database instance
    *
    * @return PDO
    */
   public static function createDatabaseInstance() {
-    return new PDO('sqlite:' . self::$sessionFileName);
+    $instance = PunyApp::getInstance('PDO');
+    return $instance;
   }
 }

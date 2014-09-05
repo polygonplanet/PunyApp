@@ -42,7 +42,7 @@ class PunyApp_Session_Posql extends PunyApp_Session_Common {
   /**
    * Check database error
    *
-   * @return boolean
+   * @return bool
    */
   public static function isError() {
     $result = false;

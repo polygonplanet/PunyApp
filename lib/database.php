@@ -36,6 +36,7 @@ class PunyApp_Database_Settings {
         case 'user':
         case 'pass':
         case 'engine':
+        case 'encoding':
           break;
         case 'dsn':
           $dsn = $val;
@@ -73,6 +74,22 @@ class PunyApp_Database_Settings {
     }
 
     return (string)$engine;
+  }
+
+  /**
+   * Get encoding
+   *
+   * @return string
+   */
+  public function getEncoding() {
+    $encoding = null;
+
+    if (isset($this->encoding) && $this->encoding != null) {
+      $encoding = $this->encoding;
+      $this->encoding = null;
+    }
+
+    return (string)$encoding;
   }
 
   /**
@@ -119,6 +136,11 @@ class PunyApp_Database {
   const DATABASE_FILENAME = 'app-database';
 
   /**
+   * @var PunyApp
+   */
+  public $app = null;
+
+  /**
    * @var PDO
    */
   private $_db = null;
@@ -131,13 +153,15 @@ class PunyApp_Database {
   /**
    * Connect database with DSN
    *
-   * @param PunyApp_Database_Settings $settings
+   * @param PunyApp $app
    */
-  public function __construct(PunyApp_Database_Settings $settings) {
-    $dsn = $settings->getDSN();
-    $engine = $settings->getEngine();
-    $user = $settings->getUser();
-    $pass = $settings->getPass();
+  public function __construct(PunyApp $app) {
+    $this->app = $app;
+
+    $dsn = $this->app->databaseSettings->getDSN();
+    $engine = $this->app->databaseSettings->getEngine();
+    $user = $this->app->databaseSettings->getUser();
+    $pass = $this->app->databaseSettings->getPass();
     $options = array();
 
     if ($dsn != null) {
@@ -150,27 +174,35 @@ class PunyApp_Database {
 
       switch ($driver) {
         case 'posql':
-          $this->_dbfile .= '.' . $driver;
+          $this->_dbfile .= sprintf('.%s', $driver);
           $this->_db = new Posql($this->_dbfile);
-          $this->_dbfile = $this->_db->getPath();
           break;
         case 'sqlite':
-          $this->_dbfile .= '.' . $driver;
+          $this->_dbfile .= sprintf('.%s', $driver);
           $dsn = 'sqlite:' . $this->_dbfile;
           $this->_db = new PDO($dsn, null, null, $options);
           break;
+        case 'mysql':
+          $this->_dbfile = null;
+          $encoding = $this->app->databaseSettings->getEncoding();
+          if ($encoding != null) {
+            $encoding = preg_replace('/\W/', '', $encoding);
+            $options[PDO::MYSQL_ATTR_INIT_COMMAND] = sprintf('SET NAMES %s', $encoding);
+          }
+          $this->_db = PunyApp::getInstance('PDO', $dsn, $user, $pass, $options);
+          break;
         default:
           $this->_dbfile = null;
-          $this->_db = new PDO($dsn, $user, $pass, $options);
+          $this->_db = PunyApp::getInstance('PDO', $dsn, $user, $pass, $options);
           break;
+      }
+
+      if ($this->isError()) {
+        throw new PunyApp_Database_Error($this->getLastError());
       }
     }
   }
 
-
-  public function __call($func, $args) {
-    return call_user_func_array(array($this->_db, $func), $args);
-  }
 
   /**
    * Prepare
@@ -214,7 +246,7 @@ class PunyApp_Database {
    * @return boolean
    */
   public function isError() {
-    if ($this->_db instanceof Posql) {
+    if (is_callable(array($this->_db, 'isError'))) {
       return $this->_db->isError();
     }
 
@@ -232,7 +264,7 @@ class PunyApp_Database {
    * @return string
    */
   public function getLastError() {
-    if ($this->_db instanceof Posql) {
+    if (is_callable(array($this->_db, 'lastError'))) {
       return $this->_db->lastError();
     }
 
@@ -242,6 +274,11 @@ class PunyApp_Database {
     }
 
     return $info[2];
+  }
+
+
+  public function __call($func, $args) {
+    return call_user_func_array(array($this->_db, $func), $args);
   }
 }
 

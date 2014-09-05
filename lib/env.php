@@ -91,7 +91,6 @@ class PunyApp_Env implements Iterator {
     return $result;
   }
 
-
   public function __get($name) {
     return $this->_getEnv($name);
   }

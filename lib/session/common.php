@@ -27,25 +27,36 @@ class PunyApp_Session_Common {
   /**
    * @var string the session tablename
    */
-  protected $_tableName = 'session';
+  protected $_tableName = 'punyapp_sessions';
 
   /**
-   * @var boolean maintains whether the session is started
+   * @var string database creation scheme
+   */
+  protected $_scheme = "CREATE TABLE IF NOT EXISTS %s (
+    id       varchar(255) NOT NULL default '',
+    data     text,
+    expire   integer default NULL,
+    updateAt integer default NULL,
+    PRIMARY KEY (id)
+  )";
+
+  /**
+   * @var bool maintains whether the session is started
    */
   protected $_started = false;
 
   /**
-   * @var boolean maintains whether the database was vacuumed
+   * @var bool maintains whether the database was vacuumed
    */
   protected $_vacuumed = false;
 
   /**
-   * @var boolean maintains whether the instance is initialized
+   * @var bool maintains whether the instance is initialized
    */
   protected $_initialized = false;
 
   /**
-   * @var boolean maintains whether the session is closed
+   * @var bool maintains whether the session is closed
    */
   protected $_closed = false;
 
@@ -58,6 +69,12 @@ class PunyApp_Session_Common {
    * @var string session class name
    */
   public static $className = null;
+
+  /**
+   * Constructor
+   */
+  public function __construct() {
+  }
 
   /**
    * Set session filename
@@ -92,7 +109,7 @@ class PunyApp_Session_Common {
    * @param  string   session table name
    * @param  number   session lifetime (e.g. (60 * 60 * 24 * 365) = 1 year)
    * @param  string   session cookie path (e.g. '/path/to/myproject/')
-   * @param  boolean  whether connected with HTTPS (use PunyApp::isHTTPS)
+   * @param  bool  whether connected with HTTPS (use PunyApp::isHTTPS)
    */
   public static function init($sess_name,
                               $save_path,
@@ -100,7 +117,6 @@ class PunyApp_Session_Common {
                               $max_lifetime = 0,
                               $cookie_path = '/',
                               $is_https = false) {
-
     $self = PunyApp::getInstance(self::$className);
 
     if (!empty($self->_initialized)) {
@@ -118,15 +134,12 @@ class PunyApp_Session_Common {
     }
     $self->setTableName((string)$table_name);
 
-    $sql = sprintf('CREATE TABLE IF NOT EXISTS %s (
-        id       VARCHAR(255),
-        data     TEXT,
-        expire   INTEGER,
-        updateAt INTEGER
-      )',
-      $self->getTableName()
-    );
+    $sql = sprintf($self->_scheme, $self->getTableName());
     $self->_db->exec($sql);
+    if ($self->isError()) {
+      throw new PunyApp_Database_Error($self->getLastError());
+    }
+    $self->_scheme = null;
 
     if ($is_https) {
       @ini_set('session.cookie_secure', 1);
@@ -178,7 +191,7 @@ class PunyApp_Session_Common {
    * Starts the session with some settings
    *  and creates the instance of the class
    *
-   * @return boolean success or failure
+   * @return bool success or failure
    */
   public static function start() {
     $result = false;
@@ -220,7 +233,7 @@ class PunyApp_Session_Common {
   /**
    * Check whether the session was started
    *
-   * @return boolean  TRUE started, FALSE not started
+   * @return bool  TRUE started, FALSE not started
    */
   public static function isStarted() {
     $result = false;
@@ -248,7 +261,7 @@ class PunyApp_Session_Common {
    * Set the tablename as session storage
    *
    * @param  string   the table name
-   * @return boolean  success or failure
+   * @return bool  success or failure
    */
   public static function setTableName($tablename) {
     $result = false;
@@ -265,10 +278,38 @@ class PunyApp_Session_Common {
   /**
    * Check database error
    *
-   * @return boolean
+   * @return bool
    */
   public static function isError() {
-    throw new PunyApp_Error('abstract');
+    $result = false;
+    $self = PunyApp::getInstance(self::$className);
+
+    $error_code = $self->_db->errorCode();
+    if ($error_code != null && $error_code !== '00000') {
+      $result = true;
+    }
+
+    return $result;
+  }
+
+  /**
+   * Get error message
+   *
+   * @return string
+   */
+  public static function getLastError() {
+    $self = PunyApp::getInstance(self::$className);
+
+    if (is_callable(array($self->_db, 'lastError'))) {
+      return $self->_db->lastError();
+    }
+
+    $info = $self->_db->errorInfo();
+    if (empty($info) || !array_key_exists(2, $info)) {
+      return '';
+    }
+
+    return $info[2];
   }
 
   /**
@@ -276,7 +317,7 @@ class PunyApp_Session_Common {
    *
    * @param  string   file path of the session as the database
    * @param  string   session name
-   * @return boolean  success or failure
+   * @return bool  success or failure
    */
   public static function open($save_path, $name) {
     return true;
@@ -286,7 +327,7 @@ class PunyApp_Session_Common {
    * Close the session
    *
    * @param  void
-   * @return boolean  success or failure
+   * @return bool  success or failure
    * @access public
    */
   public static function close() {
@@ -331,7 +372,7 @@ class PunyApp_Session_Common {
    *
    * @param  string  session id
    * @param  string  session data
-   * @return boolean success or failure
+   * @return bool success or failure
    */
   public static function write($id, $data) {
     $result = false;
@@ -372,7 +413,7 @@ class PunyApp_Session_Common {
    * Destoroy the session
    *
    * @param  string  session id
-   * @return boolean success or failure
+   * @return bool success or failure
    */
   public static function destroy($id) {
     $result = false;
@@ -400,7 +441,7 @@ class PunyApp_Session_Common {
    *         (session.gc_probability/session.gc_divisor)
    *
    * @param  number  life time (Sec.)
-   * @return boolean success or failure
+   * @return bool success or failure
    */
   public static function gc($sec) {
     $result = false;

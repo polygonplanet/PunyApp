@@ -219,6 +219,7 @@ class PunyApp_View {
    * Render template contents
    */
   private function _render() {
+    $this->_setDefaultVars();
     extract(self::$_vars);
     require_once PunyApp::getLibPath(self::$_template, 'views/contents');
   }
@@ -227,7 +228,15 @@ class PunyApp_View {
    * Render template errors
    */
   private function _renderError() {
+    $this->_setDefaultVars();
     extract(self::$_vars);
     require_once PunyApp::getLibPath(self::$_template, 'views/errors');
+  }
+
+  /**
+   * Render template errors
+   */
+  private function _setDefaultVars() {
+    self::$_vars['charset'] = $this->app->getCharset();
   }
 }
