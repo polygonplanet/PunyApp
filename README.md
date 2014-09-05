@@ -39,6 +39,127 @@ Application directory layout:
     index.php
  
 
+### Controllers
+
+```php
+class SampleController extends PunyApp_Controller {
+
+  /**
+   * Before /login
+   */
+  public function beforeLogin() {
+    if (!empty($this->session->userId)) {
+      $this->redirect('home');
+    }
+  }
+
+  /**
+   * GET /login
+   */
+  public function getLogin() {
+    $this->view->render('sample/login');
+  }
+
+  /**
+   * POST /login
+   */
+  public function postLogin() {
+    if (!empty($this->session->userId)) {
+      $this->redirect('home');
+    }
+    $is_user = $this->models->sample->isUser(
+      $this->request->params->id,
+      $this->request->params->pass
+    );
+    if ($is_user) {
+      $this->session->userId = $this->request->params->id;
+      $this->redirect('home');
+    }
+  }
+}
+```
+
+#### Validation
+```php
+  public $validationRules = array(
+    'id' => array(
+      'required' => true,
+      'rule' => array('regex', '/^[a-z0-9]{1,10}$/i'),
+      'message' => 'Only letters and integers, max 10 characters'
+    ),
+    'email' => array(
+      'required' => true,
+      'rule' => array('email'),
+      'message' => 'Invalid email address'
+    ),
+    'pass' => array(
+      'required' => true,
+      'rule' => array(
+        array('minLength', 4),
+        array('maxLength', 20)
+      ),
+      'message' => 'Min 4 characters, max 20 characters'
+    )
+  );
+
+```
+
+### Models
+
+```php
+class SampleModel extends PunyApp_Model {
+
+  public function addUser($user_id, $email, $pass) {
+    return $this->insert(array(
+      'userId' => ':userId',
+      'email' => ':email',
+      'pass' => ':pass'
+    ), array(
+      ':userId' => $user_id,
+      ':email' => $email,
+      ':pass' => sha1($pass)
+    ));
+  }
+
+
+  public function deleteUser($user_id) {
+    return $this->delete(array('userId' => '?'),
+                         array($user_id));
+  }
+
+
+  public function getUser($user_id) {
+    return $this->findOne(
+      array('id', 'userId', 'email'),
+      array('userId' => '?'),
+      array($user_id)
+    );
+  }
+
+
+  public function isUserId($user_id) {
+    return $this->count(array('userId' => '?'),
+                        array($user_id)) > 0;
+  }
+}
+
+```
+
+### Views
+
+```php
+$this->view->set('title', 'PunyApp');
+$this->view->set('description', 'The puny developer framework for rapid compiling.');
+$this->view->render();
+```
+
+Use pure PHP template.
+
+```php
+<h1><?php echo $title ?></h1>
+<p><?php echo $description ?></p>
+```
+
 ### Settings
 
 * app/settings/app-settings.json
