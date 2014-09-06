@@ -12,7 +12,7 @@ It does not require the external PHP extensions.
 
 * MySQL
 * SQLite
-* Posql *[GitHub](https://github.com/polygonplanet/Posql) [(English)](http://feel.happy.nu/doc/posql/en/)
+* [Posql](https://github.com/polygonplanet/Posql) [(documents)](http://feel.happy.nu/doc/posql/en/)
 
 
 ### Tutorial
@@ -45,15 +45,6 @@ Application directory layout:
 class SampleController extends PunyApp_Controller {
 
   /**
-   * Before /login
-   */
-  public function beforeLogin() {
-    if (!empty($this->session->userId)) {
-      $this->redirect('home');
-    }
-  }
-
-  /**
    * GET /login
    */
   public function getLogin() {
@@ -64,9 +55,6 @@ class SampleController extends PunyApp_Controller {
    * POST /login
    */
   public function postLogin() {
-    if (!empty($this->session->userId)) {
-      $this->redirect('home');
-    }
     $is_user = $this->models->sample->isUser(
       $this->request->params->id,
       $this->request->params->pass
@@ -75,6 +63,40 @@ class SampleController extends PunyApp_Controller {
       $this->session->userId = $this->request->params->id;
       $this->redirect('home');
     }
+
+    // ...
+
+    $this->view->render('sample/login');
+  }
+
+  /**
+   * Any /login
+   */
+  public function anyLogin() {
+    // ...
+  }
+
+  /**
+   * Before /login
+   */
+  public function beforeLogin() {
+    if (!empty($this->session->userId)) {
+      $this->redirect('home');
+    }
+  }
+
+  /**
+   * After /login
+   */
+  public function afterLogin() {
+    // ...
+  }
+
+  /**
+   * GET /home
+   */
+  public function getHome() {
+    // ...
   }
 }
 ```
@@ -153,7 +175,9 @@ $this->view->set('description', 'The puny developer framework for rapid compilin
 $this->view->render();
 ```
 
-Use pure PHP template.
+Use pure PHP template.  
+
+The template variables already escaped for HTML entities.  
 
 ```php
 <h1><?php echo $title ?></h1>
@@ -167,10 +191,10 @@ Use pure PHP template.
 ```javascript
 {
   "system": {
-    "debug": true, // debug mode
+    "debug": true, // debug mode (show errors)
     "lang": "ja", // or "en" etc.
     "charset": "utf-8",
-    "timezone": "Asia/Tokyo", // or 'America/Chicago' etc.
+    "timezone": "Asia/Tokyo", // or "America/Chicago" etc.
     // Application security salt
     // Enter something characters. symbols is possible.
     "salt": "ZQJaiPPYn6Tldb2gottKwIDmGiatuSnV"
@@ -186,7 +210,7 @@ Use pure PHP template.
   },
   "session": {
     "engine": "sqlite", // or "mysql", "posql"
-    "name": "sessid", // PHPSESSID
+    "name": "sessid", // Session Cookie name (PHPSESSID)
     "expirationDate": 365
   }
 }
@@ -202,48 +226,6 @@ For SQLite, set to writable following files.
 * There is a sample login form in `/sample/`.
 
 ----
-
-#### Use Posql
-
-Posql documents [(Japanese)](http://feel.happy.nu/doc/posql/) [(English)](http://feel.happy.nu/doc/posql/en/)  
-
-1. [Download](https://github.com/polygonplanet/Posql/tree/master/posql-2.18a) latest `posql.php`
-
-2. Put `posql.php` in `/vendors` directory.
-3. Requires posql in `app/settings/app-initialize.php`
-
-```php
-PunyApp::uses('posql', 'vendors');
-```
-
-4. Settings `app/settings/app-settings.json`  
-
-```javascript
-{
-  ...
-  "database": {
-    "engine": "posql",
-    ...
-  },
-  "session": {
-    "engine": "posql",
-    ...
-  }
-}
-```
-
-After accessed to the application `/sample/`, set to writable following files.  
-
- * app/storage/databases/app-database.posql.php
- * app/storage/sessions/app-session.posql.php
-
-#### posqladmin
-
-1. Download latest posqladmin [(Japanese)](https://github.com/polygonplanet/Posql/tree/master/posql-2.18a) [(English)](http://feel.happy.nu/doc/posql/en/)
-2. Put `posqladmin.php` in public directory.
-3. Set to writable `posqladmin.php` (e.g., `0666` permissions).
-4. Access `posqladmin.php`.
-5. Set id and pass in settings.
 
 ### License
 
