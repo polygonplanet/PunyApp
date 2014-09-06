@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="<?php echo $this->escapeHTML($charset) ?>">
+<meta charset="<?php echo $charset ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?php echo $this->escapeHTML($title) ?></title>
+<title><?php echo $title ?></title>
 <style>
 body {
   font-family: tahoma, sans-serif;
@@ -48,11 +48,11 @@ body {
 </style>
 </head>
 <body>
-  <h1><?php echo $this->escapeHTML($title) ?></h1>
+  <h1><?php echo $title ?></h1>
 
   <?php if ($error): ?>
 
-    <p class="error"><?php echo $this->escapeHTML($error) ?></p>
+    <p class="error"><?php echo $error ?></p>
   <?php endif ?>
 
   <form action="<?php echo $base_uri . 'sample/login' ?>" method="post" class="validation-test-form">

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="<?php echo $this->escapeHTML($charset) ?>">
+<meta charset="<?php echo $charset ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?php echo $this->escapeHTML($title) ?></title>
+<title><?php echo $title ?></title>
 <style>
 body {
   font-family: tahoma, sans-serif;
@@ -49,7 +49,7 @@ body {
 </style>
 </head>
 <body>
-  <h1><?php echo $this->escapeHTML($title) ?></h1>
+  <h1><?php echo $title ?></h1>
 
   <form action="<?php echo $base_uri . 'sample/register' ?>" method="post" class="validation-test-form">
     <input type="hidden" name="token" value="<?php echo $this->generateToken() ?>">
@@ -68,10 +68,10 @@ body {
             </div>
             <div class="field-input">
               <input type="<?php echo $field['type'] ?>" name="<?php echo $name ?>" value="<?php
-                echo $field['type'] === 'password' ? '' : $this->escapeHTML(${$name}) ?>">
+                echo $field['type'] === 'password' ? '' : ${$name} ?>">
             </div>
             <div class="field-error">
-              <?php echo $this->escapeHTML($this->getValidationError($name)) ?>
+              <?php echo $this->getValidationError($name) ?>
 
             </div>
           </div>

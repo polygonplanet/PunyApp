@@ -66,7 +66,7 @@ class PunyApp_View {
     }
 
     foreach ($vars as $key => $val) {
-      self::$_vars[$key] = $val;
+      self::$_vars[$key] = $this->escapeHTML($val);
     }
   }
 
@@ -95,13 +95,23 @@ class PunyApp_View {
   }
 
   /**
-   * Escape HTML entities
+   * Escape the context string for HTML entities
    *
-   * @param mixed $html
-   * @return mixed
+   * @param  mixed $string subject string or array or any value
+   * @return mixed escaped value
    */
-  public function escapeHTML($html) {
-    return $this->app->escapeHTML($html);
+  public function escapeHTML($string) {
+    return $this->app->escapeHTML($string);
+  }
+
+  /**
+   * Unescape the content string for HTML entities
+   *
+   * @param  mixed $string
+   * @return mixed unescaped value
+   */
+  public static function unescapeHTML($string) {
+    return $this->app->unescapeHTML($string);
   }
 
   /**
@@ -129,9 +139,9 @@ class PunyApp_View {
     }
 
     self::$_template = $template;
-    $this->app->event->trigger('app-before-render');
+    $this->app->event->trigger('app-before-render', array($template));
     $this->_render();
-    $this->app->event->trigger('app-after-render');
+    $this->app->event->trigger('app-after-render', array($template));
   }
 
   /**
@@ -154,9 +164,9 @@ class PunyApp_View {
     $this->app->sendContentType('text/html');
 
     self::$_template = (string)$code;
-    $this->app->event->trigger('app-before-render-error');
+    $this->app->event->trigger('app-before-render-error', array($code));
     $this->_renderError();
-    $this->app->event->trigger('app-after-render-error');
+    $this->app->event->trigger('app-after-render-error', array($code));
   }
 
   /**
@@ -292,7 +302,9 @@ class PunyApp_View {
    * Render template errors
    */
   private function _setDefaultVars() {
-    self::$_vars['charset'] = $this->app->getCharset();
-    self::$_vars['base_uri'] = $this->app->getBaseURI();
+    $this->set(array(
+      'charset' => $this->app->getCharset(),
+      'base_uri' => $this->app->getBaseURI()
+    ));
   }
 }

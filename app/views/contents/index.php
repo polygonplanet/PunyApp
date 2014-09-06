@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="<?php echo $this->escapeHTML($charset) ?>">
+<meta charset="<?php echo $charset ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?php echo $this->escapeHTML($title) ?></title>
+<title><?php echo $title ?></title>
 <style>
 body {
   font-family: tahoma, sans-serif;
@@ -12,9 +12,9 @@ body {
 </style>
 </head>
 <body>
-  <h1><?php echo $this->escapeHTML($title) ?></h1>
+  <h1><?php echo $title ?></h1>
   <p>
-    <?php echo $this->escapeHTML($description) ?>
+    <?php echo $description ?>
 
   </p>
 
