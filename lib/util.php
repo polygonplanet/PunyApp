@@ -176,30 +176,62 @@ class PunyApp_Util {
   }
 
   /**
-   * Encodes the context string for HTML entities
+   * Escape the context string for HTML entities
    *
-   * @param  mixed  $html subject string or array or any value
+   * @param  mixed $string subject string or array or any value
    * @param  string $charset
-   * @return mixed  encoded value
+   * @return mixed escaped value
    */
-  public static function escapeHTML($html, $charset = null) {
+  public static function escapeHTML($string, $charset = null) {
     $result = null;
 
-    if (is_array($html)) {
+    if (is_array($string)) {
       $result = array();
-      foreach ($html as $key => $val) {
+      foreach ($string as $key => $val) {
         $key = self::escapeHTML($key);
         $val = self::escapeHTML($val);
         $result[$key] = $val;
       }
-    } else if (is_string($html) && !self::isHTMLEscaped($html)) {
+    } else if (is_string($string) && !self::isHTMLEscaped($string)) {
       if ($charset != null) {
-        $result = htmlspecialchars($html, ENT_QUOTES, $charset);
+        $result = htmlspecialchars($string, ENT_QUOTES, $charset);
       } else {
-        $result = htmlspecialchars($html, ENT_QUOTES);
+        $result = htmlspecialchars($string, ENT_QUOTES);
       }
     } else {
-      $result = $html;
+      $result = $string;
+    }
+
+    return $result;
+  }
+
+  /**
+   * Unescape the content string for HTML entities
+   *
+   * @param  mixed $string
+   * @return mixed unescaped value
+   */
+  public static function unescapeHTML($string) {
+    static $maps = array(
+      '&lt;'   => '<',
+      '&gt;'   => '>',
+      '&quot;' => '"',
+      '&#039;' => "'",
+      '&amp;'  => '&'
+    );
+
+    $result = null;
+    if (is_array($string)) {
+      $result = array();
+      foreach ($string as $key => $val) {
+        $key = self::unescapeHTML($key);
+        $val = self::unescapeHTML($val);
+        $result[$key] = $val;
+      }
+    } else if (is_string($string)) {
+      $result = strtr($string, $maps);
+    } else {
+      $result = $string;
     }
 
     return $result;
@@ -212,10 +244,10 @@ class PunyApp_Util {
    * @return bool
    */
   public static function isHTMLEscaped($string) {
-    return (bool)preg_match(
-      '/^(?:[^<>"\'&]|&(?:[a-z]\w{0,24}|#(?:x[0-9a-f]{1,8}|[0-9]{1,10}));)*$/i',
-      $string
-    );
+    return !preg_match(
+     '{[<>"\']|&(?!(?:[a-z]\w{0,24}|#(?:x[0-9a-f]{1,8}|[0-9]{1,10}));)}i',
+     (string)$string
+   );
   }
 
   /**
