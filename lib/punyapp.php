@@ -132,7 +132,7 @@ class PunyApp extends PunyApp_Settings {
       error_reporting(0);
     }
 
-    $this->event = new PunyApp_Event();
+    $this->event = new PunyApp_Event($this);
     $this->env = new PunyApp_Env($this);
     $this->request = new PunyApp_Request($this);
 
@@ -156,7 +156,7 @@ class PunyApp extends PunyApp_Settings {
     $this->cookie = new PunyApp_Cookie($this);
 
     $this->_executeUserScheme();
-    $this->event->trigger('app-initialize');
+    $this->event->trigger('app-initialize', array());
   }
 
 
@@ -301,6 +301,28 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
+   * Get class name without namespace
+   *
+   * @param object $class
+   * @return string
+   */
+  public static function getClass($class) {
+    $name = null;
+    if (is_object($class)) {
+      $name = get_class($class);
+    }
+
+    if ($name != null && is_string($name)) {
+      $pos = strrpos($name, '\\');
+      if ($pos !== false) {
+        $name = substr($name, $pos + 1);
+      }
+    }
+
+    return $name;
+  }
+
+  /**
    * Get/Create class instance
    *
    * @param string $classname
@@ -436,13 +458,23 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * A handy function that encodes the context string for HTML/XML entities
+   * Escape the context string for HTML entities
    *
-   * @param  mixed  $html subject string or array or any value
-   * @return mixed  encoded value
+   * @param  mixed $string subject string or array or any value
+   * @return mixed escaped value
    */
-  public function escapeHTML($html) {
-    return PunyApp_Util::escapeHTML($html, $this->_charset);
+  public function escapeHTML($string) {
+    return PunyApp_Util::escapeHTML($string, $this->_charset);
+  }
+
+  /**
+   * Unescape the content string for HTML entities
+   *
+   * @param  mixed $string
+   * @return mixed unescaped value
+   */
+  public static function unescapeHTML($string) {
+    return PunyApp_Util::unescapeHTML($string);
   }
 
   /**
