@@ -141,6 +141,11 @@ class PunyApp_Database {
   public $app = null;
 
   /**
+   * @var string
+   */
+  public $driver = null;
+
+  /**
    * @var PDO
    */
   private $_db = null;
@@ -164,42 +169,44 @@ class PunyApp_Database {
     $pass = $this->app->databaseSettings->getPass();
     $options = array();
 
-    if ($dsn != null) {
-      if (!preg_match('/^([^:]+):(.*)$/', $dsn, $m)) {
-        throw new PunyApp_Database_Error('Invalid DSN');
-      }
+    if ($dsn == null) {
+      return;
+    }
 
-      $driver = strtolower($m[1]);
-      $this->_dbfile = PUNYAPP_DATABASES_DIR . DIRECTORY_SEPARATOR . self::DATABASE_FILENAME;
+    if (!preg_match('/^([^:]+):(.*)$/', $dsn, $m)) {
+      throw new PunyApp_Database_Error('Invalid DSN');
+    }
 
-      switch ($driver) {
-        case 'posql':
-          $this->_dbfile .= sprintf('.%s', $driver);
-          $this->_db = new Posql($this->_dbfile);
-          break;
-        case 'sqlite':
-          $this->_dbfile .= sprintf('.%s', $driver);
-          $dsn = 'sqlite:' . $this->_dbfile;
-          $this->_db = new PDO($dsn, null, null, $options);
-          break;
-        case 'mysql':
-          $this->_dbfile = null;
-          $encoding = $this->app->databaseSettings->getEncoding();
-          if ($encoding != null) {
-            $encoding = preg_replace('/\W/', '', $encoding);
-            $options[PDO::MYSQL_ATTR_INIT_COMMAND] = sprintf('SET NAMES %s', $encoding);
-          }
-          $this->_db = PunyApp::getInstance('PDO', $dsn, $user, $pass, $options);
-          break;
-        default:
-          $this->_dbfile = null;
-          $this->_db = PunyApp::getInstance('PDO', $dsn, $user, $pass, $options);
-          break;
-      }
+    $this->driver = strtolower($m[1]);
+    $this->_dbfile = PUNYAPP_DATABASES_DIR . DIRECTORY_SEPARATOR . self::DATABASE_FILENAME;
 
-      if ($this->isError()) {
-        throw new PunyApp_Database_Error($this->getLastError());
-      }
+    switch ($this->driver) {
+      case 'posql':
+        $this->_dbfile .= sprintf('.%s', $this->driver);
+        $this->_db = new Posql($this->_dbfile);
+        break;
+      case 'sqlite':
+        $this->_dbfile .= sprintf('.%s', $this->driver);
+        $dsn = 'sqlite:' . $this->_dbfile;
+        $this->_db = new PDO($dsn, null, null, $options);
+        break;
+      case 'mysql':
+        $this->_dbfile = null;
+        $encoding = $this->app->databaseSettings->getEncoding();
+        if ($encoding != null) {
+          $encoding = preg_replace('/\W/', '', $encoding);
+          $options[PDO::MYSQL_ATTR_INIT_COMMAND] = sprintf('SET NAMES %s', $encoding);
+        }
+        $this->_db = PunyApp::getInstance('PDO', $dsn, $user, $pass, $options);
+        break;
+      default:
+        $this->_dbfile = null;
+        $this->_db = PunyApp::getInstance('PDO', $dsn, $user, $pass, $options);
+        break;
+    }
+
+    if ($this->isError()) {
+      throw new PunyApp_Database_Error($this->getLastError());
     }
   }
 
@@ -226,6 +233,7 @@ class PunyApp_Database {
   public function query() {
     $args = func_get_args();
     $stmt = call_user_func_array(array($this->_db, 'query'), $args);
+    $this->_assignError();
     return new PunyApp_Database_Statement($this, $stmt);
   }
 
@@ -237,7 +245,9 @@ class PunyApp_Database {
    */
   public function exec() {
     $args = func_get_args();
-    return call_user_func_array(array($this->_db, 'exec'), $args);
+    $result = call_user_func_array(array($this->_db, 'exec'), $args);
+    $this->_assignError();
+    return $result;
   }
 
   /**
@@ -246,7 +256,7 @@ class PunyApp_Database {
    * @return boolean
    */
   public function isError() {
-    if (is_callable(array($this->_db, 'isError'))) {
+    if ($this->driver === 'posql') {
       return $this->_db->isError();
     }
 
@@ -264,8 +274,13 @@ class PunyApp_Database {
    * @return string
    */
   public function getLastError() {
-    if (is_callable(array($this->_db, 'lastError'))) {
-      return $this->_db->lastError();
+    if ($this->driver === 'posql') {
+      $error = $this->_db->lastError();
+      if ($error != null) {
+        $this->_db->getErrors();
+        $this->_db->pushError($error);
+      }
+      return $error;
     }
 
     $info = $this->_db->errorInfo();
@@ -274,6 +289,16 @@ class PunyApp_Database {
     }
 
     return $info[2];
+  }
+
+
+  /**
+   * Assign error
+   */
+  private function _assignError() {
+    if ($this->isError()) {
+      $this->app->event->trigger('app-database-error', array($this->getLastError()));
+    }
   }
 
 
@@ -307,12 +332,6 @@ class PunyApp_Database_Statement {
     $this->_db = $db;
     $this->_stmt = $stmt;
   }
-
-
-  public function __call($func, $args) {
-    return call_user_func_array(array($this->_stmt, $func), $args);
-  }
-
 
   /**
    * Bind column
@@ -366,7 +385,24 @@ class PunyApp_Database_Statement {
    */
   public function execute() {
     $args = func_get_args();
-    return call_user_func_array(array($this->_stmt, 'execute'), $args);
+    $result = call_user_func_array(array($this->_stmt, 'execute'), $args);
+    $this->_assignError();
+    return $result;
+  }
+
+
+  /**
+   * Assign error
+   */
+  private function _assignError() {
+    if ($this->_db->isError()) {
+      $this->_db->app->event->trigger('app-database-error', array($this->_db->getLastError()));
+    }
+  }
+
+
+  public function __call($func, $args) {
+    return call_user_func_array(array($this->_stmt, $func), $args);
   }
 
 

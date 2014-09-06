@@ -142,7 +142,8 @@ class PunyApp_Controller {
    * @param string $url
    */
   protected function redirect($url) {
-    $this->app->event->trigger('app-before-redirect');
+    $args = func_get_args();
+    $this->app->event->trigger('app-before-redirect', $args);
     $this->app->redirect($url);
   }
 
@@ -162,7 +163,8 @@ class PunyApp_Controller {
    * @return bool
    */
   protected function validate($rules = array()) {
-    $this->app->event->trigger('app-before-validate');
+    $args = func_get_args();
+    $this->app->event->trigger('app-before-validate', $args);
 
     $valid = true;
 

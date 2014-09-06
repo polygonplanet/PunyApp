@@ -20,12 +20,18 @@
 class PunyApp_Event {
 
   /**
+   * @var PunyApp
+   */
+  public $app = null;
+
+  /**
    * @var array
    */
   private $_handlers = null;
 
 
-  public function __construct() {
+  public function __construct(PunyApp $app) {
+    $this->app = $app;
     $this->_handlers = array();
   }
 
@@ -107,14 +113,18 @@ class PunyApp_Event {
    * Trigger event
    *
    * @param string $when
+   * @param array $args
    * @return PunyApp_Event
    */
-  public function trigger($when) {
+  public function trigger($when, $args = array()) {
     if (!array_key_exists($when, $this->_handlers)) {
       return $this;
     }
 
-    $args = array_slice(func_get_args(), 1);
+    if (!is_array($args)) {
+      $args = array();
+    }
+    array_unshift($args, $this->app);
     $handlers = &$this->_handlers[$when];
 
     $count = count($handlers);

@@ -67,7 +67,7 @@ class PunyApp_Dispatcher {
   private static function _executeActions($methods) {
     $params = self::_getParams();
 
-    self::$app->event->trigger('app-before-filter');
+    self::$app->event->trigger('app-before-filter', $params);
     if (is_callable(array(self::$app->controller, 'beforeFilter'))) {
       call_user_func_array(array(self::$app->controller, 'beforeFilter'), $params);
     }
@@ -82,7 +82,7 @@ class PunyApp_Dispatcher {
       call_user_func_array(array(self::$app->controller, $methods->after), $params);
     }
 
-    self::$app->event->trigger('app-after-filter');
+    self::$app->event->trigger('app-after-filter', $params);
     if (is_callable(array(self::$app->controller, 'afterFilter'))) {
       call_user_func_array(array(self::$app->controller, 'afterFilter'), $params);
     }
