@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="<?php echo $charset ?>">
+<meta charset="<?php echo $this->getCharset() ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>404 - Not Found</title>
 <style>
