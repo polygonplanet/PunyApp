@@ -4,7 +4,7 @@
 <meta charset="<?php echo $charset ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?php echo $title ?></title>
-<link rel="stylesheet" href="<?php echo $base_uri . 'css/sample.css' ?>">
+<link rel="stylesheet" href="<?php echo $this->currentPath('css/sample.css') ?>">
 </head>
 <body>
   <h1><?php echo $title ?></h1>
@@ -19,7 +19,7 @@
   </div>
 
   <p>
-    <a href="<?php echo $base_uri . 'sample/logout' ?>">logout</a>
+    <a href="<?php echo $this->currentPath('sample/logout') ?>">logout</a>
   </p>
 </body>
 </html>

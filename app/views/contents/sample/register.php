@@ -4,7 +4,7 @@
 <meta charset="<?php echo $charset ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?php echo $title ?></title>
-<link rel="stylesheet" href="<?php echo $base_uri . 'css/sample.css' ?>">
+<link rel="stylesheet" href="<?php echo $this->currentPath('css/sample.css') ?>">
 </head>
 <body>
   <h1><?php echo $title ?></h1>
@@ -15,7 +15,7 @@
   <?php endif ?>
 
 
-  <form action="<?php echo $base_uri . 'sample/register' ?>" method="post" class="validation-test-form">
+  <form action="<?php echo $this->currentPath('sample/register') ?>" method="post" class="validation-test-form">
     <input type="hidden" name="token" value="<?php echo $this->generateToken() ?>">
 
     <fieldset>
@@ -47,7 +47,7 @@
   </form>
 
   <p>
-    <a href="<?php echo $base_uri . 'sample/login' ?>">login</a>
+    <a href="<?php echo $this->currentPath('sample/login') ?>">login</a>
   </p>
 </body>
 </html>
