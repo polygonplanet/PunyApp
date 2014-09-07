@@ -28,6 +28,6 @@ class IndexController extends PunyApp_Controller {
   public function anyIndex() {
     $this->view->set('title', 'PunyApp');
     $this->view->set('description', 'The puny developer framework for rapid compiling.');
-    $this->view->render();
+    $this->view->render('index');
   }
 }
