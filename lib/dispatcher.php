@@ -39,7 +39,8 @@ class PunyApp_Dispatcher {
   private static function _execute() {
     $actions = self::_getActions();
 
-    if (!self::$app->uses($actions->ctrlFileName, $actions->dirname)) {
+    if (empty($actions->actionName) ||
+        !self::$app->uses($actions->controllerFileName, $actions->dirname)) {
       self::$app->view->renderError(404);
       exit;
     }
@@ -94,14 +95,34 @@ class PunyApp_Dispatcher {
    * @return object
    */
   private static function _getActions() {
-    $controller_name = self::$app->request->controllerName;
-    $action_name = self::$app->request->actionName;
+    $path = null;
+    $action = self::$app->request->controllerName;
+    $filename = null;
+    $action_name = null;
+    $controller_name = null;
+    $dirname = 'controllers';
+
+    foreach (array($action, 'any') as $name) {
+      $path = self::$app->getLibPath($name, $dirname);
+      if ($path != null) {
+        $controller_name = $name;
+        break;
+      }
+    }
+
+    if ($controller_name != null) {
+      $filename = PunyApp_Util::underscore($controller_name);
+      $action_name = self::$app->request->actionName;
+      self::$app->request->controllerName = $controller_name;
+      self::$app->request->actionName = $action;
+    }
 
     return (object) array(
       'actionName' => $action_name,
-      'ctrlFileName' => PunyApp_Util::underscore($controller_name),
+      'controllerName' => $controller_name,
+      'controllerFileName' => $filename,
       'className' => PunyApp_Util::camelize($controller_name, true) . 'Controller',
-      'dirname' => 'controllers'
+      'dirname' => $dirname
     );
   }
 
