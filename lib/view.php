@@ -234,7 +234,7 @@ class PunyApp_View {
    * @return array
    */
   public function getValidationErrors() {
-    return $this->validationErrors;
+    return $this->escapeHTML($this->validationErrors);
   }
 
   /**
