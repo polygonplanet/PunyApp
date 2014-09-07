@@ -20,7 +20,7 @@
 class PunyApp_Dispatcher {
 
   /**
-   * $var PunyApp
+   * @var PunyApp
    */
   public static $app = null;
 
