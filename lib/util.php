@@ -149,27 +149,35 @@ class PunyApp_Util {
    * Returns the normalized file path
    *
    * @param  string $path file path
-   * @param  string $delim directory delimiter
-   * @return string  file path that is cleaned
+   * @param  string $delimiter directory delimiter
+   * @return string
    */
-  public static function cleanFilePath($path, $delimiter = '/') {
+  public static function normalizeFilePath($path, $delimiter = '/') {
     $result = '';
 
     if (is_string($path)) {
       $delim = (string)$delimiter;
       $result = strtr(trim($path), '\\', '/');
       $pre = '';
+      $suf = '';
+      if (substr($result, -1) === $delim) {
+        $suf = $delim;
+      }
 
       $pos = strpos($result, '://');
       if ($pos === false) {
         $pos = 0;
+        if (substr($result, 0, 1) === $delim) {
+          $pre = $delim;
+        }
       } else {
         $pos += 3;
         $pre = substr($result, 0, $pos);
       }
 
       $result = $pre . implode($delim,
-        array_filter(explode('/', substr($result, $pos)), 'strlen'));
+        array_filter(explode('/', substr($result, $pos)), 'strlen')
+      ) . $suf;
     }
 
     return $result;
@@ -299,7 +307,7 @@ class PunyApp_Util {
       $pattern .= $ext;
     }
 
-    $files = @glob(rtrim(self::cleanFilePath($dir), '/') . $pattern);
+    $files = @glob(rtrim(self::normalizeFilePath($dir), '/') . $pattern);
     if (!$files) {
       return array();
     }

@@ -420,17 +420,17 @@ class PunyApp extends PunyApp_Settings {
     if ($uri === null) {
       $uri = '';
       $sep = '/';
-      $docroot = PunyApp_Util::cleanFilePath($this->env->DOCUMENT_ROOT);
-      $filename = PunyApp_Util::cleanFilePath($this->env->SCRIPT_FILENAME);
+      $docroot = PunyApp_Util::normalizeFilePath($this->env->DOCUMENT_ROOT);
+      $filename = PunyApp_Util::normalizeFilePath($this->env->SCRIPT_FILENAME);
       $uri = str_replace($docroot, '', $filename);
 
       $removals = array('<', '>', '*', '\'', '"');
-      $uri = PunyApp_Util::cleanFilePath(str_replace($removals, '', dirname($uri)));
+      $uri = PunyApp_Util::normalizeFilePath(str_replace($removals, '', dirname($uri)));
       if ($uri === '\\' || $uri === '.' || $uri == null) {
         $uri = $sep;
       }
 
-      $uri = PunyApp_Util::cleanFilePath($uri);
+      $uri = PunyApp_Util::normalizeFilePath($uri);
       if (substr($uri, 0, 1) !== $sep) {
         $uri = $sep . $uri;
       }

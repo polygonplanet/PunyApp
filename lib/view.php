@@ -115,6 +115,22 @@ class PunyApp_View {
   }
 
   /**
+   * Get current path
+   *
+   * @param string $path
+   * @return string
+   */
+  public function currentPath($path) {
+    $base_uri = $this->app->getBaseURI();
+    if (substr($path, 0, strlen($base_uri)) === $base_uri) {
+      $base_uri = '';
+    }
+
+    $path = PunyApp_Util::normalizeFilePath($base_uri . $path);
+    return $this->escapeHTML($path);
+  }
+
+  /**
    * Render template
    *
    * @param string $template
@@ -206,10 +222,19 @@ class PunyApp_View {
   /**
    * Get the validation error messages
    *
+   * @return array
+   */
+  public function getValidationErrors() {
+    return $this->validationErrors;
+  }
+
+  /**
+   * Get the validation error messages as HTML
+   *
    * @param string $attributes
    * @return string
    */
-  public function getValidationErrors($attributes = array('style' => 'color:red')) {
+  public function getValidationErrorMessages($attributes = array('style' => 'color:red')) {
     $results = array();
     $attr = $this->_buildHTMLAttributes($attributes);
     if ($attr == null) {
