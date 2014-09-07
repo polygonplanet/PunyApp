@@ -118,7 +118,8 @@ class SampleController extends PunyApp_Controller {
     $this->view->set(array(
       'id' => null,
       'email' => null,
-      'pass' => null
+      'pass' => null,
+      'error' => null
     ));
   }
 
@@ -135,15 +136,21 @@ class SampleController extends PunyApp_Controller {
   public function postRegister() {
     $this->_validateToken();
 
+    $error = null;
     if ($this->validate()) {
-      $this->_registerUser();
-      $this->redirect('home');
+      if ($this->models->sample->isUserId($this->request->params->id)) {
+        $error = 'This id already exists';
+      } else {
+        $this->_registerUser();
+        $this->redirect('home');
+      }
     }
 
     $this->view->set(array(
       'id' => $this->request->params->id,
       'email' => $this->request->params->email,
-      'pass' => ''
+      'pass' => '',
+      'error' => $error
     ));
 
     $this->view->render('sample/register');
