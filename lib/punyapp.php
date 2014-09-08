@@ -156,6 +156,7 @@ class PunyApp extends PunyApp_Settings {
     $this->cookie = new PunyApp_Cookie($this);
 
     $this->_executeUserScheme();
+    $this->removePoweredByHeader();
     $this->event->trigger('app-initialize', array());
   }
 
@@ -497,7 +498,14 @@ class PunyApp extends PunyApp_Settings {
           return false;
         }
 
-        $headers[$name] = array($name . ': ' . $value, $replace, $code);
+        $header = null;
+        if ($value === null) {
+          $header = $name;
+        } else {
+          $header = $name . ': ' . $value;
+        }
+
+        $headers[$name] = array($header, $replace, $code);
         if ($code === null) {
           array_pop($headers[$name]);
         }
@@ -526,7 +534,7 @@ class PunyApp extends PunyApp_Settings {
    * @param int $code
    * @return bool
    */
-  public static function sendResponseCode($code) {
+  public function sendResponseCode($code) {
     if (headers_sent()) {
       return false;
     }
@@ -534,6 +542,9 @@ class PunyApp extends PunyApp_Settings {
     $code = (int)$code;
     $response = null;
     switch ($code) {
+      case 403:
+        $response = 'Forbidden';
+        break;
       case 404:
         $response = 'Not Found';
         break;
@@ -542,8 +553,12 @@ class PunyApp extends PunyApp_Settings {
         break;
     }
 
-    if ($response) {
-      header(sprintf('HTTP/1.0 %d %s', $code, $response), true, $code);
+    if ($response != null) {
+      $protocol = 'HTTP/1.0';
+      if (isset($this->env->SERVER_PROTOCOL)) {
+        $protocol = $this->env->SERVER_PROTOCOL;
+      }
+      self::header('set', sprintf('%s %d %s', $protocol, $code, $response), null, true, $code);
       return true;
     }
     return false;
@@ -574,7 +589,7 @@ class PunyApp extends PunyApp_Settings {
    * Remove X-Powered-By: PHP x.x.x header
    */
   public static function removePoweredByHeader() {
-    self::header('set', 'X-Powered-By', null);
+    self::header('set', 'X-Powered-By', '');
   }
 
   /**
@@ -587,7 +602,8 @@ class PunyApp extends PunyApp_Settings {
     $url = trim($url);
 
     if (!headers_sent()) {
-      header('Location: ' . $url);
+      self::header('set', 'Location', $url);
+      self::header('send');
       exit;
     }
 
