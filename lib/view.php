@@ -187,6 +187,7 @@ class PunyApp_View {
 
     $this->app->sendResponseCode($code);
     $this->app->sendContentType('text/html');
+    PunyApp::header('send');
 
     self::$_template = (string)$code;
     $this->app->event->trigger('app-before-render-error', array($code));
