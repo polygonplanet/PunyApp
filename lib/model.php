@@ -43,7 +43,7 @@ class PunyApp_Model {
    * @return array result rows
    */
   public function find($fields = array(), $conditions = array(), $params = array()) {
-    return $this->_find($fields, $conditions, null, $params);
+    return $this->_find($fields, $conditions, null, (array)$params);
   }
 
   /**
@@ -55,8 +55,29 @@ class PunyApp_Model {
    * @return array result row
    */
   public function findOne($fields = array(), $conditions = array(), $params = array()) {
-    $results = $this->_find($fields, $conditions, 'LIMIT 1', $params);
+    $results = $this->_find($fields, $conditions, 'LIMIT 1', (array)$params);
     return isset($results, $results[0]) ? $results[0] : $results;
+  }
+
+  /**
+   * Find a data
+   *
+   * @param string $field
+   * @param array $conditions
+   * @param array $params
+   * @return mixed result column
+   */
+  public function findColumn($field, $conditions = array(), $params = array()) {
+    $sql = sprintf('SELECT %s FROM %s WHERE %s',
+      $this->_joinValues((array)$field),
+      $this->tableName,
+      $this->_createConditions($conditions)
+    );
+
+    $stmt = $this->database->prepare($sql);
+    $stmt->execute((array)$params);
+
+    return $stmt->fetchColumn(0);
   }
 
   /**
@@ -73,7 +94,7 @@ class PunyApp_Model {
     );
 
     $stmt = $this->database->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute((array)$params);
     return (int)$stmt->fetchColumn(0);
   }
 
@@ -92,7 +113,25 @@ class PunyApp_Model {
     );
 
     $stmt = $this->database->prepare($sql);
-    return $stmt->execute($params);
+    return $stmt->execute((array)$params);
+  }
+
+  /**
+   * Replace data
+   *
+   * @param array $fields
+   * @param array $params
+   * @return boolean
+   */
+  public function replace($fields = array(), $params = array()) {
+    $sql = sprintf('REPLACE INTO %s (%s) VALUES (%s)',
+      $this->tableName,
+      $this->_joinValues(array_keys($fields)),
+      $this->_joinValues(array_values($fields))
+    );
+
+    $stmt = $this->database->prepare($sql);
+    return $stmt->execute((array)$params);
   }
 
   /**
@@ -111,7 +150,7 @@ class PunyApp_Model {
     );
 
     $stmt = $this->database->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute((array)$params);
     return $stmt->rowCount();
   }
 
@@ -129,7 +168,7 @@ class PunyApp_Model {
     );
 
     $stmt = $this->database->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute((array)$params);
     return $stmt->rowCount();
   }
 
@@ -142,7 +181,7 @@ class PunyApp_Model {
    */
   public function query($sql, $params = array()) {
     $stmt = $this->database->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute((array)$params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
@@ -155,7 +194,7 @@ class PunyApp_Model {
    */
   public function exec($sql, $params = array()) {
     $stmt = $this->database->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute((array)$params);
     return $stmt->rowCount();
   }
 
@@ -184,7 +223,7 @@ class PunyApp_Model {
     }
 
     $stmt = $this->database->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute((array)$params);
 
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $results;
@@ -199,7 +238,7 @@ class PunyApp_Model {
    */
   private function _query($sql, $params = array()) {
     $stmt = $this->database->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute((array)$params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
