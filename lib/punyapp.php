@@ -33,7 +33,7 @@ class PunyApp extends PunyApp_Settings {
   /**
    * @const string settings filename
    */
-  const SETTINGS_FILENAME = 'app-settings.json';
+  const SETTINGS_FILENAME = 'app-settings.php';
 
   /**
    * @const string schema filename
@@ -165,16 +165,11 @@ class PunyApp extends PunyApp_Settings {
    * Parse settings file
    */
   private function _parseSettings() {
-    $filename = PunyApp_Util::fullPath(
+    require_once PunyApp_Util::fullPath(
       PUNYAPP_SETTINGS_DIR . DIRECTORY_SEPARATOR . self::SETTINGS_FILENAME
     );
-    $settings = file_get_contents($filename);
-    $data = json_decode($settings);
-    if (!$data) {
-      throw new PunyApp_Error('Invalid JSON format');
-    }
 
-    foreach ($data as $cat => $values) {
+    foreach ($settings as $cat => $values) {
       switch ($cat) {
         case 'system':
           foreach ($values as $key => $val) {
@@ -607,7 +602,7 @@ class PunyApp extends PunyApp_Settings {
       exit;
     }
 
-    echo '</script></textarea><html><head>';
+    echo '</script></textarea></pre><html><head>';
     printf('<meta http-equiv="refresh" content="0;url=%s">',
       $this->escapeHTML($url)
     );
