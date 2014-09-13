@@ -444,6 +444,15 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
+   * Check the debug mode
+   *
+   * @return bool return TRUE if running in debug mode
+   */
+  public function isDebug() {
+    return $this->_debug;
+  }
+
+  /**
    * Return string length
    *
    * @param string $string

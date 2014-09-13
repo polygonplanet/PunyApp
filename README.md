@@ -262,10 +262,7 @@ $this->event->on('app-before-validate', function ($app, $rules = array()) {});
 $this->event->on('app-before-redirect', function ($app, $url) {});
 $this->event->on('app-before-render', function ($app, $template) {});
 $this->event->on('app-after-render', function ($app, $template) {});
-$this->event->on('app-before-render-error', function ($app, $code) {});
-$this->event->on('app-after-render-error', function ($app, $code) {});
-$this->event->on('app-before-filter', function ($app, $params = array()) {});
-$this->event->on('app-after-filter', function ($app, $params = array()) {});
+...
 ```
 
 #### Handle Error
@@ -273,7 +270,7 @@ $this->event->on('app-after-filter', function ($app, $params = array()) {});
 ```php
 // Handle the database error
 $this->event->on('app-database-error', function ($app, $error) {
-  if ($app->getDebug()) {
+  if ($app->isDebug()) {
     // Show error message only in debug mode
     echo '<div style="color:red">', $app->escapeHTML($error), '</div>';
   }

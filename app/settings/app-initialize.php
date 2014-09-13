@@ -21,7 +21,7 @@
 /**
  * // Handle the database error
  * $this->event->on('app-database-error', function ($app, $error) {
- *   if ($app->getDebug()) {
+ *   if ($app->isDebug()) {
  *     // Show error message only in debug mode
  *     echo $app->escapeHTML($error);
  *   }
