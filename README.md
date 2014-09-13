@@ -189,17 +189,12 @@ The template variables already escaped for HTML entities.
 * app/settings/app-settings.php
 
 ```php
-<?php
-/**
- * PunyApp:
- *   The puny developer framework for rapid compiling.
- */
-
 $settings = array(
   /**
    * System settings
    */
   'system' => array(
+
     /**
      * Debug mode
      *
@@ -222,6 +217,7 @@ $settings = array(
    * Database settings
    */
   'database' => array(
+
     /**
      * Database engine
      *
@@ -236,6 +232,7 @@ $settings = array(
    * Session settings
    */
   'session' => array(
+
     /**
      * Session engine
      *
@@ -243,15 +240,7 @@ $settings = array(
      */
     'engine' => 'sqlite',
 
-    /**
-     * Session name (e.g., 'PHPSESSID')
-     */
-    'name' => 'sessid',
-
-    /**
-     * The expiration date of session
-     */
-    'expirationDate' => 365
+    ...
   )
 );
 
