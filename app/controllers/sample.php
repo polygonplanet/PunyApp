@@ -38,7 +38,6 @@ class SampleController extends PunyApp_Controller {
 
   public function beforeRender() {
     $this->sendContentType('text/html');
-    $this->app->removePoweredByHeader();
   }
 
 
