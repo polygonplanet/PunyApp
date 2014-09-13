@@ -55,7 +55,6 @@ define('PUNYAPP_SESSIONS_DIR', PUNYAPP_STORAGE_DIR . DIRECTORY_SEPARATOR . 'sess
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'security' . DIRECTORY_SEPARATOR . 'cipher.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'security' . DIRECTORY_SEPARATOR . 'arcfour.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'security' . DIRECTORY_SEPARATOR . 'token.php';
-require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'compat.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'util.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'view.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'database.php';
