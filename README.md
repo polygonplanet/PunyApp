@@ -27,7 +27,7 @@ Application directory layout:
       /views              -> App views
       /storage            -> A storage of the filebase database
       /settings           -> Application settings
-        app-settings.json
+        app-settings.php
         app-scheme.php
       /public             -> public web
         /css
@@ -186,34 +186,76 @@ The template variables already escaped for HTML entities.
 
 ### Settings
 
-* app/settings/app-settings.json
+* app/settings/app-settings.php
 
-```javascript
-{
-  "system": {
-    "debug": true, // debug mode (show errors)
-    "lang": "ja", // or "en" etc.
-    "charset": "utf-8",
-    "timezone": "Asia/Tokyo", // or "America/Chicago" etc.
-    // Application security salt
-    // Enter something characters. symbols is possible.
-    "salt": "ZQJaiPPYn6Tldb2gottKwIDmGiatuSnV"
-  },
-  "database": {
-    "engine": "sqlite", // or "mysql", "posql"
-    "encoding": "utf8",
-    "user": "",
-    "pass": "",
-    "dbname": "database_name",
-    "host": "localhost",
-    "port": ""
-  },
-  "session": {
-    "engine": "sqlite", // or "mysql", "posql"
-    "name": "sessid", // Session Cookie name (PHPSESSID)
-    "expirationDate": 365
-  }
-}
+```php
+<?php
+/**
+ * PunyApp:
+ *   The puny developer framework for rapid compiling.
+ */
+
+$settings = array(
+  /**
+   * System settings
+   */
+  'system' => array(
+    /**
+     * Debug mode
+     *
+     * true = show errors
+     * false = hide errors
+     */
+    'debug' => true,
+
+    /**
+     * internal character-code
+     *
+     * default = utf-8
+     */
+    'charset' => 'utf-8',
+
+    ...
+  ),
+
+  /**
+   * Database settings
+   */
+  'database' => array(
+    /**
+     * Database engine
+     *
+     * Available engines: "mysql", "sqlite" and "posql".
+     */
+    'engine' => 'sqlite',
+
+    ...
+  ),
+
+  /**
+   * Session settings
+   */
+  'session' => array(
+    /**
+     * Session engine
+     *
+     * Available engines: "mysql", "sqlite" and "posql".
+     */
+    'engine' => 'sqlite',
+
+    /**
+     * Session name (e.g., 'PHPSESSID')
+     */
+    'name' => 'sessid',
+
+    /**
+     * The expiration date of session
+     */
+    'expirationDate' => 365
+  )
+);
+
+
 ```
 
 For SQLite, set to writable following files.  
