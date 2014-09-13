@@ -68,24 +68,24 @@ class PunyApp_Dispatcher {
   private static function _executeActions($methods) {
     $params = self::_getParams();
 
-    self::$app->event->trigger('app-before-filter', $params);
+    self::$app->event->trigger('app-before-filter', array($params));
     if (is_callable(array(self::$app->controller, 'beforeFilter'))) {
-      call_user_func_array(array(self::$app->controller, 'beforeFilter'), $params);
+      call_user_func(array(self::$app->controller, 'beforeFilter'), $params);
     }
 
     if ($methods->before != null) {
-      call_user_func_array(array(self::$app->controller, $methods->before), $params);
+      call_user_func(array(self::$app->controller, $methods->before), $params);
     }
 
-    call_user_func_array(array(self::$app->controller, $methods->method), $params);
+    call_user_func(array(self::$app->controller, $methods->method), $params);
 
     if ($methods->after != null) {
-      call_user_func_array(array(self::$app->controller, $methods->after), $params);
+      call_user_func(array(self::$app->controller, $methods->after), $params);
     }
 
-    self::$app->event->trigger('app-after-filter', $params);
+    self::$app->event->trigger('app-after-filter', array($params));
     if (is_callable(array(self::$app->controller, 'afterFilter'))) {
-      call_user_func_array(array(self::$app->controller, 'afterFilter'), $params);
+      call_user_func(array(self::$app->controller, 'afterFilter'), $params);
     }
   }
 
