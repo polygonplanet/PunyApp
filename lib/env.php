@@ -20,18 +20,13 @@
 class PunyApp_Env implements Iterator {
 
   /**
-   * @var array
-   */
-  private $_env = null;
-
-  /**
    * Constructor
    */
   public function __construct() {
-    $this->_env = array_merge(
+    $this->_getEnvVar(array_merge(
       isset($_ENV) ? (array)$_ENV : array(),
       isset($_SERVER) ? (array)$_SERVER : array()
-    );
+    ));
   }
 
   /**
@@ -42,7 +37,7 @@ class PunyApp_Env implements Iterator {
    */
   public function getEnv($name = null) {
     if ($name === null) {
-      return $this->_env;
+      return $this->_getEnvVar();
     }
     return $this->_getEnv($name);
   }
@@ -56,19 +51,20 @@ class PunyApp_Env implements Iterator {
   private function _getEnv($name, $recursive = 0) {
     $result = null;
 
-    if (isset($this->_env[$name])) {
-      return $this->_env[$name];
+    $env = $this->_getEnvVar();
+    if (isset($env[$name])) {
+      return $env[$name];
     }
 
     if (function_exists('getenv')) {
-      $result = @getenv($name);
+      $result = getenv($name);
       if ($result === false) {
         $result = null;
       }
     }
 
     if ($result === null && function_exists('apache_getenv')) {
-      $result = @apache_getenv($key);
+      $result = apache_getenv($name);
       if ($result === false) {
         $result = null;
       }
@@ -91,13 +87,34 @@ class PunyApp_Env implements Iterator {
     return $result;
   }
 
+
+  /**
+   * Get env var
+   *
+   * @param array $var
+   * @return array
+   */
+  private static function &_getEnvVar($var = null) {
+    static $env = array();
+
+    if ($var !== null) {
+      $env = $var;
+    }
+
+    return $env;
+  }
+
+
+
   public function __get($name) {
     return $this->_getEnv($name);
   }
 
 
   public function __set($name, $value) {
-    $this->_env[$name] = $value;
+    $env = &$this->_getEnvVar();
+    $env[$name] = $value;
+    unset($env);
   }
 
 
@@ -107,31 +124,48 @@ class PunyApp_Env implements Iterator {
 
 
   public function __unset($name) {
-    unset($this->_env[$name]);
+    $env = &$this->_getEnvVar();
+    unset($env[$name]);
+    unset($env);
   }
 
 
   public function rewind() {
-    return reset($this->_env);
+    $env = &$this->_getEnvVar();
+    $result = reset($env);
+    unset($env);
+    return $result;
   }
 
 
   public function current() {
-    return current($this->_env);
+    $env = &$this->_getEnvVar();
+    $result = current($env);
+    unset($env);
+    return $result;
   }
 
 
   public function key() {
-    return key($this->_env);
+    $env = &$this->_getEnvVar();
+    $result = key($env);
+    unset($env);
+    return $result;
   }
 
 
   public function next() {
-    return next($this->_env);
+    $env = &$this->_getEnvVar();
+    $result = next($env);
+    unset($env);
+    return $result;
   }
 
 
   public function valid() {
-    return key($this->_env) !== null;
+    $env = &$this->_getEnvVar();
+    $result = key($env) !== null;
+    unset($env);
+    return $result;
   }
 }
