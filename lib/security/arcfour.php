@@ -19,6 +19,8 @@
  */
 class PunyApp_Security_Arcfour {
 
+  const BLOCKSIZE = 1;
+
   /**
    * Constructor
    *
@@ -37,7 +39,7 @@ class PunyApp_Security_Arcfour {
    * @return string encrypted data
    */
   public function encrypt($data) {
-    return $this->_crypt($data);
+    return $this->_crypt($this->_padPKCS5($data, self::BLOCKSIZE));
   }
 
   /**
@@ -47,7 +49,7 @@ class PunyApp_Security_Arcfour {
    * @return string decrypted data
    */
   public function decrypt($data) {
-    return $this->_crypt($data);
+    return $this->_unpadPKCS5($this->_crypt($data));
   }
 
 
@@ -74,46 +76,66 @@ class PunyApp_Security_Arcfour {
       return;
     }
 
-    $s = range(0, 255);
-    $l = strlen($key);
+    $matrix = range(0, 255);
+    $len = strlen($key);
 
     for ($i = 0; $i < 256; $i++) {
-      $c[$i] = ord($key[$i % $l]);
+      $c[$i] = ord($key[$i % $len]);
     }
 
     for ($j = $i = 0; $i < 256; $i++) {
-      $j = ($j + $s[$i] + $c[$i]) % 256;
-      $t = $s[$i];
-      $s[$i] = $s[$j];
-      $s[$j] = $t;
+      $j = ($j + $matrix[$i] + $c[$i]) % 256;
+      $t = $matrix[$i];
+      $matrix[$i] = $matrix[$j];
+      $matrix[$j] = $t;
     }
 
-    $this->_setCacheKey($s);
+    $this->_setCacheKey($matrix);
   }
 
   /**
    * Crypt
    *
-   * @param string $a string
+   * @param string $data string
    * @return string
    */
-  private function _crypt($a) {
-    $s = $this->_getCacheKey();
-    $l = strlen($a);
+  private function _crypt($data) {
+    $data = (string)$data;
+    $matrix = $this->_getCacheKey();
+    $len = strlen($data);
 
-    for ($k = $j = $i = 0; $k < $l; $k++) {
+    for ($k = $j = $i = 0; $k < $len; $k++) {
       $i = ($i + 1) % 256;
-      $j = ($j + $s[$i]) % 256;
+      $j = ($j + $matrix[$i]) % 256;
 
-      $t = $s[$i];
-      $s[$i] = $s[$j];
-      $s[$j] = $t;
+      $t = $matrix[$i];
+      $matrix[$i] = $matrix[$j];
+      $matrix[$j] = $t;
 
-      $t = ($s[$i] + $s[$j]) % 256;
-      $a[$k] = chr(ord($a[$k]) ^ $s[$t]);
+      $t = ($matrix[$i] + $matrix[$j]) % 256;
+      $data[$k] = chr(ord($data[$k]) ^ $matrix[$t]);
     }
 
-    return $a;
+    return $data;
+  }
+
+
+  private function _padPKCS5($data, $blocksize) {
+    $pad = $blocksize - (strlen($data) % $blocksize);
+    return $data . str_repeat(chr($pad), $pad);
+  }
+
+
+  private function _unpadPKCS5($data) {
+    $pad = ord(substr($data, -1));
+    if ($pad > strlen($data)) {
+      return false;
+    }
+
+    if (strspn($data, chr($pad), strlen($data) - $pad) !== $pad) {
+      return false;
+    }
+    return substr($data, 0, -1 * $pad);
   }
 
 
