@@ -15,6 +15,6 @@
 
 <IfModule mod_rewrite.c>
   RewriteEngine on
-  RewriteRule   ^$   app/public/    [L]
-  RewriteRule   (.*) app/public/$1  [L]
+  RewriteRule   ^$   application/public/    [L]
+  RewriteRule   (.*) application/public/$1  [L]
 </IfModule>

@@ -155,6 +155,7 @@ class PunyApp extends PunyApp_Settings {
     $this->session->start();
     $this->cookie = new PunyApp_Cookie($this);
 
+    spl_autoload_register(array(__CLASS__, 'load'));
     $this->_executeUserScheme();
     $this->removePoweredByHeader();
     $this->event->trigger('app-initialize', array());
@@ -240,29 +241,84 @@ class PunyApp extends PunyApp_Settings {
    */
   public static function uses($name, $path) {
     $filename = self::getLibPath($name, $path);
-    if ($filename != null) {
-      require_once $filename;
-      return true;
+    if (!$filename) {
+      return false;
     }
-    return false;
+
+    require_once $filename;
+    return true;
+  }
+
+
+  /**
+   * Load class
+   *
+   * @param string $name class name
+   * @return mixed
+   */
+  public static function load($name) {
+    static $paths = array(), $files = null, $ext = '.php';
+
+    if ($files === null) {
+      $files = PunyApp_Util::getFiles(PUNYAPP_LIBRARIES_DIR, $ext);
+    }
+
+    if (isset($paths[$name])) {
+      return false;
+    }
+
+    $found = false;
+    $dirname = null;
+    $filename = $name . $ext;
+    foreach ($files as $file) {
+      $dirname = dirname($file);
+      $basename = basename($file);
+      if (0 === strcasecmp($filename, $basename)) {
+        $found = true;
+        break;
+      }
+
+      if (strpos($name, '_') === false) {
+        $underscore = PunyApp_Util::underscore($name) . $ext;
+        if (0 === strcasecmp($underscore, $basename)) {
+          $filename = $underscore;
+          $found = true;
+          break;
+        }
+      } else {
+        $camelcase = PunyApp_Util::camelize($name) . $ext;
+        if (0 === strcasecmp($camelcase, $basename)) {
+          $filename = $camelcase;
+          $found = true;
+          break;
+        }
+      }
+    }
+
+    if (!$found) {
+      return false;
+    }
+
+    $filename = $dirname . DIRECTORY_SEPARATOR . $filename;
+    $paths[$name] = true;
+    return include $filename;
   }
 
   /**
-   * Imports library
+   * Get library path
    *
    * @param string $name
    * @param string $path
    * @return string or false
    */
   public static function getLibPath($name, $path) {
-    $filename = null;
-    $sep = DIRECTORY_SEPARATOR;
-    $sep_hex = '\\x' . dechex(ord($sep));
-    $split_re = sprintf('{[%s/]+}', $sep_hex);
+    $sep = '/';
+    $parts = null;
+    $name = PunyApp_Util::normalizeFilePath($name);
+    $path = PunyApp_Util::normalizeFilePath($path);
 
-    if (strpos($name, '/') !== false ||
-        strpos($name, $sep) !== false) {
-      $parts = preg_split($split_re, $name, -1, PREG_SPLIT_NO_EMPTY);
+    if (strpos($name, $sep) !== false) {
+      $parts = explode($sep, $name);
       $name = array_pop($parts);
       return self::getLibPath(
         $name,
@@ -271,26 +327,26 @@ class PunyApp extends PunyApp_Settings {
     }
 
     $name = PunyApp_Util::underscore(basename($name)) . '.php';
-    $parts = preg_split($split_re, $path, -1, PREG_SPLIT_NO_EMPTY);
+    $parts = explode($sep, $path);
     $const = sprintf('PUNYAPP_%s_DIR', strtoupper(array_shift($parts)));
 
     if (!defined($const)) {
-      $filename = PunyApp_Util::fullPath($path . $sep . $name);
-    } else {
-      $dir = constant($const);
-      if (!empty($parts)) {
-        $dir .= $sep . implode($sep, $parts);
-      }
+      return false;
+    }
 
+    $dir = constant($const);
+    if (!empty($parts)) {
+      $dir .= $sep . implode($sep, $parts);
+    }
+
+    $filename = PunyApp_Util::fullPath($dir . $sep . $name);
+    if (!empty($parts) && !file_exists($filename)) {
+      $dir .= $sep . implode($sep, $parts);
       $filename = PunyApp_Util::fullPath($dir . $sep . $name);
-      if (!@file_exists($filename)) {
-        $dir .= $sep . implode($sep, $parts);
-        $filename = PunyApp_Util::fullPath($dir . $sep . $name);
-      }
+    }
 
-      if ($filename != null && @file_exists($filename)) {
-        return $filename;
-      }
+    if ($filename != null && file_exists($filename)) {
+      return $filename;
     }
 
     return false;
@@ -436,8 +492,11 @@ class PunyApp extends PunyApp_Settings {
 
       if ($uri === ($sep . $sep)) {
         $uri = $sep;
-      } else if (strpos($uri, '/app/public/') !== false) {
-        $uri = preg_replace('{^(.+/)app/public/$}', '$1', $uri);
+      } else {
+        $dir = '/application/public/';
+        if (substr($uri, -20) === $dir) {
+          $uri = substr($uri, 0, strrpos($uri, $dir) + 1);
+        }
       }
     }
     return $uri;

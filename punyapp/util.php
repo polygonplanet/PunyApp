@@ -138,7 +138,7 @@ class PunyApp_Util {
 
     if ($check_exists) {
       clearstatcache();
-      if (!@file_exists($result)) {
+      if (!file_exists($result)) {
         $result = false;
       }
     }
@@ -302,22 +302,42 @@ class PunyApp_Util {
   public static function getFiles($dir, $ext = null) {
     $results = array();
 
-    $pattern = '/*';
-    if ($ext != null) {
-      $pattern .= $ext;
-    }
-
-    $files = glob(rtrim(self::normalizeFilePath($dir), '/') . $pattern);
+    $files = glob(rtrim(self::normalizeFilePath($dir), '/') . '/*');
     if (!$files) {
       return array();
     }
 
     foreach ($files as $file) {
-      if (is_file($file)) {
+      if (is_file($file) &&
+        ($ext == null || 0 === strcasecmp(substr($file, -strlen($ext)), $ext))) {
         $results[] = $file;
       }
       if (is_dir($file)) {
         $results = array_merge($results, self::getFiles($file, $ext));
+      }
+    }
+
+    return $results;
+  }
+
+  /**
+   * Get directory names
+   *
+   * @param string $dir
+   * @return array
+   */
+  public static function getDirectories($dir) {
+    $results = array();
+
+    $files = glob(rtrim(self::normalizeFilePath($dir), '/') . '/*');
+    if (!$files) {
+      return array();
+    }
+
+    foreach ($files as $file) {
+      if (is_dir($file)) {
+        $results[] = $file;
+        $results = array_merge($results, self::getDirectories($file));
       }
     }
 

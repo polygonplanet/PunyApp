@@ -4,6 +4,6 @@
  *   The puny developer framework for rapid compiling.
  */
 
-require_once dirname(dirname(dirname(__FILE__))) . '/lib/bootstrap.php';
+require_once dirname(dirname(dirname(__FILE__))) . '/punyapp/bootstrap.php';
 
 PunyApp_Dispatcher::dispatch();

@@ -282,7 +282,7 @@ class PunyApp_View {
             }
           }
           $results[] = sprintf('style="%s"',
-            str_replace('"', "'", implode(';', $style))
+            strtr(implode(';', $style), '"', "'")
           );
           break;
         default:
