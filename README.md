@@ -21,7 +21,7 @@ It does not require the external PHP extensions.
 
 Application directory layout:  
 
-    /app                  -> Application
+    /application
       /controllers        -> App controllers
       /models             -> App models
       /views              -> App views
@@ -33,8 +33,8 @@ Application directory layout:
         /css
         /js
         index.php
-    /lib                  -> PunyApp library
-    /vendors              -> Venders
+    /punyapp              -> PunyApp libraries
+    /vendors              -> Vendors
     .htaccess
     index.php
  
