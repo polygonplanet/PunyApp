@@ -200,11 +200,7 @@ class PunyApp_Validator {
    * @return bool
    */
   protected function _validate_regex($value, $regex) {
-    if (preg_match($regex, $value)) {
-      return true;
-    }
-
-    return false;
+    return (bool)preg_match($regex, $value);
   }
 
   /**
