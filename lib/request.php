@@ -327,8 +327,8 @@ class PunyApp_Request {
 
     if ($magic_quotes_gpc === null) {
       $magic_quotes_gpc = function_exists('get_magic_quotes_gpc')
-                       && @get_magic_quotes_gpc();
-      $magic_quotes_sybase = (bool)(int)@ini_get('magic_quotes_sybase');
+                       && get_magic_quotes_gpc();
+      $magic_quotes_sybase = (bool)(int)ini_get('magic_quotes_sybase');
     }
 
     if (is_array($var)) {
@@ -474,7 +474,12 @@ class PunyApp_Request_Headers implements Iterator {
   private function _parseRequestHeaders() {
     $this->_headers = array();
 
-    if (isset($_SERVER) && is_array($_SERVER)) {
+    if (function_exists('apache_request_headers')) {
+      $this->_headers = apache_request_headers();
+    }
+
+    if ((empty($this->_headers) || !is_array($this->_headers)) &&
+        isset($_SERVER) && is_array($_SERVER)) {
       foreach ($_SERVER as $key => $val) {
         $key = strtolower($key);
 
