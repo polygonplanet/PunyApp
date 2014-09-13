@@ -25,7 +25,7 @@ class PunyApp_Util {
    * @return int
    */
   public static function now() {
-    $milliseconds = round(microtime(true) * 1000);
+    $milliseconds = floor(microtime(true) * 1000);
     return $milliseconds;
   }
 
@@ -307,7 +307,7 @@ class PunyApp_Util {
       $pattern .= $ext;
     }
 
-    $files = @glob(rtrim(self::normalizeFilePath($dir), '/') . $pattern);
+    $files = glob(rtrim(self::normalizeFilePath($dir), '/') . $pattern);
     if (!$files) {
       return array();
     }

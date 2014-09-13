@@ -73,21 +73,21 @@ class PunyApp_Settings {
    * Update settings with new variables
    */
   protected function _updateSettings() {
-    @ini_set('display_errors', $this->_debug ? 1 : 0);
-    @ini_set('log_errors', false);
-    @ini_set('track_errors', false);
-    @ini_set('default_mimetype', $this->_mimeType);
-    @ini_set('default_charset', $this->_charset);
-    @ini_set('arg_separator.output', $this->_argSeparatorOutput);
-    @ini_set('memory_limit', $this->_memoryLimit);
+    ini_set('display_errors', $this->_debug ? 1 : 0);
+    ini_set('log_errors', false);
+    ini_set('track_errors', false);
+    ini_set('default_mimetype', $this->_mimeType);
+    ini_set('default_charset', $this->_charset);
+    ini_set('arg_separator.output', $this->_argSeparatorOutput);
+    ini_set('memory_limit', $this->_memoryLimit);
 
-    if (!@ini_get('safe_mode') &&
-      (int)$this->_maxExecutionTime > (int)(@ini_get('max_execution_time'))) {
-      @set_time_limit($this->_maxExecutionTime);
+    if (!ini_get('safe_mode') &&
+      (int)$this->_maxExecutionTime > (int)ini_get('max_execution_time')) {
+      set_time_limit($this->_maxExecutionTime);
     }
 
     if ($this->_implicitFlush) {
-      @ob_implicit_flush(1);
+      ob_implicit_flush(1);
     }
 
     if (extension_loaded('mbstring')) {
@@ -105,8 +105,8 @@ class PunyApp_Settings {
       mb_regex_encoding($this->_charset);
       mb_http_output('pass');
       mb_detect_order('auto');
-      @ini_set('mbstring.http_input', 'pass');
-      @ini_set('mbstring.func_overload', 0);
+      ini_set('mbstring.http_input', 'pass');
+      ini_set('mbstring.func_overload', 0);
     }
 
     if (extension_loaded('iconv')) {
