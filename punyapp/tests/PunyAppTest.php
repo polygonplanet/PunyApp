@@ -14,11 +14,7 @@ class PunyAppTest extends PHPUnit_Framework_TestCase {
     $contents = ob_get_contents();
     ob_end_clean();
 
-    $this->assertTrue(strpos(strtolower($contents), 'error') === false);
-    $this->assertTrue(strpos(strtolower($contents), 'notice') === false);
-    $this->assertTrue(strpos(strtolower($contents), 'warn') === false);
-    $this->assertTrue(strpos(strtolower($contents), 'fatal') === false);
-
+    $this->assertTrue(!preg_match('/Error|Notice|Warning|Fatal/i', $contents));
     $this->assertContains('<html', $contents);
     $this->assertContains('<h1>PunyApp</h1>', $contents);
     $this->assertContains('framework', $contents);
