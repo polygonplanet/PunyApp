@@ -273,21 +273,21 @@ class PunyApp extends PunyApp_Settings {
     foreach ($files as $file) {
       $dirname = dirname($file);
       $basename = basename($file);
-      if (0 === strcasecmp($filename, $basename)) {
+      if ($filename === $basename) {
         $found = true;
         break;
       }
 
       if (strpos($name, '_') === false) {
         $underscore = PunyApp_Util::underscore($name) . $ext;
-        if (0 === strcasecmp($underscore, $basename)) {
+        if ($underscore === $basename) {
           $filename = $underscore;
           $found = true;
           break;
         }
       } else {
         $camelcase = PunyApp_Util::camelize($name) . $ext;
-        if (0 === strcasecmp($camelcase, $basename)) {
+        if ($camelcase === $basename) {
           $filename = $camelcase;
           $found = true;
           break;
