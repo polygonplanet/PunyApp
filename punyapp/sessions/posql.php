@@ -32,9 +32,9 @@ class PunyApp_Session_Posql extends PunyApp_Session_Common {
   protected $_vacuumble = true;
 
   /**
-   * @var string database creation scheme
+   * @var string database creation schema
    */
-  protected $_scheme = "CREATE TABLE IF NOT EXISTS %s (
+  protected $_schema = "CREATE TABLE IF NOT EXISTS %s (
     id       varchar(255) NOT NULL default '',
     data     text,
     expire   integer default NULL,

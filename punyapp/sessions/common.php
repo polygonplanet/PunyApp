@@ -30,9 +30,9 @@ class PunyApp_Session_Common {
   protected $_tableName = 'punyapp_sessions';
 
   /**
-   * @var string database creation scheme
+   * @var string database creation schema
    */
-  protected $_scheme = "CREATE TABLE IF NOT EXISTS %s (
+  protected $_schema = "CREATE TABLE IF NOT EXISTS %s (
     id       varchar(255) NOT NULL default '',
     data     text,
     expire   integer default NULL,
@@ -139,12 +139,12 @@ class PunyApp_Session_Common {
     }
     $self->setTableName((string)$table_name);
 
-    $sql = sprintf($self->_scheme, $self->getTableName());
+    $sql = sprintf($self->_schema, $self->getTableName());
     $self->_db->exec($sql);
     if ($self->isError()) {
       throw new PunyApp_Database_Error($self->getLastError());
     }
-    $self->_scheme = null;
+    $self->_schema = null;
 
     if ($is_https) {
       @ini_set('session.cookie_secure', 1);

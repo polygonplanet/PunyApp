@@ -156,7 +156,7 @@ class PunyApp extends PunyApp_Settings {
     $this->cookie = new PunyApp_Cookie($this);
 
     spl_autoload_register(array(__CLASS__, 'load'));
-    $this->_executeUserScheme();
+    $this->_executeUserSchema();
     $this->removePoweredByHeader();
     $this->event->trigger('app-initialize', array());
   }
@@ -205,9 +205,9 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * Execute user scheme
+   * Execute user schema
    */
-  private function _executeUserScheme() {
+  private function _executeUserSchema() {
     require_once PunyApp_Util::fullPath(
       PUNYAPP_SETTINGS_DIR . DIRECTORY_SEPARATOR . self::SCHEMA_FILENAME
     );

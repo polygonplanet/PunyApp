@@ -27,9 +27,9 @@ class PunyApp_Session_MySQL extends PunyApp_Session_Common {
   protected $_db = null;
 
   /**
-   * @var string database creation scheme
+   * @var string database creation schema
    */
-  protected $_scheme = "CREATE TABLE IF NOT EXISTS %s (
+  protected $_schema = "CREATE TABLE IF NOT EXISTS %s (
     id       varchar(128) NOT NULL default '',
     data     text,
     expire   int(11) default NULL,
