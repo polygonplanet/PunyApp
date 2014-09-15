@@ -9,7 +9,7 @@
  * @subpackage -
  * @category   Application
  * @author     polygon planet <polygon.planet.aqua@gmail.com>
- * @link       http://polygonpla.net/
+ * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
  * @version    1.0.11
@@ -41,6 +41,11 @@ class PunyApp extends PunyApp_Settings {
   const SCHEMA_FILENAME = 'app-schema.php';
 
   /**
+   * @const string cache name
+   */
+  const CACHE_NAME = 'app-cache';
+
+  /**
    * @var PunyApp_Request
    */
   public $request = null;
@@ -69,6 +74,11 @@ class PunyApp extends PunyApp_Settings {
    * @var PunyApp_Cookie
    */
   public $cookie = null;
+
+  /**
+   * @var PunyApp_Cache
+   */
+  public $cache = null;
 
   /**
    * @var PunyApp_Security_Cipher
@@ -127,7 +137,7 @@ class PunyApp extends PunyApp_Settings {
     $initialized = true;
 
     if ($this->_debug) {
-      error_reporting(E_ALL & ~E_STRICT);
+      error_reporting(E_ALL & ~E_STRICT & ~E_DEPRECATED);
     } else {
       error_reporting(0);
     }
@@ -142,11 +152,12 @@ class PunyApp extends PunyApp_Settings {
     $this->_parseSettings();
     $this->_updateTimezone();
     $this->_updateSettings();
-    $this->_executeUserInitialization();
+    $this->_executeAppInitialization();
 
     $this->cipher = new PunyApp_Security_Cipher($this->_generateKey());
     $this->arcfour = new PunyApp_Security_Arcfour($this->_generateKey());
     $this->token = new PunyApp_Security_Token($this);
+    $this->cache = new PunyApp_Cache(self::CACHE_NAME);
     $this->view = new PunyApp_View($this);
     $this->database = new PunyApp_Database($this);
     $this->model = new PunyApp_Model($this);
@@ -156,7 +167,7 @@ class PunyApp extends PunyApp_Settings {
     $this->cookie = new PunyApp_Cookie($this);
 
     spl_autoload_register(array(__CLASS__, 'load'));
-    $this->_executeUserSchema();
+    $this->_executeAppSchema();
     $this->removePoweredByHeader();
     $this->event->trigger('app-initialize', array());
   }
@@ -198,7 +209,7 @@ class PunyApp extends PunyApp_Settings {
   /**
    * Execute user initialize file
    */
-  private function _executeUserInitialization() {
+  private function _executeAppInitialization() {
     require_once PunyApp_Util::fullPath(
       PUNYAPP_SETTINGS_DIR . DIRECTORY_SEPARATOR . self::INITIALIZE_FILENAME
     );
@@ -207,7 +218,11 @@ class PunyApp extends PunyApp_Settings {
   /**
    * Execute user schema
    */
-  private function _executeUserSchema() {
+  private function _executeAppSchema() {
+    if ($this->cache->_appSchemaDone) {
+      return;
+    }
+
     require_once PunyApp_Util::fullPath(
       PUNYAPP_SETTINGS_DIR . DIRECTORY_SEPARATOR . self::SCHEMA_FILENAME
     );
@@ -220,6 +235,8 @@ class PunyApp extends PunyApp_Settings {
         }
       }
     }
+
+    $this->cache->_appSchemaDone = true;
   }
 
 
@@ -393,7 +410,7 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * Cache
+   * Store
    *
    * @param string $action
    * @param string $name
@@ -401,8 +418,8 @@ class PunyApp extends PunyApp_Settings {
    * @param string $secret_key
    * @return mixed
    */
-  public static function cache($action, $name, $value = null, $secret_key = null) {
-    static $cache = array(), $secrets = array();
+  public static function store($action, $name, $value = null, $secret_key = null) {
+    static $store = array(), $secrets = array();
 
     $num_args = func_num_args();
     switch (strtolower($action)) {
@@ -411,7 +428,7 @@ class PunyApp extends PunyApp_Settings {
           $secret_key = $value;
         }
 
-        if ($name == null || !array_key_exists($name, $cache)) {
+        if ($name == null || !array_key_exists($name, $store)) {
           return null;
         }
 
@@ -419,16 +436,16 @@ class PunyApp extends PunyApp_Settings {
           if (array_key_exists($name, $secrets)) {
             return null;
           }
-          return $cache[$name];
+          return $store[$name];
         }
 
         if (!array_key_exists($name, $secrets) || $secrets[$name] !== $secret_key) {
           return null;
         }
 
-        return $cache[$name];
+        return $store[$name];
       case 'set':
-        $cache[$name] = $value;
+        $store[$name] = $value;
         if ($secret_key != null) {
           $secrets[$name] = $secret_key;
         }
@@ -442,7 +459,7 @@ class PunyApp extends PunyApp_Settings {
           if (array_key_exists($name, $secrets)) {
             return false;
           }
-          unset($cache[$name]);
+          unset($store[$name]);
           return true;
         }
 
@@ -450,7 +467,7 @@ class PunyApp extends PunyApp_Settings {
           return false;
         }
         if ($secrets[$name] === $secret_key) {
-          unset($cache[$name], $secrets[$name]);
+          unset($store[$name], $secrets[$name]);
           return true;
         }
         return false;

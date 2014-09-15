@@ -9,7 +9,7 @@
  * @subpackage -
  * @category   Bootstrap
  * @author     polygon planet <polygon.planet.aqua@gmail.com>
- * @link       http://polygonpla.net/
+ * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
  */
@@ -32,7 +32,6 @@ defined('E_USER_DEPRECATED') or define('E_USER_DEPRECATED', 16384);
 
 error_reporting(E_ALL & ~E_DEPRECATED);
 
-
 define('PUNYAPP', 'PUNYAPP');
 define('PUNYAPP_ROOT_DIR', dirname(dirname(__FILE__)));
 
@@ -50,6 +49,7 @@ define('PUNYAPP_SETTINGS_DIR', PUNYAPP_APP_DIR . DIRECTORY_SEPARATOR . 'settings
 define('PUNYAPP_LIBRARIES_DIR', PUNYAPP_APP_DIR . DIRECTORY_SEPARATOR . 'libraries');
 define('PUNYAPP_CONTROLLERS_DIR', PUNYAPP_APP_DIR . DIRECTORY_SEPARATOR . 'controllers');
 
+define('PUNYAPP_CACHE_DIR', PUNYAPP_STORAGE_DIR . DIRECTORY_SEPARATOR . 'cache');
 define('PUNYAPP_DATABASES_DIR', PUNYAPP_STORAGE_DIR . DIRECTORY_SEPARATOR . 'databases');
 define('PUNYAPP_SESSIONS_DIR', PUNYAPP_STORAGE_DIR . DIRECTORY_SEPARATOR . 'sessions');
 
@@ -57,6 +57,8 @@ require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'security' . DIRECTORY_SEPA
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'security' . DIRECTORY_SEPARATOR . 'arcfour.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'security' . DIRECTORY_SEPARATOR . 'token.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'util.php';
+require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'file.php';
+require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'cache.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'view.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'database.php';
 require_once PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'model.php';
