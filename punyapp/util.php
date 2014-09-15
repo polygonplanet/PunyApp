@@ -9,7 +9,7 @@
  * @subpackage -
  * @category   Util
  * @author     polygon planet <polygon.planet.aqua@gmail.com>
- * @link       http://polygonpla.net/
+ * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
  */
@@ -342,5 +342,35 @@ class PunyApp_Util {
     }
 
     return $results;
+  }
+
+  /**
+   * Checks whether the file is readable.
+   * This function validates 'allow_url_fopen' flag.
+   *
+   * @param string $file filename
+   * @return bool
+   */
+  public static function isReadable($file) {
+    $fp = @fopen($file, 'r', true);
+    if ($fp) {
+      return fclose($fp);
+    }
+    return false;
+  }
+
+  /**
+   * Checks whether the file is writable.
+   * This function validates 'allow_url_fopen' flag.
+   *
+   * @param string $file filename
+   * @return bool
+   */
+  public static function isWritable($file) {
+    $fp = @fopen($file, 'a', true);
+    if ($fp) {
+      return fclose($fp);
+    }
+    return false;
   }
 }
