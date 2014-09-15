@@ -9,7 +9,7 @@
  * @subpackage -
  * @category   Security/Cipher
  * @author     polygon planet <polygon.planet.aqua@gmail.com>
- * @link       http://polygonpla.net/
+ * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
  */
@@ -36,7 +36,7 @@ class PunyApp_Security_Cipher {
    */
   public function __construct($key = null) {
     if ($key != null) {
-      $this->_setCacheKey($key);
+      $this->_setStoreKey($key);
     }
   }
 
@@ -61,7 +61,7 @@ class PunyApp_Security_Cipher {
 
     $td = mcrypt_module_open($this->cipher, '', $this->mode, '');
     $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
-    mcrypt_generic_init($td, $this->_getCacheKey(), $iv);
+    mcrypt_generic_init($td, $this->_getStoreKey(), $iv);
     $data = mcrypt_generic($td, $input);
 
     mcrypt_generic_deinit($td);
@@ -79,7 +79,7 @@ class PunyApp_Security_Cipher {
   public function decrypt($data) {
     $td = mcrypt_module_open($this->cipher, '', $this->mode, '');
     $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
-    mcrypt_generic_init($td, $this->_getCacheKey(), $iv);
+    mcrypt_generic_init($td, $this->_getStoreKey(), $iv);
 
     $data = mdecrypt_generic($td, $data);
     mcrypt_generic_deinit($td);
@@ -109,14 +109,14 @@ class PunyApp_Security_Cipher {
   }
 
 
-  private function _getCacheKey() {
+  private function _getStoreKey() {
     $class = __CLASS__;
-    return PunyApp::cache('get', $class . '-key', $class . '-skey');
+    return PunyApp::store('get', $class . '-key', $class . '-skey');
   }
 
-  private function _setCacheKey($key) {
+  private function _setStoreKey($key) {
     $class = __CLASS__;
-    PunyApp::cache('set', $class . '-key', $key, $class . '-skey');
+    PunyApp::store('set', $class . '-key', $key, $class . '-skey');
   }
 
 
@@ -127,7 +127,7 @@ class PunyApp_Security_Cipher {
 
   public function __set($name, $value) {
     if ($name === 'key') {
-      $this->_setCacheKey($value);
+      $this->_setStoreKey($value);
     } else {
       $this->{$name} = $value;
     }

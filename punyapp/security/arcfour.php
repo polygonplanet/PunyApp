@@ -9,7 +9,7 @@
  * @subpackage -
  * @category   Security/Cipher
  * @author     polygon planet <polygon.planet.aqua@gmail.com>
- * @link       http://polygonpla.net/
+ * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
  */
@@ -72,7 +72,7 @@ class PunyApp_Security_Arcfour {
   private function _setKey($key) {
     $key = (string)$key;
 
-    if ($key == null || $key === $this->_getCacheKey()) {
+    if ($key == null || $key === $this->_getStoreKey()) {
       return;
     }
 
@@ -90,7 +90,7 @@ class PunyApp_Security_Arcfour {
       $matrix[$j] = $t;
     }
 
-    $this->_setCacheKey($matrix);
+    $this->_setStoreKey($matrix);
   }
 
   /**
@@ -101,7 +101,7 @@ class PunyApp_Security_Arcfour {
    */
   private function _crypt($data) {
     $data = (string)$data;
-    $matrix = $this->_getCacheKey();
+    $matrix = $this->_getStoreKey();
     $len = strlen($data);
 
     for ($k = $j = $i = 0; $k < $len; $k++) {
@@ -139,13 +139,13 @@ class PunyApp_Security_Arcfour {
   }
 
 
-  private function _getCacheKey() {
+  private function _getStoreKey() {
     $class = __CLASS__;
-    return PunyApp::cache('get', $class . '-key', $class . '-skey');
+    return PunyApp::store('get', $class . '-key', $class . '-skey');
   }
 
-  private function _setCacheKey($key) {
+  private function _setStoreKey($key) {
     $class = __CLASS__;
-    PunyApp::cache('set', $class . '-key', $key, $class . '-skey');
+    PunyApp::store('set', $class . '-key', $key, $class . '-skey');
   }
 }
