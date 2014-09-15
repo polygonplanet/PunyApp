@@ -151,17 +151,17 @@ class SampleModel extends PunyApp_Model {
 
 
   public function getUser($user_id) {
-    return $this->findOne(
-      array('id', 'userId', 'email'),
-      array('userId' => '?'),
-      array($user_id)
-    );
+    return $this->findOne(array(
+      'fields' => array('id', 'userId', 'email'),
+      'where' => array('userId' => '?'),
+    ), array($user_id));
   }
 
 
   public function isUserId($user_id) {
-    return $this->count(array('userId' => '?'),
-                        array($user_id)) > 0;
+    return $this->has(array(
+      'where' => array('userId' => '?')
+    ), array($user_id));
   }
 }
 
