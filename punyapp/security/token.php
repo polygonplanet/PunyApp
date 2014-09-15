@@ -9,7 +9,7 @@
  * @subpackage -
  * @category   Security/Token
  * @author     polygon planet <polygon.planet.aqua@gmail.com>
- * @link       http://polygonpla.net/
+ * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
  */
