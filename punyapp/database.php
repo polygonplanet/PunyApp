@@ -331,6 +331,9 @@ class PunyApp_Database_Statement {
   public function __construct($db, $stmt) {
     $this->_db = $db;
     $this->_stmt = $stmt;
+    if (!$this->_stmt) {
+      throw new PunyApp_Database_Error('Cannot execute statement');
+    }
   }
 
   /**
