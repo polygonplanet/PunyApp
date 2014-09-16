@@ -20,19 +20,38 @@
 class PunyApp_Model {
 
   /**
-   * @var PunyApp
-   */
-  public $app = null;
-
-  /**
    * @var PunyApp_Database
    */
-  public $database = null;
+  private $_database = null;
+
+  /**
+   * @var string model name
+   */
+  private $_name = null;
 
   /**
    * @var string tablename
    */
-  public $tableName = null;
+  private $_tableName = null;
+
+  /**
+   * @var array fields
+   */
+  private $_fields = array();
+
+  /**
+   * Constructor
+   *
+   * @param PunyApp_Database
+   * @param string $name
+   * @param string $table_name
+   */
+  public function __construct(PunyApp_Database $database, $name, $table_name) {
+    $this->_database = $database;
+    $this->_name = $name;
+    $this->_tableName = $table_name;
+    $this->_fields = array();
+  }
 
   /**
    * Find data
@@ -67,7 +86,7 @@ class PunyApp_Model {
    */
   public function findColumn($query = array(), $params = array()) {
     $statement = $this->_buildStatement($query);
-    $stmt = $this->database->prepare($statement);
+    $stmt = $this->_database->prepare($statement);
     $stmt->execute((array)$params);
     return $stmt->fetchColumn(0);
   }
@@ -100,17 +119,10 @@ class PunyApp_Model {
    *
    * @param array $fields
    * @param array $params
-   * @return boolean
+   * @return bool
    */
   public function insert($fields = array(), $params = array()) {
-    $statement = sprintf('INSERT INTO %s (%s) VALUES (%s)',
-      $this->tableName,
-      $this->_joinValues(array_keys($fields)),
-      $this->_joinValues(array_values($fields))
-    );
-
-    $stmt = $this->database->prepare($statement);
-    return $stmt->execute((array)$params);
+    return $this->_add('INSERT', $fields, $params);
   }
 
   /**
@@ -118,17 +130,10 @@ class PunyApp_Model {
    *
    * @param array $fields
    * @param array $params
-   * @return boolean
+   * @return bool
    */
   public function replace($fields = array(), $params = array()) {
-    $statement = sprintf('REPLACE INTO %s (%s) VALUES (%s)',
-      $this->tableName,
-      $this->_joinValues(array_keys($fields)),
-      $this->_joinValues(array_values($fields))
-    );
-
-    $stmt = $this->database->prepare($statement);
-    return $stmt->execute((array)$params);
+    return $this->_add('REPLACE', $fields, $params);
   }
 
   /**
@@ -140,14 +145,19 @@ class PunyApp_Model {
    * @return int affected rows
    */
   public function update($fields = array(), $conditions = array(), $params = array()) {
+    $params = (array)$params;
+
+    // Add modified time
+    $this->_setSpecialFields(array('modified'), $fields, $params);
+
     $statement = sprintf('UPDATE %s SET %s WHERE %s',
-      $this->tableName,
+      $this->_tableName,
       $this->_joinKeyValues($fields),
       $this->_createConditions($conditions)
     );
 
-    $stmt = $this->database->prepare($statement);
-    $stmt->execute((array)$params);
+    $stmt = $this->_database->prepare($statement);
+    $stmt->execute($params);
     return $stmt->rowCount();
   }
 
@@ -160,11 +170,11 @@ class PunyApp_Model {
    */
   public function delete($conditions = array(), $params = array()) {
     $statement = sprintf('DELETE FROM %s WHERE %s',
-      $this->tableName,
+      $this->_tableName,
       $this->_createConditions($conditions)
     );
 
-    $stmt = $this->database->prepare($statement);
+    $stmt = $this->_database->prepare($statement);
     $stmt->execute((array)$params);
     return $stmt->rowCount();
   }
@@ -177,7 +187,7 @@ class PunyApp_Model {
    * @return array result rows
    */
   public function query($statement, $params = array()) {
-    $stmt = $this->database->prepare($statement);
+    $stmt = $this->_database->prepare($statement);
     $stmt->execute((array)$params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
@@ -190,10 +200,74 @@ class PunyApp_Model {
    * @return int affected rows
    */
   public function exec($statement, $params = array()) {
-    $stmt = $this->database->prepare($statement);
+    $stmt = $this->_database->prepare($statement);
     $stmt->execute((array)$params);
     return $stmt->rowCount();
   }
+
+  /**
+   * Return instance of PunyApp_Database
+   *
+   * @return PunyApp_Database
+   */
+  public function getDatabase() {
+    return $this->_database;
+  }
+
+  /**
+   * Create new instance
+   *
+   * @return PunyApp_Model
+   */
+  public function newInstance() {
+    $class = $this->_name;
+    $instance = new $class($this->_database, $this->_name, $this->_tableName);
+    return $instance;
+  }
+
+  /**
+   * Save fields
+   *
+   * @return bool
+   */
+  public function save() {
+    if (empty($this->_fields)) {
+      return false;
+    }
+
+    $fields = array();
+    $params = array();
+    foreach ($this->_fields as $key => $val) {
+      $fields[$key] = ':' . $key;
+      $params[':' . $key] = $val;
+    }
+
+    return $this->replace($fields, $params);
+  }
+
+
+  /**
+   * Magic methods
+   */
+  public function __get($name) {
+    return isset($this->_fields[$name]) ? $this->_fields[$name] : null;
+  }
+
+
+  public function __set($name, $value) {
+    $this->_fields[$name] = $value;
+  }
+
+
+  public function __isset($name) {
+    return isset($this->_fields[$name]);
+  }
+
+
+  public function __unset($name) {
+    unset($this->_fields[$name]);
+  }
+
 
   /**
    * Query
@@ -203,7 +277,7 @@ class PunyApp_Model {
    * @return array result rows
    */
   private function _query($statement, $params = array()) {
-    $stmt = $this->database->prepare($statement);
+    $stmt = $this->_database->prepare($statement);
     $stmt->execute((array)$params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
@@ -217,10 +291,117 @@ class PunyApp_Model {
    */
   private function _find($query = array(), $params = array()) {
     $statement = $this->_buildStatement($query);
-    $stmt = $this->database->prepare($statement);
+    $stmt = $this->_database->prepare($statement);
     $stmt->execute((array)$params);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $results;
+  }
+
+  /**
+   * Add data
+   *
+   * @param array $fields
+   * @param array $params
+   * @return bool
+   */
+  private function _add($command, $fields = array(), $params = array()) {
+    $params = (array)$params;
+
+    // Add created time and modified time
+    $this->_setSpecialFields(array('created', 'modified'), $fields, $params);
+
+    $statement = sprintf('%s INTO %s (%s) VALUES (%s)',
+      strtoupper($command),
+      $this->_tableName,
+      $this->_joinValues(array_keys($fields)),
+      $this->_joinValues(array_values($fields))
+    );
+
+    $stmt = $this->_database->prepare($statement);
+    return $stmt->execute($params);
+  }
+
+  /**
+   * Add values to special fields
+   *
+   * @param array $names
+   * @param array $fields
+   * @param array $params
+   * @return bool
+   */
+  private function _setSpecialFields($names = array(), &$fields, &$params) {
+    $special_fields = $this->_hasSpecialFields();
+    if (!is_array($special_fields)) {
+      return false;
+    }
+
+    $prepare_names = false;
+    foreach ($params as $key => $val) {
+      if (is_string($key)) {
+        $prepare_names = true;
+      }
+    }
+
+    $result = false;
+    foreach ($names as $name) {
+      if (isset($special_fields[$name]) && $special_fields[$name] &&
+          !array_key_exists($name, $fields) &&
+          (!$prepare_names || !array_key_exists(':' . $name, $params))) {
+
+        $now = (string)PunyApp::now();
+        if ($prepare_names) {
+          $fields[$name] = ':' . $name;
+          $params[':' . $name] = $now;
+        } else {
+          $fields[$name] = '?';
+          if (empty($params)) {
+            $params[] = $now;
+          } else {
+            array_splice($params, count($fields) - 1, 0, $now);
+          }
+        }
+        $result = true;
+      }
+    }
+
+    return $result;
+  }
+
+  /**
+   * Checks whether the special fields is available
+   *
+   * @param string $field_name
+   * @return mixed
+   */
+  private function _hasSpecialFields($field_name = null) {
+    $cache_key = sprintf('%s-%s-%s', __METHOD__, $this->_name, $this->_tableName);
+    $cache = PunyApp::store('get', $cache_key);
+    if (!empty($cache)) {
+      if ($field_name === null) {
+        return $cache;
+      }
+      return isset($cache[$field_name]) ? $cache[$field_name] : null;
+    }
+
+    $results = array(
+      'created' => false,
+      'modified' => false
+    );
+
+    $length = strlen((string)PunyApp::now());
+    $fields = $this->_database->driver->describe($this->_tableName);
+    foreach ($results as $key => $val) {
+      if (isset($fields[$key]) &&
+          ($fields[$key]['length'] == null || $fields[$key]['length'] > $length)) {
+        $results[$key] = true;
+      }
+    }
+
+    PunyApp::store('set', $cache_key, $results);
+    if ($field_name === null) {
+      return $results;
+    }
+    return isset($results[$field_name]) ? $results[$field_name] : null;
   }
 
   /**
@@ -286,7 +467,7 @@ class PunyApp_Model {
           break;
         case 'from':
           if ($val == null) {
-            $val = $this->tableName;
+            $val = $this->_tableName;
           } else {
             $alias = $this->_parseAlias($val);
             if (!is_array($alias)) {
@@ -397,7 +578,7 @@ class PunyApp_Model {
 
     return $results + array(
       'fields' => '*',
-      'from' => $this->tableName,
+      'from' => $this->_tableName,
       'where' => array()
     );
   }
