@@ -226,6 +226,13 @@ class PunyApp_Dispatcher {
       return false;
     }
 
+    foreach (array('before', 'after') as $pre) {
+      if (strlen($method) > strlen($pre) &&
+          0 === strncasecmp($method, $pre, strlen($pre))) {
+        return false;
+      }
+    }
+
     $func = array(self::$app->controller, $method);
     if (!is_callable($func)) {
       return false;
@@ -275,12 +282,11 @@ class PunyApp_Dispatcher {
         self::$app->uses($model, 'models');
         $model_name = PunyApp_Util::camelize($model);
         $model_class = $model_name . 'Model';
-        $models_ref = &self::$app->controller->models;
-        $models_ref->{$model_name} = new $model_class();
-        $models_ref->{$model_name}->app = self::$app;
-        $models_ref->{$model_name}->database = self::$app->database;
-        $models_ref->{$model_name}->tableName = $model;
-        unset($models_ref);
+        self::$app->controller->models->{$model_name} = new $model_class(
+          self::$app->database,
+          $model_class,
+          $model
+        );
       }
     }
 
