@@ -3,16 +3,16 @@ PunyApp
 
 [![Build Status](https://travis-ci.org/polygonplanet/PunyApp.svg?branch=master)](https://travis-ci.org/polygonplanet/PunyApp)
 
-PunyApp is a lightweight MVC PHP framework.  
-PunyApp requires PHP 5.2.0 or newer.  
-It does not require the external PHP extensions.  
+PunyApp is a lightweight MVC PHP framework that does not require the external PHP extensions, it's based the CakePHP framework.  
+  
+Requires PHP 5.2.0 or newer.  
 
 
 ### Supported Databases
 
 * MySQL
 * SQLite
-* [Posql](https://github.com/polygonplanet/Posql) [(documents)](http://feel.happy.nu/doc/posql/en/)
+* [Posql](http://feel.happy.nu/doc/posql/en/)
 
 
 ### Tutorial
@@ -25,7 +25,8 @@ Application directory layout:
       /controllers        -> App controllers
       /models             -> App models
       /views              -> App views
-      /storage            -> A storage of the filebase database
+      /libraries          -> App libraries
+      /storage            -> App storage
       /settings           -> Application settings
         app-settings.php
         app-scheme.php
@@ -35,7 +36,6 @@ Application directory layout:
         index.php
     /punyapp              -> PunyApp libraries
     /vendors              -> Vendors
-    .htaccess
     index.php
  
 
@@ -55,18 +55,17 @@ class SampleController extends PunyApp_Controller {
    * POST /login
    */
   public function postLogin() {
-    $is_user = $this->models->sample->isUser(
+    $has = $this->models->sample->hasUser(
       $this->request->params->id,
       $this->request->params->pass
     );
-    if ($is_user) {
-      $this->session->userId = $this->request->params->id;
+
+    if ($has) {
+      $this->session->userid = $this->request->params->id;
       $this->redirect('home');
     }
 
     // ...
-
-    $this->view->render('sample/login');
   }
 
   /**
@@ -80,7 +79,7 @@ class SampleController extends PunyApp_Controller {
    * Before /login
    */
   public function beforeLogin() {
-    if (!empty($this->session->userId)) {
+    if (!empty($this->session->userid)) {
       $this->redirect('home');
     }
   }
@@ -96,97 +95,170 @@ class SampleController extends PunyApp_Controller {
    * GET /home
    */
   public function getHome() {
-    // ...
+    if (empty($this->session->userid)) {
+      $this->redirect('login');
+    }
+
+    $user = $this->models->sample->getUser(
+      $this->session->userid
+    );
+    $this->view->set('user', $user);
+    $this->view->render('sample/home');
+  }
+
+  /**
+   * GET /register
+   */
+  public function getRegister() {
+    $this->view->render('sample/register');
+  }
+
+  /**
+   * POST /register
+   */
+  public function postRegister() {
+    if ($this->validate()) {
+      $this->models->sample->addUser(
+        $this->request->params->id,
+        $this->request->params->email,
+        $this->request->params->pass
+      );
+      $this->session->userid = $this->request->params->id;
+      $this->redirect('home');
+    }
+
+    $this->view->render('sample/register');
   }
 }
-```
-
-#### Validation
-```php
-  public $validationRules = array(
-    'id' => array(
-      'required' => true,
-      'rule' => array('regex', '/^[a-z0-9]{1,10}$/i'),
-      'message' => 'Only letters and integers, max 10 characters'
-    ),
-    'email' => array(
-      'required' => true,
-      'rule' => array('email'),
-      'message' => 'Invalid email address'
-    ),
-    'pass' => array(
-      'required' => true,
-      'rule' => array(
-        array('minLength', 4),
-        array('maxLength', 20)
-      ),
-      'message' => 'Min 4 characters, max 20 characters'
-    )
-  );
-
 ```
 
 ### Models
 
+Using Prepared Statements.  
+
+
 ```php
 class SampleModel extends PunyApp_Model {
 
-  public function addUser($user_id, $email, $pass) {
-    return $this->insert(array(
-      'userId' => ':userId',
-      'email' => ':email',
-      'pass' => ':pass'
-    ), array(
-      ':userId' => $user_id,
-      ':email' => $email,
-      ':pass' => sha1($pass)
-    ));
+  public function addUser($userid, $email, $pass) {
+    $sample = $this->newInstance();
+    $sample->userid = $userid;
+    $sample->email = $email;
+    $sample->pass = sha1($pass);
+    $sample->save();
   }
 
 
-  public function deleteUser($user_id) {
-    return $this->delete(array('userId' => '?'),
-                         array($user_id));
+  public function deleteUser($userid) {
+    return $this->delete(
+      array('userid' => '?'),
+      array($userid)
+    );
   }
 
 
-  public function getUser($user_id) {
-    return $this->findOne(array(
-      'fields' => array('id', 'userId', 'email'),
-      'where' => array('userId' => '?'),
-    ), array($user_id));
+  public function getUser($userid) {
+    return $this->findOne(
+      array(
+        'fields' => array('id', 'userid', 'email'),
+        'where' => array('userid' => '?')
+      ),
+      array($userid)
+    );
   }
 
 
-  public function isUserId($user_id) {
-    return $this->has(array(
-      'where' => array('userId' => '?')
-    ), array($user_id));
+  public function hasUser($userid, $pass) {
+    return $this->has(
+      array(
+        'where' => array(
+          'userid' => ':userid',
+          'pass' => ':pass'
+        )
+      ),
+      array(
+        ':userid' => $userid,
+        ':pass' => sha1($pass)
+      )
+    );
   }
 }
+
 
 ```
 
 ### Views
 
-```php
-$this->view->set('title', 'PunyApp');
-$this->view->set('description', 'The puny developer framework for rapid compiling.');
-$this->view->render();
-```
+Using pure PHP template.  
 
-Use pure PHP template.  
+The template variables is escaped for HTML entities by default.  
 
-The template variables already escaped for HTML entities.  
 
 ```php
-<h1><?php echo $title ?></h1>
-<p><?php echo $description ?></p>
+$this->view->set('text', 'Hello!');
+$this->view->render('index');
 ```
 
-### Settings
+views/index.php  
 
-* app/settings/app-settings.php
+```php
+<html>
+  <body>
+    <h1>Sample</h1>
+    <?php echo $text; ?>
+  </body>
+</html>
+```
+
+### Events
+
+Handle application events, or define yourself.  
+
+```php
+// Handle the database error
+$this->event->on('app-database-error', function ($app, $error) {
+  if ($app->isDebug()) {
+    // Show error message only in debug mode
+    echo $app->escapeHTML($error);
+  }
+});
+```
+
+
+### Validation
+
+Request Form Validation.  
+
+```php
+public $validationRules = array(
+  'id' => array(
+    'required' => true,
+    'rule' => array('regex', '/^[a-z0-9]{1,10}$/i'),
+    'message' => 'Only letters and integers, max 10 characters'
+  ),
+  'email' => array(
+    'required' => true,
+    'rule' => array('email'),
+    'message' => 'Invalid email address'
+  ),
+  'pass' => array(
+    'required' => true,
+    'rule' => array(
+      array('minLength', 4),
+      array('maxLength', 20)
+    ),
+    'message' => 'Min 4 characters, max 20 characters'
+  )
+);
+
+```
+
+
+### Install and Run
+
+* Extract the files to the any directory on the server.
+
+* Settings `application/settings/app-settings.php`.
 
 ```php
 $settings = array(
@@ -194,23 +266,12 @@ $settings = array(
    * System settings
    */
   'system' => array(
-
     /**
-     * Debug mode
+     * Timezone
      *
-     * true = show errors
-     * false = hide errors
+     * e.g., 'America/Chicago', 'Asia/Tokyo' etc.
      */
-    'debug' => true,
-
-    /**
-     * internal character-code
-     *
-     * default = utf-8
-     */
-    'charset' => 'utf-8',
-
-    ...
+    'timezone' => '',
   ),
 
   /**
@@ -223,9 +284,7 @@ $settings = array(
      *
      * Available engines: "mysql", "sqlite" and "posql".
      */
-    'engine' => 'sqlite',
-
-    ...
+    'engine' => '',
   ),
 
   /**
@@ -238,45 +297,16 @@ $settings = array(
      *
      * Available engines: "mysql", "sqlite" and "posql".
      */
-    'engine' => 'sqlite',
-
-    ...
+    'engine' => '',
   )
 );
-
-
 ```
 
-For SQLite, set to writable following files.  
+*  Create database schema or write schema in  `application/settings/app-schema.php`.
 
- * app/storage/databases/app-database.sqlite
- * app/storage/sessions/app-session.sqlite
+* Set to writable permission in the directories and files under `application/storage`.
 
-### Events
-
-```php
-// Example events
-$this->event->on('app-initialize', function ($app) {});
-$this->event->on('app-database-error', function ($app, $error) {});
-$this->event->on('app-before-validate', function ($app, $rules = array()) {});
-$this->event->on('app-before-redirect', function ($app, $url) {});
-$this->event->on('app-before-render', function ($app, $template) {});
-$this->event->on('app-after-render', function ($app, $template) {});
-...
-```
-
-#### Handle Error
-
-```php
-// Handle the database error
-$this->event->on('app-database-error', function ($app, $error) {
-  if ($app->isDebug()) {
-    // Show error message only in debug mode
-    echo '<div style="color:red">', $app->escapeHTML($error), '</div>';
-  }
-});
-```
-
+* Browse the first you files extracted directory.  
 
 ### Sample
 
@@ -287,5 +317,6 @@ $this->event->on('app-database-error', function ($app, $error) {
 ### License
 
 The PunyApp is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+
 
 
