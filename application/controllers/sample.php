@@ -57,7 +57,7 @@ class SampleController extends PunyApp_Controller {
    * Before /login
    */
   public function beforeLogin() {
-    if (!empty($this->session->userId)) {
+    if (!empty($this->session->userid)) {
       $this->redirect('home');
     }
 
@@ -76,7 +76,7 @@ class SampleController extends PunyApp_Controller {
    * POST /login
    */
   public function postLogin() {
-    if (!empty($this->session->userId)) {
+    if (!empty($this->session->userid)) {
       $this->redirect('home');
     }
 
@@ -86,13 +86,13 @@ class SampleController extends PunyApp_Controller {
     if (!$this->validate(array('id', 'pass'))) {
       $error = $this->view->getLastValidationError();
     } else {
-      $is_user = $this->models->sample->isUser(
+      $has = $this->models->sample->hasUser(
         $this->request->params->id,
         $this->request->params->pass
       );
 
-      if ($is_user) {
-        $this->session->userId = $this->request->params->id;
+      if ($has) {
+        $this->session->userid = $this->request->params->id;
         $this->redirect('home');
       }
 
@@ -105,7 +105,7 @@ class SampleController extends PunyApp_Controller {
 
 
   public function getLogout() {
-    unset($this->session->userId);
+    unset($this->session->userid);
     $this->redirect('login');
   }
 
@@ -160,11 +160,11 @@ class SampleController extends PunyApp_Controller {
    * GET /home
    */
   public function getHome() {
-    if (empty($this->session->userId)) {
+    if (empty($this->session->userid)) {
       $this->redirect('login');
     }
 
-    $user = $this->models->sample->getUser($this->session->userId);
+    $user = $this->models->sample->getUser($this->session->userid);
     $this->view->set('user', $user);
     $this->view->render('sample/home');
   }
@@ -178,7 +178,7 @@ class SampleController extends PunyApp_Controller {
     );
 
     if ($res) {
-      $this->session->userId = $this->request->params->id;
+      $this->session->userid = $this->request->params->id;
       return true;
     }
 

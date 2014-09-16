@@ -13,7 +13,7 @@
 
   <div>
     <ul>
-      <li>id: <?php echo isset($user, $user['userId']) ? $user['userId'] : '?' ?></li>
+      <li>id: <?php echo isset($user, $user['userid']) ? $user['userid'] : '?' ?></li>
       <li>email: <?php echo isset($user, $user['email']) ? $user['email'] : '?' ?></li>
     </ul>
   </div>
