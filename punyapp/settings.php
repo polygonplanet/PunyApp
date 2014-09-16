@@ -70,6 +70,11 @@ class PunyApp_Settings {
   protected $_salt = null;
 
   /**
+   * @var bool whether to log error
+   */
+  protected $_logError = true;
+
+  /**
    * Update settings with new variables
    */
   protected function _updateSettings() {
@@ -341,5 +346,23 @@ class PunyApp_Settings {
    */
   public function setSalt($salt) {
     $this->_salt = (string)$salt;
+  }
+
+  /**
+   * Gets the logError
+   *
+   * @return bool whether to log error
+   */
+  public function getLogError() {
+    return $this->_logError;
+  }
+
+  /**
+   * Sets the logError
+   *
+   * @param bool $log_error
+   */
+  public function setLogError($log_error) {
+    $this->_logError = (bool)$log_error;
   }
 }

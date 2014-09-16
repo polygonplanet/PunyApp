@@ -46,6 +46,16 @@ class PunyApp extends PunyApp_Settings {
   const CACHE_NAME = 'app-cache';
 
   /**
+   * @const string error log name
+   */
+  const ERROR_LOG_NAME = 'app-error';
+
+  /**
+   * @const int error log max
+   */
+  const ERROR_LOG_MAX = 200;
+
+  /**
    * @var PunyApp_Request
    */
   public $request = null;
@@ -79,6 +89,11 @@ class PunyApp extends PunyApp_Settings {
    * @var PunyApp_Cache
    */
   public $cache = null;
+
+  /**
+   * @var PunyApp_Log
+   */
+  public $errorlog = null;
 
   /**
    * @var PunyApp_Security_Cipher
@@ -158,14 +173,16 @@ class PunyApp extends PunyApp_Settings {
     $this->arcfour = new PunyApp_Security_Arcfour($this->_generateKey());
     $this->token = new PunyApp_Security_Token($this);
     $this->cache = new PunyApp_Cache(self::CACHE_NAME);
+    $this->errorlog = new PunyApp_Log(self::ERROR_LOG_NAME, self::ERROR_LOG_MAX);
     $this->view = new PunyApp_View($this);
     $this->database = new PunyApp_Database($this);
-    $this->model = new PunyApp_Model($this);
+    $this->model = new PunyApp_Model($this->database, null, null);
     $this->validator = new PunyApp_Validator($this);
     $this->session = new PunyApp_Session($this);
     $this->session->start();
     $this->cookie = new PunyApp_Cookie($this);
 
+    set_error_handler(array($this, 'handleError'));
     spl_autoload_register(array(__CLASS__, 'load'));
     $this->_executeAppSchema();
     $this->removePoweredByHeader();
@@ -243,7 +260,7 @@ class PunyApp extends PunyApp_Settings {
   /**
    * Get current time in milliseconds
    *
-   * @return int
+   * @return float
    */
   public static function now() {
     return PunyApp_Util::now();
@@ -367,6 +384,31 @@ class PunyApp extends PunyApp_Settings {
     }
 
     return false;
+  }
+
+  /**
+   * Custom error handler
+   *
+   * @param int $code
+   * @param string $message
+   * @param string $file
+   * @param int $line
+   * @param array $context
+   */
+  public function handleError($code,
+                              $message,
+                              $file = null,
+                              $line = null,
+                              $context = null) {
+
+    $e = new ErrorException(strip_tags($message), 0, $code, $file, $line);
+
+    if ($this->_logError) {
+      $this->errorlog->write($e);
+    }
+
+    $this->event->trigger('app-error', array($e));
+    throw $e;
   }
 
   /**
