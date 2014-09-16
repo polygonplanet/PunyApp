@@ -6,51 +6,60 @@
 
 class SampleModel extends PunyApp_Model {
 
-  public function addUser($user_id, $email, $pass) {
-    if ($this->isUserId($user_id)) {
+  public function addUser($userid, $email, $pass) {
+    if ($this->isUserId($userid)) {
       return false;
     }
 
-    return $this->insert(array(
-      'userId' => ':userId',
-      'email' => ':email',
-      'pass' => ':pass',
-      'updateAt' => ':updateAt'
-    ), array(
-      ':userId' => $user_id,
-      ':email' => $email,
-      ':pass' => sha1($pass),
-      ':updateAt' => PunyApp::now()
-    ));
+    $sample = $this->newInstance();
+    $sample->userid = $userid;
+    $sample->email = $email;
+    $sample->pass = sha1($pass);
+    $sample->save();
   }
 
 
-  public function deleteUser($user_id) {
-    return $this->delete(array('userId' => '?'), array($user_id));
-  }
-
-
-  public function getUser($user_id) {
-    return $this->findOne(
-      array('id', 'userId', 'email'),
-      array('userId' => '?'),
-      array($user_id)
+  public function deleteUser($userid) {
+    return $this->delete(
+      array('userid' => '?'),
+      array($userid)
     );
   }
 
 
-  public function isUserId($user_id) {
-    return $this->count(array('userId' => '?'), array($user_id)) > 0;
+  public function getUser($userid) {
+    return $this->findOne(
+      array(
+        'fields' => array('id', 'userid', 'email'),
+        'where' => array('userid' => '?')
+      ),
+      array($userid)
+    );
   }
 
 
-  public function isUser($user_id, $pass) {
-    return $this->count(array(
-      'userId' => ':userId',
-      'pass' => ':pass'
-    ), array(
-      ':userId' => $user_id,
-      ':pass' => sha1($pass)
-    )) > 0;
+  public function isUserId($userid) {
+    return $this->has(
+      array(
+        'where' => array('userid' => '?')
+      ),
+      array($userid)
+    );
+  }
+
+
+  public function hasUser($userid, $pass) {
+    return $this->has(
+      array(
+        'where' => array(
+          'userid' => ':userid',
+          'pass' => ':pass'
+        )
+      ),
+      array(
+        ':userid' => $userid,
+        ':pass' => sha1($pass)
+      )
+    );
   }
 }
