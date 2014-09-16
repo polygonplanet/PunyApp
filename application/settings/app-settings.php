@@ -36,9 +36,14 @@ $settings = array(
     'timezone' => '',
     /**
      * Application security salt
-     * Enter something characters, symbols is possible.
+     * Enter something characters.
+     * Symbols is possible and enables any length.
      */
-    'salt' => 'ZQJaiPPYn6Tldb2gottKwIDmGiatuSnV'
+    'salt' => 'ZQJaiPPYn6Tldb2gottKwIDmGiatuSnV',
+    /**
+     * Log application error to 'application/storage/logs'
+     */
+    'logError' => true
   ),
   /**
    * Database settings
@@ -73,7 +78,11 @@ $settings = array(
     /**
      * Database port
      */
-    'port'=> ''
+    'port'=> '',
+    /**
+     * Log SQL query to 'application/storage/logs'
+     */
+    'logQuery' => true
   ),
   /**
    * Session settings
