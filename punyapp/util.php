@@ -59,6 +59,17 @@ class PunyApp_Util {
   }
 
   /**
+   * Remove all line breaks
+   *
+   * @param string $string
+   * @param string $replace
+   * @return string
+   */
+  public static function removeLineBreaks($string, $replace = ' ') {
+    return preg_replace('/\r\n|\n|\r/', $replace, $string);
+  }
+
+  /**
    * Return string length
    *
    * @param string $string
