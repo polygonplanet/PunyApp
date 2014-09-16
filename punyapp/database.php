@@ -37,6 +37,7 @@ class PunyApp_Database_Settings {
         case 'pass':
         case 'engine':
         case 'encoding':
+        case 'logQuery':
           break;
         case 'dsn':
           $dsn = $val;
@@ -70,10 +71,24 @@ class PunyApp_Database_Settings {
 
     if (isset($this->engine) && $this->engine != null) {
       $engine = $this->engine;
-      $this->engine = null;
     }
 
     return (string)$engine;
+  }
+
+  /**
+   * Get logQuery
+   *
+   * @return bool
+   */
+  public function getLogQuery() {
+    $log_query = null;
+
+    if (isset($this->logQuery)) {
+      $log_query = $this->logQuery;
+    }
+
+    return (bool)$log_query;
   }
 
   /**
@@ -136,14 +151,14 @@ class PunyApp_Database {
   const DATABASE_FILENAME = 'app-database';
 
   /**
+   * @const string queries log name
+   */
+  const QUERIES_LOG_NAME = 'app-queries';
+
+  /**
    * @var PunyApp
    */
   public $app = null;
-
-  /**
-   * @var string
-   */
-  public $driver = null;
 
   /**
    * @var PDO
@@ -151,9 +166,39 @@ class PunyApp_Database {
   private $_db = null;
 
   /**
+   * @var PunyApp_Database_Common
+   */
+  public $driver = null;
+
+  /**
+   * @var string
+   */
+  public $driverName = null;
+
+  /**
+   * @var PunyApp_Log
+   */
+  private $_log = null;
+
+  /**
    * @var string
    */
   private $_dbfile = null;
+
+  /**
+   * @var bool whether to log SQL query
+   */
+  private $_storeQueriesLog = array();
+
+  /**
+   * @var array queries log
+   */
+  private $_queriesLog = array();
+
+  /**
+   * @var int queries log max
+   */
+  private $_queriesLogMax = 200;
 
   /**
    * Connect database with DSN
@@ -162,7 +207,8 @@ class PunyApp_Database {
    */
   public function __construct(PunyApp $app) {
     $this->app = $app;
-
+    $this->_log = new PunyApp_Log(self::QUERIES_LOG_NAME, $this->_queriesLogMax, true);
+    $this->_storeQueriesLog = $this->app->databaseSettings->getLogQuery();
     $dsn = $this->app->databaseSettings->getDSN();
     $engine = $this->app->databaseSettings->getEngine();
     $user = $this->app->databaseSettings->getUser();
@@ -177,16 +223,26 @@ class PunyApp_Database {
       throw new PunyApp_Database_Error('Invalid DSN');
     }
 
-    $this->driver = strtolower($m[1]);
+    $database_dir = PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'database';
+    $common = $database_dir . DIRECTORY_SEPARATOR . 'common.php';
+    require_once $common;
+
+    $this->driverName = strtolower($m[1]);
+    $driver = $database_dir . DIRECTORY_SEPARATOR . $this->driverName . '.php';
+    if (!file_exists($driver)) {
+      throw new PunyApp_Database_Error("Driver '{$driver}' is not defined");
+    }
+    require_once $driver;
+
     $this->_dbfile = PUNYAPP_DATABASES_DIR . DIRECTORY_SEPARATOR . self::DATABASE_FILENAME;
 
-    switch ($this->driver) {
+    switch ($this->driverName) {
       case 'posql':
-        $this->_dbfile .= sprintf('.%s', $this->driver);
+        $this->_dbfile .= sprintf('.%s', $this->driverName);
         $this->_db = new Posql($this->_dbfile);
         break;
       case 'sqlite':
-        $this->_dbfile .= sprintf('.%s', $this->driver);
+        $this->_dbfile .= sprintf('.%s', $this->driverName);
         $dsn = 'sqlite:' . $this->_dbfile;
         $this->_db = new PDO($dsn, null, null, $options);
         break;
@@ -205,49 +261,71 @@ class PunyApp_Database {
         break;
     }
 
+    $driver_class = sprintf('PunyApp_Database_%s', ucfirst($this->driverName));
+    $this->driver = new $driver_class($this);
+
     if ($this->isError()) {
       throw new PunyApp_Database_Error($this->getLastError());
     }
   }
 
+  /**
+   * Destructor
+   */
+  public function __destruct() {
+    $this->_saveLogs();
+  }
 
   /**
-   * Prepare
+   * Prepare statement
    *
    * @param string $statement
    * @param array $driver_options = array()
    * @return PunyApp_Database_Statement
    */
-  public function prepare() {
+  public function prepare($statement) {
     $args = func_get_args();
     $stmt = call_user_func_array(array($this->_db, 'prepare'), $args);
-    return new PunyApp_Database_Statement($this, $stmt);
+    return new PunyApp_Database_Statement($this, $stmt, $statement);
   }
 
   /**
-   * Query
+   * Execute query
    *
    * @param string $statement
    * @return PunyApp_Database_Statement
    */
-  public function query() {
+  public function query($statement) {
     $args = func_get_args();
     $stmt = call_user_func_array(array($this->_db, 'query'), $args);
+    $this->logQuery($statement);
     $this->_assignError();
-    return new PunyApp_Database_Statement($this, $stmt);
+    return new PunyApp_Database_Statement($this, $stmt, $statement);
   }
 
   /**
-   * Exec
+   * Execute statement
    *
    * @param string $statement
    * @return PunyApp_Database_Statement
    */
-  public function exec() {
+  public function exec($statement) {
     $args = func_get_args();
     $result = call_user_func_array(array($this->_db, 'exec'), $args);
+    $this->logQuery($statement, array(), $result);
     $this->_assignError();
     return $result;
+  }
+
+  /**
+   * Return last inserted id
+   *
+   * @param string $name
+   * @return string
+   */
+  public function lastInsertId($name = null) {
+    $args = func_get_args();
+    return call_user_func_array(array($this->_db, 'lastInsertId'), $args);
   }
 
   /**
@@ -256,7 +334,7 @@ class PunyApp_Database {
    * @return boolean
    */
   public function isError() {
-    if ($this->driver === 'posql') {
+    if ($this->driverName === 'posql') {
       return $this->_db->isError();
     }
 
@@ -274,7 +352,7 @@ class PunyApp_Database {
    * @return string
    */
   public function getLastError() {
-    if ($this->driver === 'posql') {
+    if ($this->driverName === 'posql') {
       $error = $this->_db->lastError();
       if ($error != null) {
         $this->_db->getErrors();
@@ -291,6 +369,50 @@ class PunyApp_Database {
     return $info[2];
   }
 
+  /**
+   * Get queries log
+   *
+   * @return array
+   */
+  public function getLogs() {
+    return $this->_queriesLog;
+  }
+
+  /**
+   * Log query
+   *
+   * @param string $statement
+   * @param array $params
+   * @param int $affected
+   */
+  public function logQuery($statement, $params = array(), $affected = null) {
+    $this->_queriesLog[] = array(
+      'query' => $statement,
+      'params' => $params,
+      'affected' => $affected,
+      'time' => PunyApp::now()
+    );
+
+    if (count($this->_queriesLog) > $this->_queriesLogMax) {
+      array_shift($this->_queriesLog);
+    }
+  }
+
+  /**
+   * Save SQL query logs
+   */
+  private function _saveLogs() {
+    if ($this->_storeQueriesLog && !empty($this->_queriesLog)) {
+      $messages = array();
+      foreach ($this->_queriesLog as $log) {
+        $messages[] = array(
+          'message' => $log,
+          'time' => $log['time']
+        );
+      }
+      $this->_log->write($messages, true);
+    }
+  }
 
   /**
    * Assign error
@@ -315,24 +437,31 @@ class PunyApp_Database_Statement {
   /**
    * @var PunyApp_Database
    */
-  private $_db;
+  private $_db = null;
 
   /**
    * @var PDO_Statement
    */
-  private $_stmt;
+  private $_stmt = null;
+
+  /**
+   * @var string statement
+   */
+  private $_query = null;
 
   /**
    * Constructor
    *
    * @param PunyApp_Database $db
    * @param PDO_Statement $stmt
+   * @param string $query
    */
-  public function __construct($db, $stmt) {
+  public function __construct($db, $stmt, $query) {
     $this->_db = $db;
     $this->_stmt = $stmt;
+    $this->_query = $query;
     if (!$this->_stmt) {
-      throw new PunyApp_Database_Error('Cannot execute statement');
+      throw new PunyApp_Database_Error($this->_db->getLastError());
     }
   }
 
@@ -386,11 +515,21 @@ class PunyApp_Database_Statement {
    * @param array $input_parameters = array()
    * @return boolean
    */
-  public function execute() {
+  public function execute($input_parameters = array()) {
     $args = func_get_args();
     $result = call_user_func_array(array($this->_stmt, 'execute'), $args);
+    $this->_db->logQuery($this->_query, $input_parameters, $this->rowCount());
     $this->_assignError();
     return $result;
+  }
+
+  /**
+   * Returns the number of rows affected by the last SQL statement
+   *
+   * @return int
+   */
+  public function rowCount() {
+    return $this->_stmt->rowCount();
   }
 
 
