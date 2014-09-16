@@ -181,6 +181,31 @@ class PunyApp_File {
     return $result;
   }
 
+  /**
+   * Append data
+   *
+   * @param string $data
+   * @return bool
+   */
+  public function append($data) {
+    $result = false;
+
+    if ($this->open('a')) {
+      if (!flock($this->handle, LOCK_EX)) {
+        return false;
+      }
+
+      $abort = ignore_user_abort(1);
+      if (fwrite($this->handle, $data, strlen($data)) !== false) {
+        $result = true;
+      }
+      ignore_user_abort($abort);
+      flock($this->handle, LOCK_UN);
+    }
+
+    return $result;
+  }
+
 
   /**
    * Checks whether fopen()'s mode is write
