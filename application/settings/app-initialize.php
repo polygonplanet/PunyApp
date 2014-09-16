@@ -7,6 +7,7 @@
 /**
  * // Example events
  * $this->event->on('app-initialize', function ($app) {});
+ * $this->event->on('app-error', function ($app, $e) {});
  * $this->event->on('app-database-error', function ($app, $error) {});
  * $this->event->on('app-before-validate', function ($app, $rules = array()) {});
  * $this->event->on('app-before-redirect', function ($app, $url) {});
@@ -18,13 +19,13 @@
  * $this->event->on('app-after-filter', function ($app, $params = array()) {});
  */
 
-/**
- * // Handle the database error
- * $this->event->on('app-database-error', function ($app, $error) {
- *   if ($app->isDebug()) {
- *     // Show error message only in debug mode
- *     echo $app->escapeHTML($error);
- *   }
- * });
- */
+/*
+// Handle the database error
+$this->event->on('app-database-error', function ($app, $error) {
+  if ($app->isDebug()) {
+    // Show error message only in debug mode
+    echo $app->escapeHTML($error);
+  }
+});
+*/
 
