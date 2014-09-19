@@ -57,7 +57,29 @@ class PunyApp_Session implements Iterator {
     $this->_init();
   }
 
+  /**
+   * Starts session
+   */
+  public function start() {
+    if (call_user_func(array($this->_sessionClassName, 'isStarted'))) {
+      return;
+    }
 
+    call_user_func(array($this->_sessionClassName, 'init'),
+      $this->_app->sessionSettings->name,
+      PunyApp_Util::fullPath($this->_sessionFileName),
+      null,
+      $this->_sessionMaxLifeTime,
+      $this->_app->getBaseURI(),
+      $this->_app->request->isSSL()
+    );
+
+    call_user_func(array($this->_sessionClassName, 'start'));
+  }
+
+  /**
+   * Initialize
+   */
   private function _init() {
     static $initialized = false;
 
@@ -89,23 +111,6 @@ class PunyApp_Session implements Iterator {
         (int)$this->_app->sessionSettings->expirationDate > 0) {
       $this->_sessionMaxLifeTime = 60 * 60 * 24 * (int)$this->_app->sessionSettings->expirationDate;
     }
-  }
-
-
-  /**
-   * Starts session
-   */
-  public function start() {
-    call_user_func(array($this->_sessionClassName, 'init'),
-      $this->_app->sessionSettings->name,
-      PunyApp_Util::fullPath($this->_sessionFileName),
-      null,
-      $this->_sessionMaxLifeTime,
-      $this->_app->getBaseURI(),
-      $this->_app->request->isSSL()
-    );
-
-    call_user_func(array($this->_sessionClassName, 'start'));
   }
 
 
