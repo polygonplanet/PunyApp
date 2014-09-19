@@ -17,7 +17,7 @@
 /**
  * @name PunyApp_Session_Common
  */
-class PunyApp_Session_Common {
+abstract class PunyApp_Session_Common {
 
   /**
    * @var object database
@@ -102,19 +102,17 @@ class PunyApp_Session_Common {
   /**
    * Create Database instance
    */
-  public static function createDatabaseInstance() {
-    throw new PunyApp_Error('abstract');
-  }
+  abstract public static function createDatabaseInstance();
 
   /**
    * Initialize the session with some settings
    *
-   * @param  string   session name (i.e. 'PHPSESSID')
-   * @param  string   session database path (i.e. database filename)
-   * @param  string   session table name
-   * @param  number   session lifetime (e.g. (60 * 60 * 24 * 365) = 1 year)
-   * @param  string   session cookie path (e.g. '/path/to/myproject/')
-   * @param  bool  whether connected with HTTPS
+   * @param  string $sess_name  session name (i.e. 'PHPSESSID')
+   * @param  string $save_path  session database path (i.e. database filename)
+   * @param  string $table_name  session table name
+   * @param  number $max_lifetime  session lifetime (e.g. (60 * 60 * 24 * 365) = 1 year)
+   * @param  string $cookie_path  session cookie path (e.g. '/path/to/myproject/')
+   * @param  bool $is_https whether connected with HTTPS
    */
   public static function init($sess_name,
                               $save_path,
@@ -122,12 +120,12 @@ class PunyApp_Session_Common {
                               $max_lifetime = 0,
                               $cookie_path = '/',
                               $is_https = false) {
+
     $self = PunyApp::getInstance(self::$className);
 
     if (!empty($self->_initialized)) {
       return;
     }
-
     $self->_initialized = true;
     call_user_func(array(self::$className, 'commit'));
 
@@ -147,27 +145,27 @@ class PunyApp_Session_Common {
     $self->_schema = null;
 
     if ($is_https) {
-      @ini_set('session.cookie_secure', 1);
+      ini_set('session.cookie_secure', 1);
     }
 
-    @ini_set('session.use_trans_sid', 0);
-    @ini_set('url_rewriter.tags', '');
-    @ini_set('session.save_handler', 'user');
-    @ini_set('session.serialize_handler', 'php');
-    @ini_set('session.use_cookies', 1);
-    @ini_set('session.name', $sess_name);
+    ini_set('session.use_trans_sid', 0);
+    ini_set('url_rewriter.tags', '');
+    ini_set('session.save_handler', 'user');
+    ini_set('session.serialize_handler', 'php');
+    ini_set('session.use_cookies', 1);
+    ini_set('session.name', $sess_name);
 
     // Settings for the Garbage Collector
-    @ini_set('session.gc_probability', 1);
+    ini_set('session.gc_probability', 1);
 
     // GC maybe works by 1/3 probability
-    @ini_set('session.gc_divisor', 100);
+    ini_set('session.gc_divisor', 100);
 
     // Set max lifetime: => x days
-    @ini_set('session.gc_maxlifetime', $max_lifetime);
-    @ini_set('session.cookie_lifetime', $max_lifetime);
-    @ini_set('session.cookie_path', $cookie_path);
-    @ini_set('session.auto_start', 0);
+    ini_set('session.gc_maxlifetime', $max_lifetime);
+    ini_set('session.cookie_lifetime', $max_lifetime);
+    ini_set('session.cookie_path', $cookie_path);
+    ini_set('session.auto_start', 0);
 
     session_set_save_handler(
       array(__CLASS__, 'open'),
@@ -339,7 +337,7 @@ class PunyApp_Session_Common {
     $result = true;
     $self = PunyApp::getInstance(self::$className);
 
-    $max_lifetime = @ini_get('session.gc_maxlifetime');
+    $max_lifetime = ini_get('session.gc_maxlifetime');
     if (is_numeric($max_lifetime) && mt_rand(1, 150) <= 3) {
       $self->gc($max_lifetime);
     }
