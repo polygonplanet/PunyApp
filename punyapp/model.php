@@ -339,6 +339,7 @@ class PunyApp_Model {
     foreach ($params as $key => $val) {
       if (is_string($key)) {
         $prepare_names = true;
+        break;
       }
     }
 
@@ -392,7 +393,7 @@ class PunyApp_Model {
     $fields = $this->_database->driver->describe($this->_tableName);
     foreach ($results as $key => $val) {
       if (isset($fields[$key]) &&
-          ($fields[$key]['length'] == null || $fields[$key]['length'] > $length)) {
+          ($fields[$key]['length'] == null || $fields[$key]['length'] >= $length)) {
         $results[$key] = true;
       }
     }
