@@ -51,11 +51,6 @@ class PunyApp extends PunyApp_Settings {
   const ERROR_LOG_NAME = 'app-error';
 
   /**
-   * @const int error log max
-   */
-  const ERROR_LOG_MAX = 200;
-
-  /**
    * @var PunyApp_Request
    */
   public $request = null;
@@ -173,7 +168,7 @@ class PunyApp extends PunyApp_Settings {
     $this->arcfour = new PunyApp_Security_Arcfour($this->_generateKey());
     $this->token = new PunyApp_Security_Token($this);
     $this->cache = new PunyApp_Cache(self::CACHE_NAME);
-    $this->errorlog = new PunyApp_Log(self::ERROR_LOG_NAME, self::ERROR_LOG_MAX);
+    $this->errorlog = new PunyApp_Log(self::ERROR_LOG_NAME, $this->_logErrorMax);
     $this->view = new PunyApp_View($this);
     $this->database = new PunyApp_Database($this);
     $this->model = new PunyApp_Model($this->database, null, null);
@@ -182,6 +177,7 @@ class PunyApp extends PunyApp_Settings {
     $this->session->start();
     $this->cookie = new PunyApp_Cookie($this);
 
+    register_shutdown_function(array($this, 'handleLastError'));
     set_error_handler(array($this, 'handleError'));
     spl_autoload_register(array(__CLASS__, 'load'));
     $this->_executeAppSchema();
@@ -274,11 +270,19 @@ class PunyApp extends PunyApp_Settings {
    * @return bool
    */
   public static function uses($name, $path) {
+    static $paths = array();
+
+    $key = $name . ':' . $path;
+    if (isset($paths[$key])) {
+      return false;
+    }
+
     $filename = self::getLibPath($name, $path);
     if (!$filename) {
       return false;
     }
 
+    $paths[$key] = true;
     require_once $filename;
     return true;
   }
@@ -409,6 +413,33 @@ class PunyApp extends PunyApp_Settings {
 
     $this->event->trigger('app-error', array($e));
     throw $e;
+  }
+
+  /**
+   * Custom error handler
+   */
+  public function handleLastError() {
+    $last_error = error_get_last();
+    if (!empty($last_error) &&
+        isset($last_error['type'], $last_error['message'])) {
+
+      $type = $last_error['type'];
+      if (!(error_reporting() & $type)) {
+        return;
+      }
+
+      $message = $last_error['message'];
+      $file = null;
+      if (isset($last_error['file'])) {
+        $file = $last_error['file'];
+      }
+
+      $line = null;
+      if (isset($last_error['line'])) {
+        $line = $last_error['line'];
+      }
+      $this->handleError($type, $message, $file, $line);
+    }
   }
 
   /**
