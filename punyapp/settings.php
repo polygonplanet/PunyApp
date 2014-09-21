@@ -25,9 +25,9 @@ class PunyApp_Settings {
   protected $_debug = true;
 
   /**
-   * @var string internal character-code (default = UTF-8)
+   * @var string internal character-code (default = utf-8)
    */
-  protected $_charset = 'UTF-8';
+  protected $_charset = 'utf-8';
 
   /**
    * @var string internal mime-type (default = 'text/html')
@@ -73,6 +73,11 @@ class PunyApp_Settings {
    * @var bool whether to log error
    */
   protected $_logError = true;
+
+  /**
+   * @var int the maximum item counts of log error
+   */
+  protected $_logErrorMax = 200;
 
   /**
    * Update settings with new variables
@@ -364,5 +369,23 @@ class PunyApp_Settings {
    */
   public function setLogError($log_error) {
     $this->_logError = (bool)$log_error;
+  }
+
+  /**
+   * Gets the logErrorMax
+   *
+   * @return int the maximum item counts of log error
+   */
+  public function getLogErrorMax() {
+    return $this->_logErrorMax;
+  }
+
+  /**
+   * Sets the logErrorMax
+   *
+   * @param int $log_error_max
+   */
+  public function setLogErrorMax($log_error_max) {
+    $this->_logErrorMax = (int)$log_error_max;
   }
 }
