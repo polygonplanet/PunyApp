@@ -150,6 +150,7 @@ class PunyApp_Log {
       $date = '----- ' . $date . ' -----' . PHP_EOL;
     } else {
       $date .= ' ';
+      $message = PunyApp_Util::removeLineBreaks($message);
     }
 
     $result = $date . $message . PHP_EOL;
