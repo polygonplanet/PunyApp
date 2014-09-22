@@ -284,7 +284,6 @@ class PunyApp_Dispatcher {
         $model_class = $model_name . 'Model';
         self::$app->controller->models->{$model_name} = new $model_class(
           self::$app->database,
-          $model_class,
           $model
         );
       }
