@@ -145,7 +145,7 @@ class SampleModel extends PunyApp_Model {
     $sample->userid = $userid;
     $sample->email = $email;
     $sample->pass = sha1($pass);
-    $sample->save();
+    return $sample->save();
   }
 
 
