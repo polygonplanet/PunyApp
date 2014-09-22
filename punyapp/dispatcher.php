@@ -41,8 +41,7 @@ class PunyApp_Dispatcher {
 
     if (empty($actions->actionName) ||
         !self::$app->uses($actions->controllerFileName, $actions->dirname)) {
-      self::$app->view->renderError(404);
-      exit;
+      return self::$app->view->renderError(404);
     }
 
     $class = $actions->className;
@@ -51,8 +50,7 @@ class PunyApp_Dispatcher {
 
     $methods = self::_getMethods($actions->actionName);
     if ($methods->error || $methods->method == null) {
-      self::$app->view->renderError($methods->error ? 500 : 404);
-      exit;
+      return self::$app->view->renderError($methods->error ? 500 : 404);
     }
 
     self::_setProps($actions->actionName, $methods);
@@ -143,42 +141,45 @@ class PunyApp_Dispatcher {
     $method = strtolower(self::$app->request->method);
     if ($method == null) {
       $methods->error = true;
-    } else {
-      $method_names = array(
-        $method . ucfirst($action_name),
-        $method . '_' . $action_name,
-        'any' . ucfirst($action_name),
-        'any_' . $action_name
+      return $methods;
+    }
+
+    $method_names = array(
+      $method . ucfirst($action_name),
+      $method . '_' . $action_name,
+      'any' . ucfirst($action_name),
+      'any_' . $action_name
+    );
+    foreach ($method_names as $method_name) {
+      if (self::_isCallable($method_name)) {
+        $methods->method = $method_name;
+        break;
+      }
+    }
+
+    if ($methods->method == null) {
+      if (self::_isCallable($action_name)) {
+        $methods->method = $action_name;
+      } else if (self::_isCallable('any')) {
+        $methods->method = 'any';
+        $action_name = 'any';
+      }
+    }
+
+    if ($methods->method == null) {
+      return $methods;
+    }
+
+    foreach (array('before', 'after') as $prefix) {
+      $actions = array(
+        $prefix . ucfirst($action_name),
+        $prefix . '_' . $action_name
       );
-      foreach ($method_names as $method_name) {
-        if (self::_isCallable($method_name)) {
-          $methods->method = $method_name;
+
+      foreach ($actions as $name) {
+        if (is_callable(array(self::$app->controller, $name))) {
+          $methods->{$prefix} = $name;
           break;
-        }
-      }
-
-      if ($methods->method == null) {
-        if (self::_isCallable($action_name)) {
-          $methods->method = $action_name;
-        } else if (self::_isCallable('any')) {
-          $methods->method = 'any';
-          $action_name = 'any';
-        }
-      }
-
-      if ($methods->method != null) {
-        foreach (array('before', 'after') as $prefix) {
-          $actions = array(
-            $prefix . ucfirst($action_name),
-            $prefix . '_' . $action_name
-          );
-
-          foreach ($actions as $name) {
-            if (is_callable(array(self::$app->controller, $name))) {
-              $methods->{$prefix} = $name;
-              break;
-            }
-          }
         }
       }
     }
@@ -211,10 +212,9 @@ class PunyApp_Dispatcher {
    * @return boolean
    */
   private static function _isCallable($method) {
-    static $ignore_methods = array(
-      'beforeFilter' => true,
-      'afterFilter' => true,
-      'beforeRender' => true
+    static $ignore_prefixes = array(
+      'before' => true,
+      'after' => true
     );
 
     // Disable magic methods
@@ -222,13 +222,10 @@ class PunyApp_Dispatcher {
       return false;
     }
 
-    if (array_key_exists(strtolower($method), $ignore_methods)) {
-      return false;
-    }
-
-    foreach (array('before', 'after') as $pre) {
-      if (strlen($method) > strlen($pre) &&
-          0 === strncasecmp($method, $pre, strlen($pre))) {
+    foreach ($ignore_prefixes as $pre) {
+      $pre_len = strlen($pre);
+      if (strlen($method) > $pre_len &&
+          0 === strncasecmp($method, $pre, $pre_len)) {
         return false;
       }
     }
@@ -296,7 +293,7 @@ class PunyApp_Dispatcher {
     }
 
     if (isset(self::$app->controller->template)) {
-      self::$app->controller->view->template = self::$app->controller->template;
+      self::$app->controller->view->setTemplate(self::$app->controller->template);
     }
     self::$app->controller->view->validationErrors = &self::$app->controller->validationErrors;
   }
