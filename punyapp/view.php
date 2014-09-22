@@ -71,13 +71,23 @@ class PunyApp_View {
   }
 
   /**
+   * Get template var
+   *
+   * @param string $name
+   * @return mixed
+   */
+  public function get($name) {
+    return $this->has($name) ? self::$_vars[$name] : null;
+  }
+
+  /**
    * Check the template variable name is exists
    *
    * @param string $name
    * @return bool
    */
   public function has($name) {
-    return array_key_exists($name, self::$_vars);
+    return isset(self::$_vars[$name]);
   }
 
   /**
@@ -92,6 +102,24 @@ class PunyApp_View {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Get template
+   *
+   * @return string
+   */
+  public function getTemplate() {
+    return $this->template;
+  }
+
+  /**
+   * Set template
+   *
+   * @param string $template
+   */
+  public function setTemplate($template) {
+    $this->template = $template;
   }
 
   /**
@@ -260,6 +288,58 @@ class PunyApp_View {
 
     return implode("\n", $results);
   }
+
+
+  /**
+   * Magic methods
+   */
+  public function __get($name) {
+    return $this->get($name);
+  }
+
+
+  public function __set($name, $value) {
+    $this->set($name, $value);
+  }
+
+
+  public function __isset($name) {
+    return $this->has($name);
+  }
+
+
+  public function __unset($name) {
+    $this->delete($name);
+  }
+
+
+  /**
+   * Iteration methods
+   */
+  public function rewind() {
+    return reset(self::$_vars);
+  }
+
+
+  public function current() {
+    return current(self::$_vars);
+  }
+
+
+  public function key() {
+    return key(self::$_vars);
+  }
+
+
+  public function next() {
+    return next(self::$_vars);
+  }
+
+
+  public function valid() {
+    return key(self::$_vars) !== null;
+  }
+
 
   /**
    * Build HTML attributes
