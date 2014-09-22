@@ -346,7 +346,7 @@ class PunyApp_Database {
   /**
    * Check error
    *
-   * @return boolean
+   * @return bool
    */
   public function isError() {
     if ($this->driverName === 'posql') {
@@ -486,7 +486,7 @@ class PunyApp_Database_Statement {
    * @param mixed $column
    * @param mixed $param
    * @param int $type
-   * @return boolean
+   * @return bool
    */
   public function bindColumn($column, &$param, $type = null) {
     if ($type === null) {
@@ -528,7 +528,7 @@ class PunyApp_Database_Statement {
    * Execute
    *
    * @param array $input_parameters = array()
-   * @return boolean
+   * @return bool
    */
   public function execute($input_parameters = array()) {
     $args = func_get_args();
@@ -545,6 +545,40 @@ class PunyApp_Database_Statement {
    */
   public function rowCount() {
     return $this->_stmt->rowCount();
+  }
+
+  /**
+   * Fetches the next row from a result set
+   *
+   * @param int $fetch_style
+   * @param int $cursor_orientation
+   * @param int $cursor_offset
+   * @return mixed
+   */
+  public function fetch($fetch_style, $cursor_orientation = null, $cursor_offset = null) {
+    if (func_num_args() === 1) {
+      return $this->_stmt->fetch($fetch_style);
+    } else {
+      $args = func_get_args();
+      return call_user_func_array(array($this->_stmt, 'fetch'), $args);
+    }
+  }
+
+  /**
+   * Returns an array containing all of the result set rows
+   *
+   * @param int $fetch_style
+   * @param mixed $fetch_argument
+   * @param array $ctor_args
+   * @return array
+   */
+  public function fetchAll($fetch_style, $fetch_argument = null, $ctor_args = array()) {
+    if (func_num_args() === 1) {
+      return $this->_stmt->fetchAll($fetch_style);
+    } else {
+      $args = func_get_args();
+      return call_user_func_array(array($this->_stmt, 'fetchAll'), $args);
+    }
   }
 
 
