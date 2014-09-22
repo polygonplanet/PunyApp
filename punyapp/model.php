@@ -49,6 +49,52 @@ class PunyApp_Model {
   /**
    * Find data
    *
+   * @example
+   * <code>
+   * $all_rows = $this->find();
+   * </code>
+   *
+   * @example
+   * <code>
+   * $rows = $this->find(
+   *   array(
+   *     'fields' => array('id', 'name'),
+   *     'where' => array('id' => '?')
+   *   ),
+   *   array($id)
+   * );
+   * </code>
+   *
+   * @example
+   * <code>
+   * $rows = $this->find(
+   *   array(
+   *     'distinct' => false,
+   *     'fields' => array(
+   *       'U.id AS id', 'U.name AS name',
+   *       'U.category AS cat', 'P.url AS url'
+   *     ),
+   *     'as' => 'U',
+   *     'joins' => array(
+   *       'type' => 'LEFT',
+   *       'table' => 'profile',
+   *       'as' => 'P',
+   *       'on' => array('U.id' => 'P.id')
+   *     ),
+   *     'where' => array(
+   *       'name' => ':name'
+   *     ),
+   *     'group' => 'cat',
+   *     'order' => 'id DESC',
+   *     'limit' => 10,
+   *     'offset' => 5
+   *   ),
+   *   array(
+   *     ':name' => $name
+   *   )
+   * );
+   * </code>
+   *
    * @param array $query
    * @param array $params
    * @return array result rows
