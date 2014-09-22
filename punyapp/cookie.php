@@ -41,20 +41,27 @@ class PunyApp_Cookie implements Iterator {
     if (isset($_COOKIE) && is_array($_COOKIE)) {
       $this->_cookies = $_COOKIE;
     }
+  }
 
-    if (!isset($this->app->session->_encryptedCookies)) {
-      $this->app->session->_encryptedCookies = array();
+  /**
+   * Get raw cookie value
+   *
+   * @param string $name
+   * @return string
+   */
+  public function getRaw($name) {
+    $value = null;
+    if (isset($this->_cookies[$name])) {
+      $value = $this->_cookies[$name];
     }
+    return $value;
   }
 
 
   public function __get($name) {
     $value = null;
     if (isset($this->_cookies[$name])) {
-      $value = $this->_cookies[$name];
-      if ($this->_isEncryptedCookie($name)) {
-        $value = $this->decrypt($value);
-      }
+      $value = $this->decrypt($this->_cookies[$name]);
     }
     return $value;
   }
@@ -63,7 +70,7 @@ class PunyApp_Cookie implements Iterator {
   public function __set($name, $value) {
     $value = $this->encrypt($value);
     $this->_cookies[$name] = $value;
-    $this->send($name, $value);
+    $this->send($name);
   }
 
 
@@ -79,12 +86,22 @@ class PunyApp_Cookie implements Iterator {
 
 
   public function rewind() {
-    return reset($this->_cookies);
+    $value = reset($this->_cookies);
+    $key = key($this->_cookies);
+    if ($key !== null) {
+      $value = $this->decrypt($value);
+    }
+    return $value;
   }
 
 
   public function current() {
-    return current($this->_cookies);
+    $value = current($this->_cookies);
+    $key = key($this->_cookies);
+    if ($key !== null) {
+      $value = $this->decrypt($value);
+    }
+    return $value;
   }
 
 
@@ -94,7 +111,12 @@ class PunyApp_Cookie implements Iterator {
 
 
   public function next() {
-    return next($this->_cookies);
+    $value = next($this->_cookies);
+    $key = key($this->_cookies);
+    if ($key !== null) {
+      $value = $this->decrypt($value);
+    }
+    return $value;
   }
 
 
@@ -106,14 +128,18 @@ class PunyApp_Cookie implements Iterator {
    * Send a cookie
    *
    * @param string $name
-   * @param string $value
+   * @param bool $raw
    * @param mixed $expire
-   * @param boolean $secure
-   * @param boolean $httponly
-   * @return boolean
+   * @param bool $secure
+   * @param bool $httponly
+   * @return bool
    */
-  public function send($name, $value, $expire = -1, $secure = false, $httponly = false) {
+  public function send($name, $raw = false, $expire = -1, $secure = false, $httponly = false) {
     $result = false;
+
+    if (!isset($this->_cookies[$name])) {
+      return false;
+    }
 
     if (!headers_sent()) {
       $domain = $this->app->env->HTTP_HOST;
@@ -127,6 +153,11 @@ class PunyApp_Cookie implements Iterator {
         $expire = strtotime($expire);
       }
 
+      $value = $this->_cookies[$name];
+      if ($raw) {
+        $value = $this->decrypt($value);
+      }
+
       $result = setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
 
       if ($result) {
@@ -134,7 +165,6 @@ class PunyApp_Cookie implements Iterator {
         if (isset($_COOKIE) && is_array($_COOKIE)) {
           $_COOKIE[$name] = $value;
         }
-        $this->_addEncryptedCookie($name);
       }
     }
 
@@ -145,7 +175,7 @@ class PunyApp_Cookie implements Iterator {
    * Delete a cookie
    *
    * @param string $name
-   * @return boolean
+   * @return bool
    */
   public function delete($name) {
     $result = false;
@@ -161,7 +191,6 @@ class PunyApp_Cookie implements Iterator {
         if (isset($_COOKIE) && is_array($_COOKIE)) {
           unset($_COOKIE[$name]);
         }
-        $this->_deleteEncryptedCookie($name);
       }
     }
 
@@ -186,48 +215,5 @@ class PunyApp_Cookie implements Iterator {
    */
   protected function decrypt($data) {
     return $this->app->decrypt($data);
-  }
-
-  /**
-   * Add encrypted cookie name
-   *
-   * @param string $name
-   */
-  private function _addEncryptedCookie($name) {
-    $encrypted_cookies = $this->app->session->_encryptedCookies;
-    if (empty($encrypted_cookies)) {
-      $encrypted_cookies = array();
-    }
-    $encrypted_cookies[$name] = 1;
-    $this->app->session->_encryptedCookies = $encrypted_cookies;
-  }
-
-  /**
-   * Delete encrypted cookie name
-   *
-   * @param string $name
-   */
-  private function _deleteEncryptedCookie($name) {
-    $encrypted_cookies = $this->app->session->_encryptedCookies;
-    if (empty($encrypted_cookies)) {
-      $encrypted_cookies = array();
-    }
-    unset($encrypted_cookies[$name]);
-    $this->app->session->_encryptedCookies = $encrypted_cookies;
-  }
-
-  /**
-   * Check whether the argument name is encrypted cookie
-   *
-   * @param string $name
-   * @return bool
-   */
-  private function _isEncryptedCookie($name) {
-    $encrypted_cookies = $this->app->session->_encryptedCookies;
-    if (empty($encrypted_cookies)) {
-      $encrypted_cookies = array();
-    }
-
-    return isset($encrypted_cookies[$name]);
   }
 }
