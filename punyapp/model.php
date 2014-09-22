@@ -25,11 +25,6 @@ class PunyApp_Model {
   private $_database = null;
 
   /**
-   * @var string model name
-   */
-  private $_name = null;
-
-  /**
    * @var string tablename
    */
   private $_tableName = null;
@@ -42,15 +37,13 @@ class PunyApp_Model {
   /**
    * Constructor
    *
-   * @param PunyApp_Database
-   * @param string $name
+   * @param PunyApp_Database $database
    * @param string $table_name
    */
-  public function __construct(PunyApp_Database $database, $name, $table_name) {
-    $this->_database = $database;
-    $this->_name = $name;
-    $this->_tableName = $table_name;
+  public function __construct(PunyApp_Database $database, $table_name) {
     $this->_fields = array();
+    $this->_database = $database;
+    $this->_tableName = $table_name;
   }
 
   /**
@@ -215,13 +208,40 @@ class PunyApp_Model {
   }
 
   /**
+   * Set database
+   *
+   * @param PunyApp_Database
+   */
+  public function setDatabase(PunyApp_Database $database) {
+    $this->_database = $database;
+  }
+
+  /**
+   * Return the table name
+   *
+   * @return string
+   */
+  public function getTableName() {
+    return $this->_tableName;
+  }
+
+  /**
+   * Set the table name
+   *
+   * @param string
+   */
+  public function setTableName($table_name) {
+    $this->_tableName = $table_name;
+  }
+
+  /**
    * Create new instance
    *
    * @return PunyApp_Model
    */
   public function newInstance() {
-    $class = $this->_name;
-    $instance = new $class($this->_database, $this->_name, $this->_tableName);
+    $class = __CLASS__;
+    $instance = new $class($this->_database, $this->_tableName);
     return $instance;
   }
 
@@ -268,19 +288,6 @@ class PunyApp_Model {
     unset($this->_fields[$name]);
   }
 
-
-  /**
-   * Query
-   *
-   * @param string $statement
-   * @param array $params
-   * @return array result rows
-   */
-  private function _query($statement, $params = array()) {
-    $stmt = $this->_database->prepare($statement);
-    $stmt->execute((array)$params);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-  }
 
   /**
    * Find data
@@ -375,7 +382,7 @@ class PunyApp_Model {
    * @return mixed
    */
   private function _hasSpecialFields($field_name = null) {
-    $cache_key = sprintf('%s-%s-%s', __METHOD__, $this->_name, $this->_tableName);
+    $cache_key = sprintf('%s-%s', __METHOD__, $this->_tableName);
     $cache = PunyApp::store('get', $cache_key);
     if (!empty($cache)) {
       if ($field_name === null) {
@@ -803,6 +810,9 @@ class PunyApp_Model {
    * @return string
    */
   private function _createOperators($operators = array()) {
+    if (is_int(key($operators))) {
+      $operators = array(reset($operators) => next($operators));
+    }
     $value = reset($operators);
     $operator = key($operators);
 
