@@ -23,12 +23,12 @@ class PunyApp_Security_Token {
   /**
    * @const string
    */
-  const NAME = "\0__token";
+  const TOKEN_NAME = "\0__token";
 
   /**
    * @const int
    */
-  const MAX = 10;
+  const TOKEN_MAX = 10;
 
   /**
    * @var PunyApp
@@ -52,9 +52,15 @@ class PunyApp_Security_Token {
   public function generate() {
     $this->_initialize();
 
-    $key = sha1(uniqid(mt_rand(), true));
-    $this->app->session->{self::NAME} = array($key => 1) +
-      array_slice($this->app->session->{self::NAME}, 0, self::MAX - 1, true);
+    $key = PunyApp::hash(uniqid(mt_rand(), true));
+    $this->app->session->{self::TOKEN_NAME} = array(
+      $key => 1
+    ) + array_slice(
+      $this->app->session->{self::TOKEN_NAME},
+      0,
+      self::TOKEN_MAX - 1,
+      true
+    );
 
     return $key;
   }
@@ -69,11 +75,11 @@ class PunyApp_Security_Token {
     $this->_initialize();
 
     $token = (string)filter_var($token);
-    $tokens = $this->app->session->{self::NAME};
+    $tokens = $this->app->session->{self::TOKEN_NAME};
 
     if (isset($tokens[$token])) {
       unset($tokens[$token]);
-      $this->app->session->{self::NAME} = $tokens;
+      $this->app->session->{self::TOKEN_NAME} = $tokens;
       return true;
     }
 
@@ -84,9 +90,9 @@ class PunyApp_Security_Token {
    * Initialize token
    */
   private function _initialize() {
-    if (!isset($this->app->session->{self::NAME}) ||
-        !is_array($this->app->session->{self::NAME})) {
-      $this->app->session->{self::NAME} = array();
+    if (!isset($this->app->session->{self::TOKEN_NAME}) ||
+        !is_array($this->app->session->{self::TOKEN_NAME})) {
+      $this->app->session->{self::TOKEN_NAME} = array();
     }
   }
 }
