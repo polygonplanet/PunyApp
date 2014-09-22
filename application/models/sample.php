@@ -14,8 +14,8 @@ class SampleModel extends PunyApp_Model {
     $sample = $this->newInstance();
     $sample->userid = $userid;
     $sample->email = $email;
-    $sample->pass = sha1($pass);
-    $sample->save();
+    $sample->pass = PunyApp::hash($pass);
+    return $sample->save();
   }
 
 
@@ -58,7 +58,7 @@ class SampleModel extends PunyApp_Model {
       ),
       array(
         ':userid' => $userid,
-        ':pass' => sha1($pass)
+        ':pass' => PunyApp::hash($pass)
       )
     );
   }

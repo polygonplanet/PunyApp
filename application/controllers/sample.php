@@ -140,8 +140,12 @@ class SampleController extends PunyApp_Controller {
       if ($this->models->sample->isUserId($this->request->params->id)) {
         $error = 'This id already exists';
       } else {
-        $this->_registerUser();
-        $this->redirect('home');
+        if ($this->_registerUser()) {
+          $this->redirect('home');
+        } else {
+          $this->view->renderError(500);
+          exit;
+        }
       }
     }
 
