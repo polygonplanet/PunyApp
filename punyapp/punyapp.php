@@ -171,7 +171,8 @@ class PunyApp extends PunyApp_Settings {
     $this->errorlog = new PunyApp_Log(self::ERROR_LOG_NAME, $this->_logErrorMax);
     $this->view = new PunyApp_View($this);
     $this->database = new PunyApp_Database($this);
-    $this->model = new PunyApp_Model($this->database, null, null);
+    $this->_executeAppSchema();
+
     $this->validator = new PunyApp_Validator($this);
     $this->session = new PunyApp_Session($this);
     $this->session->start();
@@ -180,8 +181,8 @@ class PunyApp extends PunyApp_Settings {
     register_shutdown_function(array($this, 'handleLastError'));
     set_error_handler(array($this, 'handleError'));
     spl_autoload_register(array(__CLASS__, 'load'));
-    $this->_executeAppSchema();
     $this->removePoweredByHeader();
+
     $this->event->trigger('app-initialize', array());
   }
 
@@ -252,6 +253,22 @@ class PunyApp extends PunyApp_Settings {
     $this->cache->_appSchemaDone = true;
   }
 
+  /**
+   * Set config
+   *
+   * @param mixed $name
+   * @param mixed $value
+   */
+  public static function setConfig($name, $value = null) {
+    $values = $name;
+    if (!is_array($name)) {
+      $values = array($name => $value);
+    }
+
+    foreach ($values as $key => $val) {
+      ini_set($key, $val);
+    }
+  }
 
   /**
    * Get current time in milliseconds
@@ -416,7 +433,7 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * Custom error handler
+   * Custom error handler for fatal error
    */
   public function handleLastError() {
     $last_error = error_get_last();
@@ -448,7 +465,7 @@ class PunyApp extends PunyApp_Settings {
    * @param object $class
    * @return string
    */
-  public static function getClass($class) {
+  public static function getClassName($class) {
     $name = null;
     if (is_object($class)) {
       $name = get_class($class);
@@ -468,15 +485,15 @@ class PunyApp extends PunyApp_Settings {
    * Get/Create class instance
    *
    * @param string $classname
+   * @param array $params
    * @return object
    */
-  public static function getInstance($classname) {
+  public static function getInstance($classname, $params = array()) {
     static $instances = array();
 
     if (!isset($instances[$classname])) {
-      $args = array_slice(func_get_args(), 1);
       $reflection = new ReflectionClass($classname);
-      $instance = $reflection->newInstanceArgs($args);
+      $instance = $reflection->newInstanceArgs($params);
       $instances[$classname] = $instance;
     }
     return $instances[$classname];
@@ -584,7 +601,7 @@ class PunyApp extends PunyApp_Settings {
         $uri = $sep;
       } else {
         $dir = '/application/public/';
-        if (substr($uri, -20) === $dir) {
+        if (substr($uri, -strlen($dir)) === $dir) {
           $uri = substr($uri, 0, strrpos($uri, $dir) + 1);
         }
       }
@@ -791,6 +808,16 @@ class PunyApp extends PunyApp_Settings {
     return $this->arcfour->decrypt(PunyApp_Util::base64URLDecode($data));
   }
 
+  /**
+   * Generate hash.
+   * The returned value is a 40-character hexadecimal number.
+   *
+   * @param string $value
+   * @return string
+   */
+  public static function hash($value) {
+    return sha1($value);
+  }
 
   /**
    * Generate key
@@ -798,6 +825,6 @@ class PunyApp extends PunyApp_Settings {
    * @return string
    */
   private function _generateKey() {
-    return sprintf('{"db0163bc":"%s"}', $this->_salt);
+    return self::hash(sprintf('{"db0163bc":"%s"}', $this->_salt));
   }
 }
