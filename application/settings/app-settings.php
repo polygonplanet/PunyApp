@@ -36,14 +36,18 @@ $settings = array(
     'timezone' => '',
     /**
      * Application security salt
-     * Enter something characters.
+     * Enter something random characters.
      * Symbols is possible and enables any length.
      */
     'salt' => 'ZQJaiPPYn6Tldb2gottKwIDmGiatuSnV',
     /**
      * Log application error to 'application/storage/logs'
      */
-    'logError' => true
+    'logError' => true,
+    /**
+     * The maximum item counts of log error.
+     */
+    'logErrorMax' => 200
   ),
   /**
    * Database settings
@@ -82,7 +86,11 @@ $settings = array(
     /**
      * Log SQL query to 'application/storage/logs'
      */
-    'logQuery' => true
+    'logQuery' => true,
+    /**
+     * The maximum item counts of log query.
+     */
+    'logQueryMax' => 200
   ),
   /**
    * Session settings
@@ -91,17 +99,19 @@ $settings = array(
     /**
      * Session engine
      *
-     * Available engines: "mysql", "sqlite" and "posql".
+     * Available engines: "php", "file" and "database".
      */
-    'engine' => 'sqlite',
+    'engine' => 'database',
     /**
-     * Session name (e.g., 'PHPSESSID')
+     * Session cookie name (e.g., 'PHPSESSID')
      */
-    'name' => 'sessid',
+    'name' => 'sid',
     /**
-     * The expiration date of session
+     * The expiration time (seconds) for session.
+     *
+     * default = 60*60*1 = 1 hour
      */
-    'expirationDate' => 365
+    'timeout' => 60 * 60 * 1
   )
 );
 
