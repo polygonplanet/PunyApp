@@ -19,13 +19,21 @@
  */
 
 $schema = array(
+  "CREATE TABLE IF NOT EXISTS punyapp_sessions (
+    id      varchar(128) NOT NULL default '',
+    data    text,
+    expires int(11) default NULL,
+    PRIMARY KEY (id)
+  )",
+
   "CREATE TABLE IF NOT EXISTS sample (
-    id       integer PRIMARY KEY,
+    id       int(11),
     userid   varchar(255),
     email    varchar(255),
     pass     varchar(255),
     created  varchar(255),
-    modified varchar(255)
+    modified varchar(255),
+    PRIMARY KEY (id)
   )"
 );
 
