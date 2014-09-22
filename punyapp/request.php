@@ -388,11 +388,6 @@ class PunyApp_Request_Params implements Iterator {
   private $_params = null;
 
   /**
-   * @var int
-   */
-  private $_pos = 0;
-
-  /**
    * Constructor
    *
    * @param array request vars
