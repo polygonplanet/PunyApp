@@ -295,7 +295,7 @@ $settings = array(
     /**
      * Session engine
      *
-     * Available engines: "mysql", "sqlite" and "posql".
+     * Available engines: "php", "file" and "database".
      */
     'engine' => '',
   )
