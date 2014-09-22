@@ -38,6 +38,7 @@ class PunyApp_Database_Settings {
         case 'engine':
         case 'encoding':
         case 'logQuery':
+        case 'logQueryMax':
           break;
         case 'dsn':
           $dsn = $val;
@@ -55,7 +56,7 @@ class PunyApp_Database_Settings {
     }
 
     if ($this->engine == null) {
-      return '';
+      return null;
     }
 
     return sprintf('%s:%s', $this->engine, implode(';', $props));
@@ -67,13 +68,11 @@ class PunyApp_Database_Settings {
    * @return string
    */
   public function getEngine() {
-    $engine = null;
-
-    if (isset($this->engine) && $this->engine != null) {
-      $engine = $this->engine;
+    if (isset($this->engine)) {
+      return (string)$this->engine;
     }
 
-    return (string)$engine;
+    return null;
   }
 
   /**
@@ -82,13 +81,24 @@ class PunyApp_Database_Settings {
    * @return bool
    */
   public function getLogQuery() {
-    $log_query = null;
-
     if (isset($this->logQuery)) {
-      $log_query = $this->logQuery;
+      return (bool)$this->logQuery;
     }
 
-    return (bool)$log_query;
+    return false;
+  }
+
+  /**
+   * Get logQueryMax
+   *
+   * @return int
+   */
+  public function getLogQueryMax() {
+    if (isset($this->logQueryMax)) {
+      return (int)$this->logQueryMax;
+    }
+
+    return null;
   }
 
   /**
@@ -97,14 +107,11 @@ class PunyApp_Database_Settings {
    * @return string
    */
   public function getEncoding() {
-    $encoding = null;
-
-    if (isset($this->encoding) && $this->encoding != null) {
-      $encoding = $this->encoding;
-      $this->encoding = null;
+    if (isset($this->encoding)) {
+      return (string)$this->encoding;
     }
 
-    return (string)$encoding;
+    return null;
   }
 
   /**
@@ -183,7 +190,12 @@ class PunyApp_Database {
   /**
    * @var string
    */
-  private $_dbfile = null;
+  private $_filename = null;
+
+  /**
+   * @var string
+   */
+  private $_extension = null;
 
   /**
    * @var bool whether to log SQL query
@@ -198,7 +210,7 @@ class PunyApp_Database {
   /**
    * @var int queries log max
    */
-  private $_queriesLogMax = 200;
+  private $_queriesLogMax = null;
 
   /**
    * Connect database with DSN
@@ -207,21 +219,22 @@ class PunyApp_Database {
    */
   public function __construct(PunyApp $app) {
     $this->app = $app;
-    $this->_log = new PunyApp_Log(self::QUERIES_LOG_NAME, $this->_queriesLogMax, true);
-    $this->_storeQueriesLog = $this->app->databaseSettings->getLogQuery();
     $dsn = $this->app->databaseSettings->getDSN();
-    $engine = $this->app->databaseSettings->getEngine();
-    $user = $this->app->databaseSettings->getUser();
-    $pass = $this->app->databaseSettings->getPass();
-    $options = array();
-
     if ($dsn == null) {
       return;
     }
 
     if (!preg_match('/^([^:]+):(.*)$/', $dsn, $m)) {
-      throw new PunyApp_Database_Error('Invalid DSN');
+      throw new PunyApp_Database_Error("Invalid DSN '{$dsn}'");
     }
+    $engine = $this->app->databaseSettings->getEngine();
+    $user = $this->app->databaseSettings->getUser();
+    $pass = $this->app->databaseSettings->getPass();
+    $options = array();
+
+    $this->_queriesLogMax = $this->app->databaseSettings->getLogQueryMax();
+    $this->_log = new PunyApp_Log(self::QUERIES_LOG_NAME, $this->_queriesLogMax, true);
+    $this->_storeQueriesLog = $this->app->databaseSettings->getLogQuery();
 
     $database_dir = PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'database';
     $common = $database_dir . DIRECTORY_SEPARATOR . 'common.php';
@@ -234,30 +247,32 @@ class PunyApp_Database {
     }
     require_once $driver;
 
-    $this->_dbfile = PUNYAPP_DATABASES_DIR . DIRECTORY_SEPARATOR . self::DATABASE_FILENAME;
+    $this->_filename = PUNYAPP_DATABASES_DIR . DIRECTORY_SEPARATOR . self::DATABASE_FILENAME;
 
     switch ($this->driverName) {
       case 'posql':
-        $this->_dbfile .= sprintf('.%s', $this->driverName);
-        $this->_db = new Posql($this->_dbfile);
+        $this->_extension = sprintf('.%s.php', $this->driverName);
+        $this->_filename .= $this->_extension;
+        $this->_db = new Posql($this->_filename);
         break;
       case 'sqlite':
-        $this->_dbfile .= sprintf('.%s', $this->driverName);
-        $dsn = 'sqlite:' . $this->_dbfile;
-        $this->_db = new PDO($dsn, null, null, $options);
+        $this->_extension = sprintf('.%s', $this->driverName);
+        $this->_filename .= $this->_extension;
+        $dsn = 'sqlite:' . $this->_filename;
+        $this->_db = PunyApp::getInstance('PDO', array($dsn, null, null, $options));
         break;
       case 'mysql':
-        $this->_dbfile = null;
+        $this->_filename = null;
         $encoding = $this->app->databaseSettings->getEncoding();
         if ($encoding != null) {
           $encoding = preg_replace('/\W/', '', $encoding);
           $options[PDO::MYSQL_ATTR_INIT_COMMAND] = sprintf('SET NAMES %s', $encoding);
         }
-        $this->_db = PunyApp::getInstance('PDO', $dsn, $user, $pass, $options);
+        $this->_db = PunyApp::getInstance('PDO', array($dsn, $user, $pass, $options));
         break;
       default:
-        $this->_dbfile = null;
-        $this->_db = PunyApp::getInstance('PDO', $dsn, $user, $pass, $options);
+        $this->_filename = null;
+        $this->_db = PunyApp::getInstance('PDO', array($dsn, $user, $pass, $options));
         break;
     }
 
