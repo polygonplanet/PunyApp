@@ -30,57 +30,52 @@ class PunyApp_Session implements Iterator {
   const SESSION_FILENAME = 'app-session';
 
   /**
+   * @const string session tablename
+   */
+  const SESSION_TABLENAME = 'punyapp_sessions';
+
+  /**
    * @var PunyApp
    */
   private $_app = null;
 
   /**
-   * @var string session class name
+   * @var string session cookie name
    */
-  private $_sessionClassName = null;
+  private $_name = null;
 
   /**
-   * @var string session filename
+   * @var int session timeout
    */
-  private $_sessionFileName = null;
+  private $_timeout = null;
 
   /**
-   * @var int
+   * @var string session cookie path
    */
-  private $_sessionMaxLifeTime = 0;
+  private $_cookiePath = null;
+
+  /**
+   * @var string session save path
+   */
+  private $_savePath = null;
+
+  /**
+   * @var PunyApp_Session_Database
+   */
+  public static $handler = null;
 
   /**
    * @param PunyApp $app
    */
   public function __construct(PunyApp $app) {
     $this->_app = $app;
-    $this->_init();
-  }
-
-  /**
-   * Starts session
-   */
-  public function start() {
-    if (call_user_func(array($this->_sessionClassName, 'isStarted'))) {
-      return;
-    }
-
-    call_user_func(array($this->_sessionClassName, 'init'),
-      $this->_app->sessionSettings->name,
-      PunyApp_Util::fullPath($this->_sessionFileName),
-      null,
-      $this->_sessionMaxLifeTime,
-      $this->_app->getBaseURI(),
-      $this->_app->request->isSSL()
-    );
-
-    call_user_func(array($this->_sessionClassName, 'start'));
+    $this->_initialize();
   }
 
   /**
    * Initialize
    */
-  private function _init() {
+  private function _initialize() {
     static $initialized = false;
 
     if ($initialized) {
@@ -88,32 +83,142 @@ class PunyApp_Session implements Iterator {
     }
     $initialized = true;
 
-    $this->_sessionFileName = PUNYAPP_SESSIONS_DIR . DIRECTORY_SEPARATOR . self::SESSION_FILENAME;
-
-    if (isset($this->_app->sessionSettings->engine) &&
-        $this->_app->sessionSettings->engine != null) {
-      $session_dir = PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'sessions';
-      $common = $session_dir . DIRECTORY_SEPARATOR . 'common.php';
-      require_once $common;
-
-      $engine = strtolower($this->_app->sessionSettings->engine);
-      $driver = $session_dir . DIRECTORY_SEPARATOR . $engine . '.php';
-      require_once $driver;
-
-      $this->_sessionClassName = 'PunyApp_Session_' . ucfirst($engine);
-      $this->_sessionFileName .= '.' . preg_replace('/\W+/', '', $engine);
-
-      call_user_func(array($this->_sessionClassName, 'setClassName'), $this->_sessionClassName);
-      call_user_func(array($this->_sessionClassName, 'setFileName'), $this->_sessionFileName);
+    if (empty($this->_app->sessionSettings->engine)) {
+      return;
     }
 
-    if (isset($this->_app->sessionSettings->expirationDate) &&
-        (int)$this->_app->sessionSettings->expirationDate > 0) {
-      $this->_sessionMaxLifeTime = 60 * 60 * 24 * (int)$this->_app->sessionSettings->expirationDate;
+    $this->_name = $this->_app->sessionSettings->name;
+    $this->_timeout = $this->_app->sessionSettings->timeout;
+    $this->_savePath = PUNYAPP_SESSIONS_DIR;
+    $this->_cookiePath = $this->_app->getBaseURI();
+
+    $engine = strtolower($this->_app->sessionSettings->engine);
+    $config = $this->_getDefaultConfig($engine);
+
+    if (isset($config['ini'])) {
+      PunyApp::setConfig($config['ini']);
     }
+
+    if (isset($config['handler'])) {
+      $class = $config['handler']['class'];
+      $dir = PUNYAPP_LIB_DIR . DIRECTORY_SEPARATOR . 'sessions';
+      $filename = $dir . DIRECTORY_SEPARATOR . 'database.php';
+      require_once $filename;
+
+      $handler = new $class(
+        $this->_app->database,
+        self::SESSION_TABLENAME,
+        $this->_timeout
+      );
+
+      session_set_save_handler(
+        array($handler, 'open'),
+        array($handler, 'close'),
+        array($handler, 'read'),
+        array($handler, 'write'),
+        array($handler, 'destroy'),
+        array($handler, 'gc')
+      );
+    }
+    register_shutdown_function('session_write_close');
+  }
+
+  /**
+   * Starts the session
+   *
+   * @return bool
+   */
+  public static function start() {
+    if (self::isStarted()) {
+      return false;
+    }
+
+    session_write_close();
+    if (headers_sent()) {
+      if (empty($_SESSION)) {
+        $_SESSION = array();
+      }
+    } else {
+      session_cache_limiter('must-revalidate');
+      session_start();
+    }
+
+    return self::isStarted();
+  }
+
+  /**
+   * Determine if Session has been started
+   *
+   * @return bool
+   */
+  public static function isStarted() {
+    return isset($_SESSION) && session_id() != null;
+  }
+
+  /**
+   * Commit and close session
+   */
+  public static function commit() {
+    session_write_close();
   }
 
 
+  /**
+   * Get default session configurations
+   *
+   * @param string $name
+   * @return array
+   */
+  private function _getDefaultConfig($name) {
+    $defaults = array(
+      'php' => array(
+        'ini' => array()
+      ),
+      'file' => array(
+        'ini' => array(
+          'url_rewriter.tags' => '',
+          'session.serialize_handler' => 'php',
+          'session.use_cookies' => 1,
+          'session.save_path' => $this->_savePath,
+          'session.save_handler' => 'files'
+        )
+      ),
+      'database' => array(
+        'ini' => array(
+          'url_rewriter.tags' => '',
+          'session.use_cookies' => 1,
+          'session.save_handler' => 'user',
+          'session.serialize_handler' => 'php'
+        ),
+        'handler' => array(
+          'class' => 'PunyApp_Session_Database'
+        )
+      )
+    );
+
+    if (!isset($defaults[$name])) {
+      throw new PunyApp_Error("Session '{$name}' is not defined");
+    }
+
+    $commons = array(
+      'session.name' => $this->_name,
+      'session.cookie_path' => $this->_cookiePath,
+      'session.use_trans_sid' => 0,
+      'session.gc_probability' => 1,
+      'session.gc_divisor' => 1,
+      'session.gc_maxlifetime' => $this->_timeout,
+      'session.auto_start' => 0
+    );
+    $result = $defaults[$name];
+    $result['ini'] = $commons + $result['ini'];
+
+    return $result;
+  }
+
+
+  /**
+   * Magic methods
+   */
   public function __get($name) {
     return isset($_SESSION, $_SESSION[$name]) ? $_SESSION[$name] : null;
   }
@@ -139,6 +244,9 @@ class PunyApp_Session implements Iterator {
   }
 
 
+  /**
+   * Iteration methods
+   */
   public function rewind() {
     return reset($_SESSION);
   }
