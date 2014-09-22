@@ -49,7 +49,7 @@ class PunyApp_Log {
   public function __construct($name, $max_count = null, $multiline = false) {
     $filename = PUNYAPP_LOGS_DIR . DIRECTORY_SEPARATOR . $name . self::EXT;
     $this->_file = new PunyApp_File($filename, true);
-    $this->maxCount = $max_count;
+    $this->maxCount = is_numeric($max_count) ? (int)$max_count : null;
     $this->multiline = $multiline;
   }
 
