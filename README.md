@@ -11,6 +11,7 @@ Requires PHP 5.2.0 or newer.
 ### Supported Databases
 
 * MySQL
+* PostgreSQL
 * SQLite
 * [Posql](http://feel.happy.nu/doc/posql/en/)
 
@@ -256,7 +257,7 @@ public $validationRules = array(
 
 ### Install and Run
 
-* Extract the files to the any directory on the server.
+* Extract files to the any directory on the server.
 
 * Settings `application/settings/app-settings.php`.
 
@@ -282,7 +283,7 @@ $settings = array(
     /**
      * Database engine
      *
-     * Available engines: "mysql", "sqlite" and "posql".
+     * Available engines: "mysql", "pgsql", "sqlite" and "posql".
      */
     'engine' => '',
   ),
