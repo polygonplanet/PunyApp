@@ -308,7 +308,7 @@ class PunyApp_Model {
       $params[':' . $key] = $val;
     }
 
-    return $this->replace($fields, $params);
+    return $this->insert($fields, $params);
   }
 
 
@@ -398,11 +398,15 @@ class PunyApp_Model {
 
     $result = false;
     foreach ($names as $name) {
-      if (isset($special_fields[$name]) && $special_fields[$name] &&
+      if (isset($special_fields[$name]) && $special_fields[$name] !== false &&
           !array_key_exists($name, $fields) &&
           (!$prepare_names || !array_key_exists(':' . $name, $params))) {
 
-        $now = (string)PunyApp::now();
+        $now = $this->_getSpecialFieldValue($special_fields[$name]);
+        if ($now === false) {
+          continue;
+        }
+
         if ($prepare_names) {
           $fields[$name] = ':' . $name;
           $params[':' . $name] = $now;
@@ -442,12 +446,10 @@ class PunyApp_Model {
       'modified' => false
     );
 
-    $length = strlen((string)PunyApp::now());
     $fields = $this->_database->driver->describe($this->_tableName);
     foreach ($results as $key => $val) {
-      if (isset($fields[$key]) &&
-          ($fields[$key]['length'] == null || $fields[$key]['length'] >= $length)) {
-        $results[$key] = true;
+      if (isset($fields[$key])) {
+        $results[$key] = $fields[$key];
       }
     }
 
@@ -456,6 +458,54 @@ class PunyApp_Model {
       return $results;
     }
     return isset($results[$field_name]) ? $results[$field_name] : null;
+  }
+
+  /**
+   * Get the special fields value
+   *
+   * @param array $field
+   * @return mixed
+   */
+  private function _getSpecialFieldValue($field) {
+    if (!is_array($field) || !isset($field['name'])) {
+      return false;
+    }
+
+    $name = strtolower($field['name']);
+    $length = $field['length'];
+    $now = PunyApp::now();
+    $now_length = strlen((string)$now);
+    $time = time();
+    $time_length = strlen((string)$time);
+
+    switch ($name) {
+      case 'date':
+        return date('Y-m-d');
+      case 'datetime':
+      case 'timestamp':
+        return date('Y-m-d H:i:s');
+      case 'time':
+        return date('H:i:s');
+      case 'char':
+      case 'character':
+      case 'varchar':
+      case 'character varying':
+      case 'text':
+        if ($length === null || $length >= $now_length) {
+          return (string)$now;
+        } else if ($length >= $time_length) {
+          return (string)$time;
+        }
+        return '';
+      default:
+        if ($length >= $now_length) {
+          return $now;
+        } else if ($length === null || $length >= $time_length) {
+          return $time;
+        }
+    }
+
+    return null;
   }
 
   /**
