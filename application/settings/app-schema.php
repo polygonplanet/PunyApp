@@ -22,12 +22,13 @@ $schema = array(
   "CREATE TABLE IF NOT EXISTS punyapp_sessions (
     id      varchar(128) NOT NULL default '',
     data    text,
-    expires int(11) default NULL,
+    expires integer default NULL,
     PRIMARY KEY (id)
   )",
 
+  // For pgsql, change field id type to 'serial'.
   "CREATE TABLE IF NOT EXISTS sample (
-    id       int(11),
+    id       integer,
     userid   varchar(255),
     email    varchar(255),
     pass     varchar(255),

@@ -56,7 +56,7 @@ $settings = array(
     /**
      * Database engine
      *
-     * Available engines: "mysql", "sqlite" and "posql".
+     * Available engines: "mysql", "pgsql", "sqlite" and "posql".
      */
     'engine' => 'sqlite',
     /**
@@ -101,7 +101,7 @@ $settings = array(
      *
      * Available engines: "php", "file" and "database".
      */
-    'engine' => 'database',
+    'engine' => 'php',
     /**
      * Session cookie name (e.g., 'PHPSESSID')
      */
