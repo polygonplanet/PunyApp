@@ -270,6 +270,7 @@ class PunyApp_Database {
         }
         $this->_db = PunyApp::getInstance('PDO', array($dsn, $user, $pass, $options));
         break;
+      case 'pgsql':
       default:
         $this->_filename = null;
         $this->_db = PunyApp::getInstance('PDO', array($dsn, $user, $pass, $options));
