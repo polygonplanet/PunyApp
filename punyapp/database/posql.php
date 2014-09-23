@@ -43,17 +43,13 @@ class PunyApp_Database_Posql extends PunyApp_Database_Common {
       $type = $row['type'];
       $default = $row['default'];
 
-      $length = null;
-      if (preg_match('/[(]\s*(\d+)\s*[)]/', $type, $m)) {
-        $length = (int)$m[1];
-      }
+      $types = $this->_parseColumnType($type);
 
       $results[$name] = array(
         'type' => $type,
         'null' => true,
-        'default' => $default,
-        'length' => $length
-      );
+        'default' => $default
+      ) + $types;
 
       if ($row['key'] === 'primary' || $row['extra'] === 'alias for rowid') {
         $results[$name]['primaryKey'] = true;

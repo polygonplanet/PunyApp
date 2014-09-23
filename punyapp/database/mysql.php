@@ -37,17 +37,13 @@ class PunyApp_Database_MySQL extends PunyApp_Database_Common {
     $stmt = $this->database->query($statement);
 
     while (($row = $stmt->fetch(PDO::FETCH_OBJ))) {
-      $length = null;
-      if (preg_match('/[(]\s*(\d+)\s*[)]/', $row->Type, $m)) {
-        $length = (int)$m[1];
-      }
+      $types = $this->_parseColumnType($row->Type);
 
       $results[$row->Field] = array(
         'type' => $row->Type,
         'null' => $row->Null === 'YES',
-        'default' => $row->Default,
-        'length' => $length
-      );
+        'default' => $row->Default
+      ) + $types;
 
       if (!empty($row->Key) && $row->Key === 'PRI') {
         $results[$row->Field]['primaryKey'] = true;

@@ -49,17 +49,13 @@ class PunyApp_Database_SQLite extends PunyApp_Database_Common {
         $default = trim($default_value, "'");
       }
 
-      $length = null;
-      if (preg_match('/[(]\s*(\d+)\s*[)]/', $type, $m)) {
-        $length = (int)$m[1];
-      }
+      $types = $this->_parseColumnType($type);
 
       $results[$name] = array(
         'type' => $type,
         'null' => !$not_null,
-        'default' => $default,
-        'length' => $length
-      );
+        'default' => $default
+      ) + $types;
 
       if ($row['pk'] == 1) {
         $results[$name]['primaryKey'] = true;
