@@ -133,18 +133,21 @@ class SampleController extends PunyApp_Controller {
    * POST /register
    */
   public function postRegister() {
-    $this->_validateToken();
-
     $error = null;
-    if ($this->validate()) {
-      if ($this->models->sample->isUserId($this->request->params->id)) {
-        $error = 'This id already exists';
-      } else {
-        if ($this->_registerUser()) {
-          $this->redirect('home');
+
+    if (!$this->_validateToken()) {
+      $error = 'Bad Request';
+    } else {
+      if ($this->validate()) {
+        if ($this->models->sample->isUserId($this->request->params->id)) {
+          $error = 'This id already exists';
         } else {
-          $this->view->renderError(500);
-          exit;
+          if ($this->_registerUser()) {
+            $this->redirect('home');
+          } else {
+            $this->view->renderError(500);
+            exit;
+          }
         }
       }
     }
@@ -191,10 +194,10 @@ class SampleController extends PunyApp_Controller {
 
 
   private function _validateToken() {
-    if (!isset($this->request->params->token) ||
-        !$this->token->validate($this->request->params->token)) {
-      $this->view->renderError(500);
-      exit;
+    if (isset($this->request->params->token) &&
+        $this->token->validate($this->request->params->token)) {
+      return true;
     }
+    return false;
   }
 }
