@@ -91,11 +91,33 @@ class PunyApp_Session_Database {
       return false;
     }
 
-    $session = $this->_model->newInstance();
-    $session->id = $id;
-    $session->data = $data;
-    $session->expires = time() + $this->_timeout;
-    return $session->save();
+    $has = $this->_model->has(
+      array(
+        'where' => array('id' => '?')
+      ),
+      array($id)
+    );
+
+    if (!$has) {
+      $session = $this->_model->newInstance();
+      $session->id = $id;
+      $session->data = $data;
+      $session->expires = time() + $this->_timeout;
+      return $session->save();
+    }
+
+    return (bool)$this->_model->update(
+      array(
+        'data' => ':data'
+      ),
+      array(
+        'id' => ':id'
+      ),
+      array(
+        ':data' => $data,
+        ':id' => $id
+      )
+    );
   }
 
   /**
