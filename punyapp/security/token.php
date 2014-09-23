@@ -23,7 +23,7 @@ class PunyApp_Security_Token {
   /**
    * @const string
    */
-  const TOKEN_NAME = "\0__token";
+  const TOKEN_NAME = "_punyapp_token";
 
   /**
    * @const int
