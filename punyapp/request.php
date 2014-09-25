@@ -235,7 +235,7 @@ class PunyApp_Request {
   private function _parseRequestURI() {
     $base = $this->app->getBaseURI();
     $uri = $this->app->env->REQUEST_URI;
-    if ($base != null && $base !== '/' && strpos($uri, $base) === 0) {
+    if ($base != null && strpos($uri, $base) === 0) {
       $uri = substr($uri, strlen($base));
     }
     $this->_parseURI($uri);
