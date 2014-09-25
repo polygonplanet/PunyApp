@@ -53,6 +53,11 @@ class PunyApp_Request {
   public $queryString = null;
 
   /**
+   * @var string raw request data
+   */
+  public $raw = null;
+
+  /**
    * @var PunyApp application instance
    */
   public $app = null;
@@ -299,17 +304,28 @@ class PunyApp_Request {
       isset($_POST) ? (array)$_POST : array()
     );
 
-    $this->params = new PunyApp_Request_Params(array_merge(
-      isset($_GET) ? (array)$_GET : array(),
-      isset($_POST) ? (array)$_POST : array()
-    ));
+    $this->headers = new PunyApp_Request_Headers();
+
+    $this->params = null;
+    $this->raw = file_get_contents('php://input');
+    if (preg_match('/^\s*\(?\s*\{[\s\S]*\}\s*\)?\s*$/', $this->raw)) {
+      $data = json_decode($this->raw, true);
+      if (is_array($data)) {
+        $this->params = new PunyApp_Request_Params($data);
+      }
+      $data = null;
+    }
+
+    if ($this->params === null) {
+      $this->params = new PunyApp_Request_Params(array_merge(
+        isset($_GET) ? (array)$_GET : array(),
+        isset($_POST) ? (array)$_POST : array()
+      ));
+    }
 
     $this->files = new PunyApp_Request_Files(
       isset($_FILES) ? (array)$_FILES : array()
     );
-
-    $this->headers = new PunyApp_Request_Headers();
-
     $this->_parseRequestURI();
   }
 
@@ -475,6 +491,7 @@ class PunyApp_Request_Headers implements Iterator {
 
     if ((empty($this->_headers) || !is_array($this->_headers)) &&
         isset($_SERVER) && is_array($_SERVER)) {
+
       foreach ($_SERVER as $key => $val) {
         $key = strtolower($key);
 
@@ -493,9 +510,37 @@ class PunyApp_Request_Headers implements Iterator {
     }
   }
 
+  /**
+   * Get header
+   *
+   * @param  string $name
+   * @return mixed
+   */
+  private function _getHeader($name, $recursive = 0) {
+    if (isset($this->_headers[$name])) {
+      return $this->_headers[$name];
+    }
 
+    if (++$recursive > 2) {
+      return null;
+    }
+
+    if (strpos($name, '-') !== false || strpos($name, '_') !== false) {
+      return $this->_getHeader(PunyApp_Util::camelize($name), $recursive);
+    }
+
+    $name = implode('-', array_map('ucfirst',
+      explode('_', PunyApp_Util::underscore($name))));
+
+    return $this->_getHeader($name, $recursive);
+  }
+
+
+  /**
+   * Magic methods
+   */
   public function __get($name) {
-    return isset($this->_headers[$name]) ? $this->_headers[$name] : null;
+    return $this->_getHeader($name);
   }
 
 
@@ -505,7 +550,7 @@ class PunyApp_Request_Headers implements Iterator {
 
 
   public function __isset($name) {
-    return isset($this->_headers[$name]);
+    return $this->_getHeader($name) !== null;
   }
 
 
@@ -513,6 +558,9 @@ class PunyApp_Request_Headers implements Iterator {
     unset($this->_headers[$name]);
   }
 
+  /**
+   * Iteration methods
+   */
   public function rewind() {
     return reset($this->_headers);
   }
