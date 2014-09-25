@@ -668,13 +668,7 @@ class PunyApp extends PunyApp_Settings {
           return false;
         }
 
-        $header = null;
-        if ($value === null) {
-          $header = $name;
-        } else {
-          $header = $name . ': ' . $value;
-        }
-
+        $header = $name . ': ' . $value;
         $headers[$name] = array($header, $replace, $code);
         if ($code === null) {
           array_pop($headers[$name]);
@@ -692,7 +686,12 @@ class PunyApp extends PunyApp_Settings {
         $headers = array();
         return true;
       case 'delete':
-        unset($headers[$name]);
+        if (function_exists('header_remove')) {
+          header_remove($name);
+          unset($headers[$name]);
+        } else {
+          PunyApp::header('set', $name, null);
+        }
         return true;
     }
   }
@@ -759,7 +758,7 @@ class PunyApp extends PunyApp_Settings {
    * Remove X-Powered-By: PHP x.x.x header
    */
   public static function removePoweredByHeader() {
-    self::header('set', 'X-Powered-By', '');
+    self::header('delete', 'X-Powered-By');
   }
 
   /**
