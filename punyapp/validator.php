@@ -50,7 +50,7 @@ class PunyApp_Validator {
     $args = (array)$args;
     array_unshift($args, $value);
 
-    if (call_user_func_array(array($this, $method), $args)) {
+    if (call_user_func_array($method, $args)) {
       return true;
     }
 
@@ -62,7 +62,7 @@ class PunyApp_Validator {
    * Get validatable callback name
    *
    * @param mixed $func
-   * @return string
+   * @return array or false
    */
   public function getValidatableName($func) {
     $name = $func;
@@ -70,15 +70,21 @@ class PunyApp_Validator {
       $name = $func[1];
     }
 
-    $prefix = '_validate_';
-    $method = $prefix . $name;
-    if (is_callable(array($this, $method))) {
-      return $method;
-    }
+    $contexts = array($this, $this->app->controller);
+    $prefixes = array('_validate_', 'validate_', 'validate', '');
 
-    $method = $prefix . PunyApp_Util::underscore($name);
-    if (is_callable(array($this, $method))) {
-      return $method;
+    foreach ($prefixes as $prefix) {
+      foreach ($contexts as $context) {
+        $method = $prefix . $name;
+        if (is_callable(array($context, $method))) {
+          return array($context, $method);
+        }
+
+        $method = $prefix . PunyApp_Util::underscore($name);
+        if (is_callable(array($context, $method))) {
+          return array($context, $method);
+        }
+      }
     }
 
     return false;

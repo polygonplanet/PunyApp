@@ -214,7 +214,8 @@ class PunyApp_Dispatcher {
   private static function _isCallable($method) {
     static $ignore_prefixes = array(
       'before' => true,
-      'after' => true
+      'after' => true,
+      'validate' => true
     );
 
     // Disable magic methods
