@@ -12,7 +12,7 @@
  * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
- * @version    1.0.17
+ * @version    1.0.20
  */
 
 /**
