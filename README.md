@@ -13,7 +13,7 @@ Requires PHP 5.2.0 or newer.
 * MySQL
 * PostgreSQL
 * SQLite
-* [Posql](http://feel.happy.nu/doc/posql/en/)
+* [Posql](https://github.com/polygonplanet/Posql)
 
 
 ### Tutorial
