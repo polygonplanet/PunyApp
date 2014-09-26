@@ -201,29 +201,4 @@ class PunyApp_Controller {
 
     return $valid;
   }
-
-
-  /**
-   * Called before the controller action
-   *
-   * @param array $params request parameters
-   */
-  public function beforeFilter($params = array()) {
-  }
-
-  /**
-   * Called after the controller action is run and rendered
-   *
-   * @param array $params request parameters
-   */
-  public function afterFilter($params = array()) {
-  }
-
-  /**
-   * Called before the render action
-   *
-   * @param array $params request parameters
-   */
-  public function beforeRender($params = array()) {
-  }
 }
