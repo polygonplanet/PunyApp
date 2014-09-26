@@ -205,19 +205,25 @@ class PunyApp_Controller {
 
   /**
    * Called before the controller action
+   *
+   * @param array $params request parameters
    */
-  public function beforeFilter() {
+  public function beforeFilter($params = array()) {
   }
 
   /**
    * Called after the controller action is run and rendered
+   *
+   * @param array $params request parameters
    */
-  public function afterFilter() {
+  public function afterFilter($params = array()) {
   }
 
   /**
    * Called before the render action
+   *
+   * @param array $params request parameters
    */
-  public function beforeRender() {
+  public function beforeRender($params = array()) {
   }
 }
