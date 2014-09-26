@@ -45,6 +45,8 @@ Application directory layout:
 ```php
 class SampleController extends PunyApp_Controller {
 
+  public $models = array('sample');
+
   /**
    * GET /login
    */
@@ -75,7 +77,7 @@ class SampleController extends PunyApp_Controller {
   /**
    * Before /login
    */
-  public function beforeLogin() {
+  public function beforeLogin($params) {
     if (!empty($this->session->userid)) {
       $this->redirect('home');
     }
@@ -84,7 +86,7 @@ class SampleController extends PunyApp_Controller {
   /**
    * After /login
    */
-  public function afterLogin() {
+  public function afterLogin($params) {
     // ...
   }
 
