@@ -48,21 +48,17 @@ class SampleController extends PunyApp_Controller {
   /**
    * GET /login
    */
-  public function getLogin() {
+  public function getLogin($params) {
     $this->view->render('sample/login');
   }
 
   /**
    * POST /login
    */
-  public function postLogin() {
-    $has = $this->models->sample->hasUser(
-      $this->request->params->id,
-      $this->request->params->pass
-    );
-
+  public function postLogin($params) {
+    $has = $this->sample->hasUser($params['id'], $params['pass']);
     if ($has) {
-      $this->session->userid = $this->request->params->id;
+      $this->session->userid = $params['id'];
       $this->redirect('home');
     }
 
@@ -72,7 +68,7 @@ class SampleController extends PunyApp_Controller {
   /**
    * Any /login
    */
-  public function anyLogin() {
+  public function anyLogin($params) {
     // ...
   }
 
@@ -95,39 +91,31 @@ class SampleController extends PunyApp_Controller {
   /**
    * GET /home
    */
-  public function getHome() {
+  public function getHome($params) {
     if (empty($this->session->userid)) {
       $this->redirect('login');
     }
 
-    $user = $this->models->sample->getUser(
-      $this->session->userid
-    );
-    $this->view->set('user', $user);
+    $this->view->user = $this->sample->getUser($this->session->userid);
     $this->view->render('sample/home');
   }
 
   /**
    * GET /register
    */
-  public function getRegister() {
+  public function getRegister($params) {
     $this->view->render('sample/register');
   }
 
   /**
    * POST /register
    */
-  public function postRegister() {
+  public function postRegister($params) {
     if ($this->validate()) {
-      $this->models->sample->addUser(
-        $this->request->params->id,
-        $this->request->params->email,
-        $this->request->params->pass
-      );
-      $this->session->userid = $this->request->params->id;
+      $this->sample->addUser($params['id'], $params['email'], $params['pass']);
+      $this->session->userid = $params['id'];
       $this->redirect('home');
     }
-
     $this->view->render('sample/register');
   }
 }
@@ -196,7 +184,7 @@ The template variables is escaped for HTML entities by default.
 
 
 ```php
-$this->view->set('text', 'Hello!');
+$this->view->text = 'Hello!';
 $this->view->render('index');
 ```
 
@@ -220,7 +208,7 @@ Handle application events, or define yourself.
 $this->event->on('app-database-error', function ($app, $error) {
   if ($app->isDebug()) {
     // Show error message only in debug mode
-    echo $app->escapeHTML($error);
+    echo $error;
   }
 });
 ```
@@ -305,7 +293,7 @@ $settings = array(
 
 *  Create database schema or write schema in  `application/settings/app-schema.php`.
 
-* Set to writable permission in the directories and files under `application/storage`.
+* Set to writable in the directories and files under `application/storage`.
 
 * Browse the first you files extracted directory.  
 
