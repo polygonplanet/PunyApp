@@ -1,33 +1,46 @@
 <?php
-/**
- * PunyApp:
- *   The puny developer framework for rapid compiling.
- */
+// PunyApp sample index
 
 class IndexController extends PunyApp_Controller {
 
+  /**
+   * @var array models
+   */
   public $models = array();
 
+  /**
+   * Before filter
+   *
+   * @param array $params request parameters
+   */
+  public function beforeFilter($params) {
+  }
 
-  public function beforeRender() {
+  /**
+   * After filter
+   *
+   * @param array $params request parameters
+   */
+  public function afterFilter($params) {
+  }
+
+  /**
+   * Before render
+   *
+   * @param array $params request parameters
+   */
+  public function beforeRender($params) {
     $this->sendContentType('text/html');
   }
 
-
-  public function beforeFilter() {
-  }
-
-
-  public function afterFilter() {
-  }
-
-
   /**
-   * any /index
+   * Any /index
+   *
+   * @param array $params request parameters
    */
-  public function anyIndex() {
-    $this->view->set('title', 'PunyApp');
-    $this->view->set('description', 'The puny developer framework for rapid compiling.');
+  public function anyIndex($params) {
+    $this->view->title = 'PunyApp';
+    $this->view->description = 'The puny developer framework for rapid compiling.';
     $this->view->render('index');
   }
 }

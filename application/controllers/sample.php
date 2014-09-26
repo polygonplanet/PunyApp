@@ -1,13 +1,21 @@
 <?php
-/**
- * PunyApp:
- *   The puny developer framework for rapid compiling.
- */
+// PunyApp sample login from
 
 class SampleController extends PunyApp_Controller {
 
+  /**
+   * @var array
+   */
   public $models = array('sample');
 
+  /**
+   * @var SampleModel
+   */
+  public $sample;
+
+  /**
+   * @var array
+   */
   public $validationRules = array(
     'id' => array(
       'required' => true,
@@ -24,87 +32,117 @@ class SampleController extends PunyApp_Controller {
       'rule' => array(
         array('minLength', 4),
         array('maxLength', 20),
-        array('regex', '/^[a-zA-Z0-9_.!?@=+-]{4,20}$/')
+        // Custom validator
+        array('MyPassword')
       ),
       'message' => 'Min 4 characters, max 20 characters, enables [a-zA-Z0-9_.!?@=+-].'
     )
   );
 
-
-  public function beforeFilter() {
-    $this->view->set('title', 'PunyApp - Sample');
-  }
-
-
-  public function beforeRender() {
-    $this->sendContentType('text/html');
-  }
-
-
-  public function afterFilter() {
+  /**
+   * Custom validator
+   *
+   * @param mixed $value
+   * @return bool
+   */
+  public function validateMyPassword($value) {
+    return (bool)preg_match('/^[a-zA-Z0-9_.!?@=+-]{4,20}$/', $value);
   }
 
 
   /**
-   * any /index
+   * Before filter
+   *
+   * @param array $params request parameters
    */
-  public function anyIndex() {
-    $this->getHome();
+  public function beforeFilter($params) {
+    $this->view->title = 'PunyApp - Sample';
+  }
+
+  /**
+   * After filter
+   *
+   * @param array $params request parameters
+   */
+  public function afterFilter($params) {
+  }
+
+  /**
+   * Before render
+   *
+   * @param array $params request parameters
+   */
+  public function beforeRender($params) {
+    $this->sendContentType('text/html');
+  }
+
+
+  /**
+   * Any /index
+   *
+   * @param array $params request parameters
+   */
+  public function anyIndex($params) {
+    $this->getHome($params);
   }
 
 
   /**
    * Before /login
+   *
+   * @param array $params request parameters
    */
-  public function beforeLogin() {
+  public function beforeLogin($params) {
     if (!empty($this->session->userid)) {
       $this->redirect('home');
     }
-
-    $this->view->set('error', null);
+    $this->view->error = null;
   }
 
   /**
    * GET /login
+   *
+   * @param array $params request parameters
    */
-  public function getLogin() {
-    $this->view->set('error', null);
+  public function getLogin($params) {
+    $this->view->error = null;
     $this->view->render('sample/login');
   }
 
   /**
    * POST /login
+   *
+   * @param array $params request parameters
    */
-  public function postLogin() {
+  public function postLogin($params) {
     if (!empty($this->session->userid)) {
       $this->redirect('home');
     }
 
-    $error = null;
-    $this->_validateToken();
-
-    if (!$this->validate(array('id', 'pass'))) {
-      $error = $this->view->getLastValidationError();
+    if (!$this->_validateToken()) {
+      $this->view->error = 'Bad Request';
+    } else if (!$this->validate(array('id', 'pass'))) {
+      $this->view->error = $this->view->getLastValidationError();
     } else {
-      $has = $this->models->sample->hasUser(
-        $this->request->params->id,
-        $this->request->params->pass
-      );
+      $has = $this->sample->hasUser($params['id'], $params['pass']);
 
       if ($has) {
-        $this->session->userid = $this->request->params->id;
+        $this->session->userid = $params['id'];
         $this->redirect('home');
       }
-
-      $error = 'Missing id or pass';
+      $this->view->error = 'Missing id or pass';
     }
 
-    $this->view->set('error', $error);
     $this->view->render('sample/login');
   }
 
 
-  public function getLogout() {
+  /**
+   * GET /logout
+   *
+   * @param array $params request parameters
+   */
+  public function getLogout($params) {
     unset($this->session->userid);
     $this->redirect('login');
   }
@@ -112,87 +150,87 @@ class SampleController extends PunyApp_Controller {
 
   /**
    * Before /register
+   *
+   * @param array $params request parameters
    */
-  public function beforeRegister() {
-    $this->view->set(array(
-      'id' => null,
-      'email' => null,
-      'pass' => null,
-      'error' => null
-    ));
+  public function beforeRegister($params) {
+    $this->view->id = null;
+    $this->view->email = null;
+    $this->view->pass = null;
+    $this->view->error = null;
   }
 
   /**
    * GET /register
+   *
+   * @param array $params request parameters
    */
-  public function getRegister() {
+  public function getRegister($params) {
     $this->view->render('sample/register');
   }
 
   /**
    * POST /register
+   *
+   * @param array $params request parameters
    */
-  public function postRegister() {
-    $error = null;
-
+  public function postRegister($params) {
     if (!$this->_validateToken()) {
-      $error = 'Bad Request';
-    } else {
-      if ($this->validate()) {
-        if ($this->models->sample->isUserId($this->request->params->id)) {
-          $error = 'This id already exists';
-        } else {
-          if ($this->_registerUser()) {
-            $this->redirect('home');
-          } else {
-            $this->view->renderError(500);
-            exit;
-          }
-        }
+      $this->view->error = 'Bad Request';
+    } else if ($this->validate()) {
+      if ($this->sample->isUserId($params['id'])) {
+        $this->view->error = 'This id already exists';
+      } else if ($this->_registerUser($params)) {
+        $this->redirect('home');
+      } else {
+        return $this->view->renderError(500);
       }
     }
 
-    $this->view->set(array(
-      'id' => $this->request->params->id,
-      'email' => $this->request->params->email,
-      'pass' => '',
-      'error' => $error
-    ));
-
+    $this->view->id = $params['id'];
+    $this->view->email = $params['email'];
+    $this->view->pass = '';
     $this->view->render('sample/register');
   }
 
 
   /**
    * GET /home
+   *
+   * @param array $params request parameters
    */
-  public function getHome() {
+  public function getHome($params) {
     if (empty($this->session->userid)) {
       $this->redirect('login');
     }
 
-    $user = $this->models->sample->getUser($this->session->userid);
-    $this->view->set('user', $user);
+    $this->view->user = $this->sample->getUser($this->session->userid);
     $this->view->render('sample/home');
   }
 
 
-  private function _registerUser() {
-    $res = $this->models->sample->addUser(
-      $this->request->params->id,
-      $this->request->params->email,
-      $this->request->params->pass
-    );
+  /**
+   * Add user
+   *
+   * @param array $params request parameters
+   * @return bool
+   */
+  private function _registerUser($params) {
+    $res = $this->sample->addUser($params['id'], $params['email'], $params['pass']);
 
     if ($res) {
-      $this->session->userid = $this->request->params->id;
+      $this->session->userid = $params['id'];
       return true;
     }
-
     return false;
   }
 
 
+  /**
+   * Validate from
+   *
+   * @return bool
+   */
   private function _validateToken() {
     if (isset($this->request->params->token) &&
         $this->token->validate($this->request->params->token)) {
