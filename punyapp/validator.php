@@ -71,7 +71,7 @@ class PunyApp_Validator {
     }
 
     $contexts = array($this, $this->app->controller);
-    $prefixes = array('_validate_', 'validate_', 'validate', '');
+    $prefixes = array('_validate_', '_validate', 'validate', '');
 
     foreach ($prefixes as $prefix) {
       foreach ($contexts as $context) {
