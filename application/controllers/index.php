@@ -9,7 +9,7 @@ class IndexController extends PunyApp_Controller {
   public $models = array();
 
   /**
-   * Before filter
+   * Called before the controller action
    *
    * @param array $params request parameters
    */
@@ -17,7 +17,7 @@ class IndexController extends PunyApp_Controller {
   }
 
   /**
-   * After filter
+   * Called after the controller action is run and rendered
    *
    * @param array $params request parameters
    */
@@ -25,7 +25,7 @@ class IndexController extends PunyApp_Controller {
   }
 
   /**
-   * Before render
+   * Called before the render action
    *
    * @param array $params request parameters
    */
