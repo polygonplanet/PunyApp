@@ -195,12 +195,8 @@ class PunyApp_Dispatcher {
    */
   private static function _getParams() {
     $results = array();
-    $i = 0;
     foreach (self::$app->request->params as $key => $val) {
-      if ($key === $i) {
-        $results[] = $val;
-        $i++;
-      }
+      $results[$key] = $val;
     }
     return $results;
   }
@@ -218,7 +214,7 @@ class PunyApp_Dispatcher {
       'validate' => true
     );
 
-    // Disable magic methods
+    // Disable magic methods and private methods
     if (strpos($method, '_') === 0) {
       return false;
     }
@@ -284,6 +280,8 @@ class PunyApp_Dispatcher {
           self::$app->database,
           $model
         );
+        // ref.
+        self::$app->controller->{$model_name} = self::$app->controller->models->{$model_name};
       }
     }
 
