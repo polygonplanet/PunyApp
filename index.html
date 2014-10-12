@@ -1,361 +1,872 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="utf-8">
+<title>PunyApp リファレンス</title>
+<link rel="stylesheet" href="css/base.css" />
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body><div class="container"><h2 id="punyapp-リファレンス"><a href="https://github.com/polygonplanet/PunyApp">PunyApp</a> リファレンス</h2>
 
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Punyapp : The puny PHP framework for rapid compiling.">
+<div class="toc"><div class="toc">
+<ul>
+<li><a href="#punyapp-リファレンス">PunyApp リファレンス</a><ul>
+<li><a href="#概要">概要</a></li>
+<li><a href="#ダウンロード">ダウンロード</a></li>
+<li><a href="#GitHub">GitHub</a></li>
+<li><a href="#要件">要件</a></li>
+<li><a href="#ライセンス">ライセンス</a></li>
+<li><a href="#機能特徴">機能/特徴</a></li>
+<li><a href="#ディレクトリ構成">ディレクトリ構成</a></li>
+<li><a href="#アプリケーション設定">アプリケーション設定</a></li>
+<li><a href="#コントローラ">コントローラ</a><ul>
+<li><a href="#コントローラの作成">コントローラの作成</a></li>
+<li><a href="#メソッド名の付け方">メソッド名の付け方</a></li>
+<li><a href="#before-after">before, after</a></li>
+<li><a href="#any">any</a></li>
+<li><a href="#パラメータ">パラメータ</a></li>
+<li><a href="#beforefilter-afterfilter-beforerender">beforeFilter, afterFilter, beforeRender</a></li>
+</ul>
+</li>
+<li><a href="#スキーマ">スキーマ</a><ul>
+<li><a href="#テーブル定義">テーブル定義</a></li>
+<li><a href="#created-modified">created, modified</a></li>
+</ul>
+</li>
+<li><a href="#モデル">モデル</a><ul>
+<li><a href="#モデルの作成">モデルの作成</a></li>
+<li><a href="#find-メソッド">find メソッド</a></li>
+<li><a href="#pdo-として扱う">PDO として扱う</a></li>
+<li><a href="#コントローラでのモデル指定">コントローラでのモデル指定</a></li>
+</ul>
+</li>
+<li><a href="#ビュー">ビュー</a><ul>
+<li><a href="#ビューの作成">ビューの作成</a></li>
+</ul>
+</li>
+<li><a href="#バリデーション">バリデーション</a><ul>
+<li><a href="#定義の作成">定義の作成</a></li>
+<li><a href="#独自ルールの作成">独自ルールの作成</a></li>
+<li><a href="#バリデーションを実行">バリデーションを実行</a></li>
+<li><a href="#メッセージを取得">メッセージを取得</a></li>
+</ul>
+</li>
+<li><a href="#フォームトークン">フォームトークン</a></li>
+<li><a href="#イベント">イベント</a></li>
+<li><a href="#インストールと実行">インストールと実行</a></li>
+<li><a href="#サンプルコード">サンプルコード</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+<hr>
 
-    <title>Punyapp</title>
-  </head>
 
-  <body>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/polygonplanet/PunyApp">View on GitHub</a>
+<h3 id="概要">概要</h3>
 
-          <h1 id="project_title">Punyapp</h1>
-          <h2 id="project_tagline">The puny PHP framework for rapid compiling.</h2>
+<p>PunyApp は、MVC モデルの軽量 PHP フレームワークです。</p>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/polygonplanet/PunyApp/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/polygonplanet/PunyApp/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
+<p>おおまかな設計は CakePHP を基にしてて、使い方も似ています。 <br>
+規模のあるフレームワークを使うまでもないような時に有用です。  </p>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h1>
-<a name="punyapp" class="anchor" href="#punyapp"><span class="octicon octicon-link"></span></a>PunyApp</h1>
+<p>他のPHP拡張等は必要ありません。  </p>
 
-<p><a href="https://travis-ci.org/polygonplanet/PunyApp"><img src="https://travis-ci.org/polygonplanet/PunyApp.svg?branch=master" alt="Build Status"></a></p>
 
-<p>PunyApp is a lightweight MVC PHP framework that does not require the external PHP extensions, it's based the CakePHP framework.  </p>
-
-<p>Requires PHP 5.2.0 or newer.  </p>
-
-<h3>
-<a name="supported-databases" class="anchor" href="#supported-databases"><span class="octicon octicon-link"></span></a>Supported Databases</h3>
+<h3 id="ダウンロード">ダウンロード</h3>
 
 <ul>
-<li>MySQL</li>
-<li>PostgreSQL</li>
-<li>SQLite</li>
-<li><a href="http://feel.happy.nu/doc/posql/en/">Posql</a></li>
-</ul><h3>
-<a name="tutorial" class="anchor" href="#tutorial"><span class="octicon octicon-link"></span></a>Tutorial</h3>
+<li><a href="https://github.com/polygonplanet/PunyApp/releases">ダウンロード リリース一覧</a></li>
+</ul>
 
-<h4>
-<a name="layout" class="anchor" href="#layout"><span class="octicon octicon-link"></span></a>layout</h4>
 
-<p>Application directory layout:  </p>
 
-<pre><code>/application
-  /controllers        -&gt; App controllers
-  /models             -&gt; App models
-  /views              -&gt; App views
-  /libraries          -&gt; App libraries
-  /storage            -&gt; App storage
-  /settings           -&gt; Application settings
-    app-settings.php
-    app-scheme.php
-  /public             -&gt; public web
-    /css
-    /js
-    index.php
-/punyapp              -&gt; PunyApp libraries
-/vendors              -&gt; Vendors
+<h3 id="GitHub">GitHub</h3>
+
+<ul>
+<li><a href="https://github.com/polygonplanet/PunyApp">GitHub</a></li>
+</ul>
+
+
+
+
+<h3 id="要件">要件</h3>
+
+<ul>
+<li>PHP 5.2.0+</li>
+<li>mod_rewrite が有効 (Apache Server)</li>
+</ul>
+
+
+
+<h3 id="ライセンス">ライセンス</h3>
+
+<ul>
+<li>MIT</li>
+</ul>
+
+
+
+<h3 id="機能特徴">機能/特徴</h3>
+
+<ul>
+<li>MySQL, PostgreSQL, SQLite, Posql に対応</li>
+<li>ビューのテンプレート変数はデフォルトでHTMLエスケープされる</li>
+<li>セッション (データベース使用可能)</li>
+<li>クッキー (暗号化対応)</li>
+<li>フォームのバリデーション</li>
+<li>フォームリクエストのトークン (CSRF対策)</li>
+<li>イベント (初期化時、データベースエラー時など)</li>
+<li>エラーログ、SQL クエリのログ</li>
+</ul>
+
+
+
+<h3 id="ディレクトリ構成">ディレクトリ構成</h3>
+
+<pre><code>/application             → アプリケーションディレクトリ
+    /controllers         → コントローラ
+    /models              → モデル
+    /views               → ビュー
+    /libraries           → 共通ライブラリやヘルパー等
+    /storage             → データを保管するディレクトリ
+    /settings            → 設定
+        app-settings.php → アプリケーション設定ファイル
+    /public              → 公開ディレクトリ
+        /css
+        /js
+        index.php
+/punyapp                 → PunyApp 内部ライブラリ
+/vendors                 → 外部ライブラリ等を入れるディレクトリ
 index.php
 </code></pre>
 
-<h3>
-<a name="controllers" class="anchor" href="#controllers"><span class="octicon octicon-link"></span></a>Controllers</h3>
+<p>application ディレクトリ配下にソースコードを置きます。</p>
 
-<div class="highlight highlight-php"><pre><span class="k">class</span> <span class="nc">SampleController</span> <span class="k">extends</span> <span class="nx">PunyApp_Controller</span> <span class="p">{</span>
+<hr>
 
-  <span class="sd">/**</span>
-<span class="sd">   * GET /login</span>
-<span class="sd">   */</span>
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">getLogin</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">view</span><span class="o">-&gt;</span><span class="na">render</span><span class="p">(</span><span class="s1">'sample/login'</span><span class="p">);</span>
-  <span class="p">}</span>
+<h3 id="アプリケーション設定">アプリケーション設定</h3>
 
-  <span class="sd">/**</span>
-<span class="sd">   * POST /login</span>
-<span class="sd">   */</span>
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">postLogin</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nv">$has</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">models</span><span class="o">-&gt;</span><span class="na">sample</span><span class="o">-&gt;</span><span class="na">hasUser</span><span class="p">(</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">params</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">,</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">params</span><span class="o">-&gt;</span><span class="na">pass</span>
-    <span class="p">);</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="nv">$has</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">session</span><span class="o">-&gt;</span><span class="na">userid</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">params</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">;</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">redirect</span><span class="p">(</span><span class="s1">'home'</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="c1">// ...</span>
-  <span class="p">}</span>
-
-  <span class="sd">/**</span>
-<span class="sd">   * Any /login</span>
-<span class="sd">   */</span>
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">anyLogin</span><span class="p">()</span> <span class="p">{</span>
-    <span class="c1">// ...</span>
-  <span class="p">}</span>
-
-  <span class="sd">/**</span>
-<span class="sd">   * Before /login</span>
-<span class="sd">   */</span>
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">beforeLogin</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">session</span><span class="o">-&gt;</span><span class="na">userid</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">redirect</span><span class="p">(</span><span class="s1">'home'</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-
-  <span class="sd">/**</span>
-<span class="sd">   * After /login</span>
-<span class="sd">   */</span>
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">afterLogin</span><span class="p">()</span> <span class="p">{</span>
-    <span class="c1">// ...</span>
-  <span class="p">}</span>
-
-  <span class="sd">/**</span>
-<span class="sd">   * GET /home</span>
-<span class="sd">   */</span>
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">getHome</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">session</span><span class="o">-&gt;</span><span class="na">userid</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">redirect</span><span class="p">(</span><span class="s1">'login'</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="nv">$user</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">models</span><span class="o">-&gt;</span><span class="na">sample</span><span class="o">-&gt;</span><span class="na">getUser</span><span class="p">(</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">session</span><span class="o">-&gt;</span><span class="na">userid</span>
-    <span class="p">);</span>
-    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">view</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s1">'user'</span><span class="p">,</span> <span class="nv">$user</span><span class="p">);</span>
-    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">view</span><span class="o">-&gt;</span><span class="na">render</span><span class="p">(</span><span class="s1">'sample/home'</span><span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="sd">/**</span>
-<span class="sd">   * GET /register</span>
-<span class="sd">   */</span>
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">getRegister</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">view</span><span class="o">-&gt;</span><span class="na">render</span><span class="p">(</span><span class="s1">'sample/register'</span><span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="sd">/**</span>
-<span class="sd">   * POST /register</span>
-<span class="sd">   */</span>
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">postRegister</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">validate</span><span class="p">())</span> <span class="p">{</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">models</span><span class="o">-&gt;</span><span class="na">sample</span><span class="o">-&gt;</span><span class="na">addUser</span><span class="p">(</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">params</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">,</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">params</span><span class="o">-&gt;</span><span class="na">email</span><span class="p">,</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">params</span><span class="o">-&gt;</span><span class="na">pass</span>
-      <span class="p">);</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">session</span><span class="o">-&gt;</span><span class="na">userid</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">params</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">;</span>
-      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">redirect</span><span class="p">(</span><span class="s1">'home'</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">view</span><span class="o">-&gt;</span><span class="na">render</span><span class="p">(</span><span class="s1">'sample/register'</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-<h3>
-<a name="models" class="anchor" href="#models"><span class="octicon octicon-link"></span></a>Models</h3>
-
-<p>Using Prepared Statements.  </p>
-
-<div class="highlight highlight-php"><pre><span class="k">class</span> <span class="nc">SampleModel</span> <span class="k">extends</span> <span class="nx">PunyApp_Model</span> <span class="p">{</span>
-
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">addUser</span><span class="p">(</span><span class="nv">$userid</span><span class="p">,</span> <span class="nv">$email</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nv">$sample</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">newInstance</span><span class="p">();</span>
-    <span class="nv">$sample</span><span class="o">-&gt;</span><span class="na">userid</span> <span class="o">=</span> <span class="nv">$userid</span><span class="p">;</span>
-    <span class="nv">$sample</span><span class="o">-&gt;</span><span class="na">email</span> <span class="o">=</span> <span class="nv">$email</span><span class="p">;</span>
-    <span class="nv">$sample</span><span class="o">-&gt;</span><span class="na">pass</span> <span class="o">=</span> <span class="nb">sha1</span><span class="p">(</span><span class="nv">$pass</span><span class="p">);</span>
-    <span class="k">return</span> <span class="nv">$sample</span><span class="o">-&gt;</span><span class="na">save</span><span class="p">();</span>
-  <span class="p">}</span>
+<p><code>/application/settings/app-settings.php</code> を編集してアプリケーションの設定をします。</p>
 
 
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">deleteUser</span><span class="p">(</span><span class="nv">$userid</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">delete</span><span class="p">(</span>
-      <span class="k">array</span><span class="p">(</span><span class="s1">'userid'</span> <span class="o">=&gt;</span> <span class="s1">'?'</span><span class="p">),</span>
-      <span class="k">array</span><span class="p">(</span><span class="nv">$userid</span><span class="p">)</span>
-    <span class="p">);</span>
-  <span class="p">}</span>
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-variable">$settings</span> = <span class="hljs-keyword">array</span>(
+  <span class="hljs-comment">/**
+   * System settings
+   */</span>
+  <span class="hljs-string">'system'</span> =&gt; <span class="hljs-keyword">array</span>(
+    <span class="hljs-comment">/**
+     * Debug mode
+     * true にするとエラーが起きた時、表示します
+     * false にするとエラーが起きても何も表示しません
+     */</span>
+    <span class="hljs-string">'debug'</span> =&gt; <span class="hljs-keyword">true</span>,
+    <span class="hljs-comment">/**
+     * Internal language
+     * 日本語の場合 'ja' を設定します
+     */</span>
+    <span class="hljs-string">'lang'</span> =&gt; <span class="hljs-string">'ja'</span>,
+    <span class="hljs-comment">/**
+     * Timezone
+     * 日本時刻の場合は 'Asia/Tokyo' を入力します
+     */</span>
+    <span class="hljs-string">'timezone'</span> =&gt; <span class="hljs-string">'Asia/Tokyo'</span>,
+    <span class="hljs-comment">/**
+     * アプリケーションのセキュリティキーとなるもの
+     * 暗号化時に使用されます
+     * 長さ不問、記号等も使用できます
+     * 適当な文字列に変更してください
+     */</span>
+    <span class="hljs-string">'salt'</span> =&gt; <span class="hljs-string">'ZQJaiPPYn6Tldb2gottKwIDmGiatuSnV'</span>,
+    <span class="hljs-comment">/**
+     * エラーが起きた時ログを保存するかどうか
+     * 'application/storage/logs' に保存されます
+     */</span>
+    <span class="hljs-string">'logError'</span> =&gt; <span class="hljs-keyword">true</span>,
+    <span class="hljs-comment">/**
+     * logError の最大行数
+     */</span>
+    <span class="hljs-string">'logErrorMax'</span> =&gt; <span class="hljs-number">200</span>
+  ),
+  <span class="hljs-comment">/**
+   * Database settings
+   */</span>
+  <span class="hljs-string">'database'</span> =&gt; <span class="hljs-keyword">array</span>(
+    <span class="hljs-comment">/**
+     * Database engine
+     * "mysql", "pgsql", "sqlite" または "posql" が利用可能です
+     */</span>
+    <span class="hljs-string">'engine'</span> =&gt; <span class="hljs-string">''</span>,
+    <span class="hljs-comment">/**
+     * データベースの内部文字コード (default = 'utf8')
+     */</span>
+    <span class="hljs-string">'encoding'</span> =&gt; <span class="hljs-string">'utf8'</span>,
+    <span class="hljs-comment">/**
+     * Database ユーザ名
+     */</span>
+    <span class="hljs-string">'user'</span> =&gt; <span class="hljs-string">''</span>,
+    <span class="hljs-comment">/**
+     * Database パスワード
+     */</span>
+    <span class="hljs-string">'pass'</span> =&gt; <span class="hljs-string">''</span>,
+    <span class="hljs-comment">/**
+     * Database name
+     */</span>
+    <span class="hljs-string">'dbname'</span> =&gt; <span class="hljs-string">'database_name'</span>,
+    <span class="hljs-comment">/**
+     * Database host
+     */</span>
+    <span class="hljs-string">'host'</span> =&gt; <span class="hljs-string">'localhost'</span>,
+    <span class="hljs-comment">/**
+     * Database port
+     */</span>
+    <span class="hljs-string">'port'</span>=&gt; <span class="hljs-string">''</span>,
+    <span class="hljs-comment">/**
+     * SQL クエリをログ保存するかどうか
+     * ログは 'application/storage/logs' に保存されます
+     */</span>
+    <span class="hljs-string">'logQuery'</span> =&gt; <span class="hljs-keyword">true</span>,
+    <span class="hljs-comment">/**
+     * logQuery の最大クエリ数
+     */</span>
+    <span class="hljs-string">'logQueryMax'</span> =&gt; <span class="hljs-number">200</span>
+  ),
+  <span class="hljs-comment">/**
+   * Session settings
+   */</span>
+  <span class="hljs-string">'session'</span> =&gt; <span class="hljs-keyword">array</span>(
+    <span class="hljs-comment">/**
+     * セッションエンジン
+     * "php", "file", "database" が利用可能です
+     *
+     * php: PHP デフォルトのエンジンを使用します
+     * file: ファイルエンジンを使用します
+     *  セッションは 'application/storage/sessions' に置かれます
+     * database: database 項目で設定したデータベースを使用します
+     *  テーブルスキーマの定義が必要です
+     */</span>
+    <span class="hljs-string">'engine'</span> =&gt; <span class="hljs-string">'php'</span>,
+    <span class="hljs-comment">/**
+     * セッションクッキー名
+     * (PHPのデフォルトは 'PHPSESSID' となるもの)
+     */</span>
+    <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'sid'</span>,
+    <span class="hljs-comment">/**
+     * セッションの有効期限 (秒数)
+     *
+     * default = 60*60*1 = 1時間
+     */</span>
+    <span class="hljs-string">'timeout'</span> =&gt; <span class="hljs-number">60</span> * <span class="hljs-number">60</span> * <span class="hljs-number">1</span>
+  )
+);</code></pre>
+
+<hr>
+
+<h3 id="コントローラ">コントローラ</h3>
+
+<p>ここではサンプルとして ToDo アプリケーションの例で解説します。</p>
 
 
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">getUser</span><span class="p">(</span><span class="nv">$userid</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">findOne</span><span class="p">(</span>
-      <span class="k">array</span><span class="p">(</span>
-        <span class="s1">'fields'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s1">'id'</span><span class="p">,</span> <span class="s1">'userid'</span><span class="p">,</span> <span class="s1">'email'</span><span class="p">),</span>
-        <span class="s1">'where'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s1">'userid'</span> <span class="o">=&gt;</span> <span class="s1">'?'</span><span class="p">)</span>
-      <span class="p">),</span>
-      <span class="k">array</span><span class="p">(</span><span class="nv">$userid</span><span class="p">)</span>
-    <span class="p">);</span>
-  <span class="p">}</span>
+
+<h4 id="コントローラの作成">コントローラの作成</h4>
+
+<p><code>/application/controllers</code> に todo.php というファイル名で <br>
+PunyApp_Controller を継承して TodoController を作成します。</p>
+
+<p>コントローラのアクションは、GET や POST などのリクエストメソッドで切り分けができます。</p>
 
 
-  <span class="k">public</span> <span class="k">function</span> <span class="nf">hasUser</span><span class="p">(</span><span class="nv">$userid</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">has</span><span class="p">(</span>
-      <span class="k">array</span><span class="p">(</span>
-        <span class="s1">'where'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
-          <span class="s1">'userid'</span> <span class="o">=&gt;</span> <span class="s1">':userid'</span><span class="p">,</span>
-          <span class="s1">'pass'</span> <span class="o">=&gt;</span> <span class="s1">':pass'</span>
-        <span class="p">)</span>
-      <span class="p">),</span>
-      <span class="k">array</span><span class="p">(</span>
-        <span class="s1">':userid'</span> <span class="o">=&gt;</span> <span class="nv">$userid</span><span class="p">,</span>
-        <span class="s1">':pass'</span> <span class="o">=&gt;</span> <span class="nb">sha1</span><span class="p">(</span><span class="nv">$pass</span><span class="p">)</span>
-      <span class="p">)</span>
-    <span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PunyApp_Controller</span> {</span>
+
+  <span class="hljs-comment">/**
+   * GET /item
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getItem</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-comment">// GET リクエスト時の処理</span>
+  }
+
+  <span class="hljs-comment">/**
+   * POST /item
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postItem</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-comment">// POST リクエスト時の処理</span>
+  }
+
+  <span class="hljs-comment">/**
+   * DELETE /item
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">deleteItem</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-comment">// DELETE リクエスト時の処理</span>
+  }
+}</code></pre>
 
 
-</pre></div>
 
-<h3>
-<a name="views" class="anchor" href="#views"><span class="octicon octicon-link"></span></a>Views</h3>
+<h4 id="メソッド名の付け方">メソッド名の付け方</h4>
 
-<p>Using pure PHP template.  </p>
+<p>コントローラのメソッド名は、<code>リクエストメソッド名</code> + <code>アクション名</code> になります。 <br>
+GET リクエストに対応する hoge アクションの場合、<code>getHoge</code> と定義します。 <br>
+アクション名は、リクエストメソッド名を外した名前です。</p>
 
-<p>The template variables is escaped for HTML entities by default.  </p>
+<p>URL は <code>http://www.example.com/コントローラ名/アクション名</code> となり、  TodoController で getItem の場合は、<code>http://www.example.com/todo/item</code> になります。</p>
 
-<div class="highlight highlight-php"><pre><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">view</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s1">'text'</span><span class="p">,</span> <span class="s1">'Hello!'</span><span class="p">);</span>
-<span class="nv">$this</span><span class="o">-&gt;</span><span class="na">view</span><span class="o">-&gt;</span><span class="na">render</span><span class="p">(</span><span class="s1">'index'</span><span class="p">);</span>
-</pre></div>
+<p>大文字小文字は区別されません。</p>
 
-<p>views/index.php  </p>
+<hr>
 
-<div class="highlight highlight-php"><pre><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-  <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-    <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Sample</span><span class="o">&lt;/</span><span class="nx">h1</span><span class="o">&gt;</span>
-    <span class="o">&lt;?</span><span class="nx">php</span> <span class="k">echo</span> <span class="nv">$text</span><span class="p">;</span> <span class="cp">?&gt;</span><span class="x"></span>
-<span class="x">  &lt;/body&gt;</span>
-<span class="x">&lt;/html&gt;</span>
-</pre></div>
 
-<h3>
-<a name="events" class="anchor" href="#events"><span class="octicon octicon-link"></span></a>Events</h3>
 
-<p>Handle application events, or define yourself.  </p>
+<h4 id="before-after">before, after</h4>
 
-<div class="highlight highlight-php"><pre><span class="c1">// Handle the database error</span>
-<span class="nv">$this</span><span class="o">-&gt;</span><span class="na">event</span><span class="o">-&gt;</span><span class="na">on</span><span class="p">(</span><span class="s1">'app-database-error'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nv">$app</span><span class="p">,</span> <span class="nv">$error</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">isDebug</span><span class="p">())</span> <span class="p">{</span>
-    <span class="c1">// Show error message only in debug mode</span>
-    <span class="k">echo</span> <span class="nv">$app</span><span class="o">-&gt;</span><span class="na">escapeHTML</span><span class="p">(</span><span class="nv">$error</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">});</span>
-</pre></div>
+<p>リクエストメソッド名の部分を <code>before</code> にすると前処理、<code>after</code> で後処理が設定できます。</p>
 
-<h3>
-<a name="validation" class="anchor" href="#validation"><span class="octicon octicon-link"></span></a>Validation</h3>
 
-<p>Request Form Validation.  </p>
 
-<div class="highlight highlight-php"><pre><span class="k">public</span> <span class="nv">$validationRules</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
-  <span class="s1">'id'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
-    <span class="s1">'required'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
-    <span class="s1">'rule'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s1">'regex'</span><span class="p">,</span> <span class="s1">'/^[a-z0-9]{1,10}$/i'</span><span class="p">),</span>
-    <span class="s1">'message'</span> <span class="o">=&gt;</span> <span class="s1">'Only letters and integers, max 10 characters'</span>
-  <span class="p">),</span>
-  <span class="s1">'email'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
-    <span class="s1">'required'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
-    <span class="s1">'rule'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s1">'email'</span><span class="p">),</span>
-    <span class="s1">'message'</span> <span class="o">=&gt;</span> <span class="s1">'Invalid email address'</span>
-  <span class="p">),</span>
-  <span class="s1">'pass'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
-    <span class="s1">'required'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
-    <span class="s1">'rule'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
-      <span class="k">array</span><span class="p">(</span><span class="s1">'minLength'</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-      <span class="k">array</span><span class="p">(</span><span class="s1">'maxLength'</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-    <span class="p">),</span>
-    <span class="s1">'message'</span> <span class="o">=&gt;</span> <span class="s1">'Min 4 characters, max 20 characters'</span>
-  <span class="p">)</span>
-<span class="p">);</span>
+<pre class="prettyprint"><code class="language-php hljs ">  <span class="hljs-comment">/**
+   * before /item
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">beforeItem</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-comment">// 前処理</span>
+  }
 
-</pre></div>
+  <span class="hljs-comment">/**
+   * after /item
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">afterItem</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-comment">// 後処理</span>
+  }</code></pre>
 
-<h3>
-<a name="install-and-run" class="anchor" href="#install-and-run"><span class="octicon octicon-link"></span></a>Install and Run</h3>
+<hr>
+
+
+
+<h4 id="any">any</h4>
+
+<p><code>any</code> は、すべてのリクエストメソッドに対応します。</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PunyApp_Controller</span> {</span>
+
+  <span class="hljs-comment">/**
+   * any /index
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">anyIndex</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-comment">// すべてのリクエストメソッドに対応する処理</span>
+  }
+}</code></pre>
+
+<p>この例は <code>http://www.example.com/todo/index</code> にアクセスされたとき、 <br>
+GET や POST、DELETE などすべてのリクエストメソッドに対して実行されます。  </p>
+
+<p>メソッド名を any だけ <code>function any(){}</code> にすると、どんなアクションでも 404 にならずに any が実行されます。</p>
+
+<p>コントローラ名を <code>AnyController</code> (any.php) という名前にすると、 <br>
+すべてのリクエストに対応するコントローラになります。</p>
+
+<p>AnyController は <code>http://www.example.com/アクション名</code> となり、コントローラ名の部分が省かれます。</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AnyController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PunyApp_Controller</span> {</span>
+
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">any</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-comment">// ...</span>
+  }
+}</code></pre>
+
+<p>AnyController の中に any メソッドを定義すると、あらゆるリクエストに対して実行することになります。</p>
+
+<hr>
+
+
+
+<h4 id="パラメータ">パラメータ</h4>
+
+<p>引数の $params は、リクエストされたパラメータが配列で渡されます。 <br>
+パラメータがない場合は空の配列が渡されます。 <br>
+このパラメータは、<code>$this-&gt;request-&gt;params-&gt;xxx</code> で取得できるものと同じです。</p>
+
+<p>GET リクエストからのパラメータは、 <br>
+<code>http://www.example.com/コントローラ名/アクション名/1/2/3</code> のように渡すことができます。 <br>
+この場合、<code>$params = array(1, 2, 3)</code> となります。 <br>
+名前付きのパラメータは <code>/foo:1/bar:2</code> のように <code>:</code> で区切って渡します。  <br>
+これは、 <code>$params = array('foo' =&gt; 1, 'bar' =&gt; 2)</code> となります。</p>
+
+<hr>
+
+
+
+<h4 id="beforefilter-afterfilter-beforerender">beforeFilter, afterFilter, beforeRender</h4>
+
+<p>メソッド名を <code>beforeFilter</code> にすると、すべての処理の前に行う処理、 <br>
+<code>afterFilter</code> ですべての後に実行される処理が設定できます。 <br>
+<code>beforeRender</code> は <code>$this-&gt;view-&gt;render()</code> の前に実行されます。</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">beforeFilter</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+  <span class="hljs-comment">// 前処理</span>
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">afterFilter</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+  <span class="hljs-comment">// 後処理</span>
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">beforeRender</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+  <span class="hljs-comment">// renderの前の処理</span>
+}</code></pre>
+
+<h3 id="スキーマ">スキーマ</h3>
+
+
+
+<h4 id="テーブル定義">テーブル定義</h4>
+
+<p>データベースのテーブル定義を作成します。 <br>
+事前にデータベースに定義しない場合、フレームワーク内で定義することができます。</p>
+
+<p><code>/application/settings/app-schema.php</code> に記述しておくと、一度だけ実行されます。 <br>
+再度実行したい場合は、<code>/application/storage/cache/app-cache.json</code> に保存されているキャッシュを削除します。</p>
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-variable">$schema</span> = <span class="hljs-keyword">array</span>(
+  <span class="hljs-comment">// セッション</span>
+  <span class="hljs-string">"CREATE TABLE IF NOT EXISTS punyapp_sessions (
+    id      varchar(128) NOT NULL default '',
+    data    text,
+    expires integer default NULL,
+    PRIMARY KEY (id)
+  )"</span>,
+
+  <span class="hljs-comment">// Todo テーブル</span>
+  <span class="hljs-string">"CREATE TABLE IF NOT EXISTS todo (
+    id       integer,
+    content  text,
+    created  integer,
+    modified integer,
+    PRIMARY KEY (id)
+  )"</span>
+);</code></pre>
+
+<hr>
+
+
+
+<h4 id="created-modified">created, modified</h4>
+
+<p>テーブル定義にあらかじめ <code>created</code> もしくは <code>modified</code> を定義しておくと、  insert (save) や update のタイミングでそれぞれ現在時刻が自動で設定されます。</p>
+
+<p>integer や int(11) で定義すると 現在の time() が秒数で設定されます。 <br>
+datetime は Y-m-d H:i:s 形式になります。 <br>
+varchar(255) で定義すると現在時刻をミリ秒で設定されます。</p>
 
 <ul>
-<li><p>Extract files to the any directory on the server.</p></li>
-<li><p>Settings <code>application/settings/app-settings.php</code>.</p></li>
-</ul><div class="highlight highlight-php"><pre><span class="nv">$settings</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
-  <span class="sd">/**</span>
-<span class="sd">   * System settings</span>
-<span class="sd">   */</span>
-  <span class="s1">'system'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
-    <span class="sd">/**</span>
-<span class="sd">     * Timezone</span>
-<span class="sd">     *</span>
-<span class="sd">     * e.g., 'America/Chicago', 'Asia/Tokyo' etc.</span>
-<span class="sd">     */</span>
-    <span class="s1">'timezone'</span> <span class="o">=&gt;</span> <span class="s1">''</span><span class="p">,</span>
-  <span class="p">),</span>
+<li><strong>created</strong> : 作成された日時</li>
+<li><strong>modified</strong> : 更新された日時</li>
+</ul>
 
-  <span class="sd">/**</span>
-<span class="sd">   * Database settings</span>
-<span class="sd">   */</span>
-  <span class="s1">'database'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
+<p>これらはアプリケーション側で created, modified をパラメータに扱う場合は無視されます。</p>
 
-    <span class="sd">/**</span>
-<span class="sd">     * Database engine</span>
-<span class="sd">     *</span>
-<span class="sd">     * Available engines: "mysql", "pgsql", "sqlite" and "posql".</span>
-<span class="sd">     */</span>
-    <span class="s1">'engine'</span> <span class="o">=&gt;</span> <span class="s1">''</span><span class="p">,</span>
-  <span class="p">),</span>
+<hr>
 
-  <span class="sd">/**</span>
-<span class="sd">   * Session settings</span>
-<span class="sd">   */</span>
-  <span class="s1">'session'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
+<h3 id="モデル">モデル</h3>
 
-    <span class="sd">/**</span>
-<span class="sd">     * Session engine</span>
-<span class="sd">     *</span>
-<span class="sd">     * Available engines: "php", "file" and "database".</span>
-<span class="sd">     */</span>
-    <span class="s1">'engine'</span> <span class="o">=&gt;</span> <span class="s1">''</span><span class="p">,</span>
-  <span class="p">)</span>
-<span class="p">);</span>
-</pre></div>
+
+
+<h4 id="モデルの作成">モデルの作成</h4>
+
+<p>モデルは <code>/application/models</code> の中に作成します。 <br>
+TodoModel の場合、todo.php というファイル名になります。 <br>
+PunyApp_Model を継承します。</p>
+
+<p>モデルのクエリは基本的にプレースホルダ、プリペアドステートメントを使用します。 <br>
+add (insert) は、<code>$this-&gt;newInstance()</code> で新しいインスタンスを作ってデータを追加します。</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoModel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PunyApp_Model</span> {</span>
+
+  <span class="hljs-comment">/**
+   * アイテムを追加
+   *<span class="hljs-phpdoc"> @param</span> string $content
+   *<span class="hljs-phpdoc"> @return</span> bool
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addItem</span><span class="hljs-params">(<span class="hljs-variable">$content</span>)</span> {</span>
+    <span class="hljs-variable">$todo</span> = <span class="hljs-variable">$this</span>-&gt;newInstance();
+    <span class="hljs-variable">$todo</span>-&gt;content = <span class="hljs-variable">$content</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-variable">$todo</span>-&gt;save();
+  }
+
+  <span class="hljs-comment">/**
+   * アイテムを削除
+   *<span class="hljs-phpdoc"> @param</span> int $id
+   *<span class="hljs-phpdoc"> @return</span> int affected rows
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">deleteItem</span><span class="hljs-params">(<span class="hljs-variable">$id</span>)</span> {</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-variable">$this</span>-&gt;delete(
+      <span class="hljs-keyword">array</span>(<span class="hljs-string">'id'</span> =&gt; <span class="hljs-string">'?'</span>),
+      <span class="hljs-keyword">array</span>(<span class="hljs-variable">$id</span>)
+    );
+  }
+
+  <span class="hljs-comment">/**
+   * アイテムを取得
+   *<span class="hljs-phpdoc"> @param</span> int $id
+   *<span class="hljs-phpdoc"> @return</span> array
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getItem</span><span class="hljs-params">(<span class="hljs-variable">$id</span>)</span> {</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-variable">$this</span>-&gt;findOne(
+      <span class="hljs-keyword">array</span>(
+        <span class="hljs-string">'fields'</span> =&gt; <span class="hljs-keyword">array</span>(<span class="hljs-string">'id'</span>, <span class="hljs-string">'content'</span>),
+        <span class="hljs-string">'where'</span> =&gt; <span class="hljs-keyword">array</span>(<span class="hljs-string">'id'</span> =&gt; <span class="hljs-string">'?'</span>)
+      ),
+      <span class="hljs-keyword">array</span>(<span class="hljs-variable">$id</span>)
+    );
+  }
+
+  <span class="hljs-comment">/**
+   * アイテムを全部取得
+   *<span class="hljs-phpdoc"> @return</span> array
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getItems</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-variable">$this</span>-&gt;find();
+  }
+}</code></pre>
+
+<hr>
+
+
+
+<h4 id="find-メソッド">find メソッド</h4>
 
 <ul>
-<li><p>Create database schema or write schema in  <code>application/settings/app-schema.php</code>.</p></li>
-<li><p>Set to writable permission in the directories and files under <code>application/storage</code>.</p></li>
-<li><p>Browse the first you files extracted directory.  </p></li>
-</ul><h3>
-<a name="sample" class="anchor" href="#sample"><span class="octicon octicon-link"></span></a>Sample</h3>
+<li><em>array</em>  <strong>find</strong>  ( <em>array</em>  <span>$</span>query = array(), <em>array</em>  <span>$</span>params = array())</li>
+</ul>
+
+<p>find() メソッドの引数 $query は、 ‘distinct’, ‘fields’, ‘from’, ‘as’, ‘joins’, ‘where’, ‘group’, ‘having’, ‘order’, ‘limit’, ‘offset’ が使えます。 </p>
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getUserByName</span><span class="hljs-params">(<span class="hljs-variable">$name</span>)</span> {</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-variable">$this</span>-&gt;find(
+    <span class="hljs-keyword">array</span>(
+      <span class="hljs-string">'distinct'</span> =&gt; <span class="hljs-keyword">false</span>,
+      <span class="hljs-string">'fields'</span> =&gt; <span class="hljs-keyword">array</span>(
+        <span class="hljs-string">'U.id AS id'</span>, <span class="hljs-string">'U.name AS name'</span>,
+        <span class="hljs-string">'U.category AS cat'</span>, <span class="hljs-string">'P.url AS url'</span>
+      ),
+      <span class="hljs-string">'as'</span> =&gt; <span class="hljs-string">'U'</span>,
+      <span class="hljs-string">'joins'</span> =&gt; <span class="hljs-keyword">array</span>(
+        <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'LEFT'</span>,
+        <span class="hljs-string">'table'</span> =&gt; <span class="hljs-string">'profile'</span>,
+        <span class="hljs-string">'as'</span> =&gt; <span class="hljs-string">'P'</span>,
+        <span class="hljs-string">'on'</span> =&gt; <span class="hljs-keyword">array</span>(<span class="hljs-string">'U.id'</span> =&gt; <span class="hljs-string">'P.id'</span>)
+      ),
+      <span class="hljs-string">'where'</span> =&gt; <span class="hljs-keyword">array</span>(
+        <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">':name'</span>
+      ),
+      <span class="hljs-string">'group'</span> =&gt; <span class="hljs-string">'cat'</span>,
+      <span class="hljs-string">'order'</span> =&gt; <span class="hljs-string">'id DESC'</span>,
+      <span class="hljs-string">'limit'</span> =&gt; <span class="hljs-number">10</span>,
+      <span class="hljs-string">'offset'</span> =&gt; <span class="hljs-number">5</span>
+    ),
+    <span class="hljs-keyword">array</span>(
+      <span class="hljs-string">':name'</span> =&gt; <span class="hljs-variable">$name</span>
+    )
+  );
+}</code></pre>
+
+<p>ある程度のクエリは扱えます。</p>
+
+<hr>
+
+<h4 id="pdo-として扱う">PDO として扱う</h4>
+
+<p>モデル内では <code>$this-&gt;getDatabase()</code> が PDO として使えるので、</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getName</span><span class="hljs-params">(<span class="hljs-variable">$id</span>)</span> {</span>
+  <span class="hljs-variable">$statement</span> = <span class="hljs-string">'SELECT name FROM foo WHERE id = ?'</span>;
+  <span class="hljs-variable">$sth</span> = <span class="hljs-variable">$this</span>-&gt;getDatabase()-&gt;prepare(<span class="hljs-variable">$statement</span>);
+  <span class="hljs-variable">$sth</span>-&gt;execute(<span class="hljs-keyword">array</span>(<span class="hljs-variable">$id</span>));
+  <span class="hljs-keyword">return</span> <span class="hljs-variable">$sth</span>-&gt;fetchAll(PDO::FETCH_ASSOC);
+}</code></pre>
+
+<p>上のように直接クエリを書くことができますが、 <br>
+直接クエリを書いた場合、<strong>created</strong> と <strong>modified</strong> フィールドが自動セットされないので注意してください。</p>
+
+<hr>
+
+<h4 id="コントローラでのモデル指定">コントローラでのモデル指定</h4>
+
+<p>コントローラでモデルを指定するには以下のように <code>$models</code> を配列で指定します。 <br>
+配列内のモデルがフィールドとしてインスタンス作成されます。</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PunyApp_Controller</span> {</span>
+
+  <span class="hljs-comment">/**
+   *<span class="hljs-phpdoc"> @var</span> array
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-variable">$models</span> = <span class="hljs-keyword">array</span>(<span class="hljs-string">'todo'</span>); <span class="hljs-comment">// モデル名を入れる</span>
+
+  <span class="hljs-comment">/**
+   *<span class="hljs-phpdoc"> @var</span> TodoModel
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-variable">$todo</span>;
+
+  <span class="hljs-comment">/**
+   * POST /item
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postItem</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable">$this</span>-&gt;todo-&gt;addItem(<span class="hljs-variable">$params</span>[<span class="hljs-string">'content'</span>])) {
+      <span class="hljs-comment">// ビューへのレンダリングなど</span>
+    }
+  }
+}</code></pre>
+
+<hr>
+
+<h3 id="ビュー">ビュー</h3>
+
+
+
+<h4 id="ビューの作成">ビューの作成</h4>
+
+<p>ビューは <code>/application/views/contents</code> 内に作成します。 <br>
+PHP そのままのテンプレートを使用します。</p>
+
+<p>テンプレート変数はデフォルトで HTML エスケープされます。</p>
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PunyApp_Controller</span> {</span>  
+
+  <span class="hljs-comment">/**
+   *<span class="hljs-phpdoc"> @var</span> array
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-variable">$models</span> = <span class="hljs-keyword">array</span>(<span class="hljs-string">'todo'</span>);
+
+  <span class="hljs-comment">/**
+   *<span class="hljs-phpdoc"> @var</span> TodoModel
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-variable">$todo</span>;
+
+  <span class="hljs-comment">/**
+   * any /index
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">anyIndex</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-variable">$this</span>-&gt;view-&gt;title = <span class="hljs-string">'ToDo'</span>;
+    <span class="hljs-variable">$this</span>-&gt;view-&gt;items = <span class="hljs-variable">$this</span>-&gt;todo-&gt;getItems();
+    <span class="hljs-variable">$this</span>-&gt;view-&gt;render(<span class="hljs-string">'todo/index'</span>);
+  }
+}</code></pre>
+
+<p>views/todo/index.php  </p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs ">&lt;html&gt;
+  &lt;body&gt;
+    &lt;h1&gt;<span class="hljs-preprocessor">&lt;?php</span> <span class="hljs-keyword">echo</span> <span class="hljs-variable">$title</span> <span class="hljs-preprocessor">?&gt;</span>&lt;/h1&gt;
+    &lt;ul&gt;
+      <span class="hljs-preprocessor">&lt;?php</span> <span class="hljs-keyword">foreach</span> (<span class="hljs-variable">$items</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$item</span>): <span class="hljs-preprocessor">?&gt;</span>
+      &lt;li&gt;<span class="hljs-preprocessor">&lt;?php</span> <span class="hljs-keyword">echo</span> <span class="hljs-variable">$item</span>[<span class="hljs-string">'content'</span>] <span class="hljs-preprocessor">?&gt;</span>&lt;/li&gt;
+      <span class="hljs-preprocessor">&lt;?php</span> <span class="hljs-keyword">endforeach</span> <span class="hljs-preprocessor">?&gt;</span>
+    &lt;/ul&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+<hr>
+
+<h3 id="バリデーション">バリデーション</h3>
+
+<p>リクエストされたフォームのバリデーションを行います。 <br>
+バリデーションはコントローラで行います。</p>
+
+
+
+<h4 id="定義の作成">定義の作成</h4>
+
+<p>バリデーションの定義は、コントローラ内に <code>$validationRules</code> を配列で指定します。</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">public</span> <span class="hljs-variable">$validationRules</span> = <span class="hljs-keyword">array</span>(
+  <span class="hljs-string">'id'</span> =&gt; <span class="hljs-keyword">array</span>(
+    <span class="hljs-string">'required'</span> =&gt; <span class="hljs-keyword">true</span>,
+    <span class="hljs-string">'rule'</span> =&gt; <span class="hljs-keyword">array</span>(<span class="hljs-string">'numeric'</span>),
+    <span class="hljs-string">'message'</span> =&gt; <span class="hljs-string">'idが不正です'</span>
+  ),
+  <span class="hljs-string">'content'</span> =&gt; <span class="hljs-keyword">array</span>(
+    <span class="hljs-string">'required'</span> =&gt; <span class="hljs-keyword">true</span>,
+    <span class="hljs-string">'rule'</span> =&gt; <span class="hljs-keyword">array</span>(
+      <span class="hljs-keyword">array</span>(<span class="hljs-string">'minLength'</span>, <span class="hljs-number">1</span>),
+      <span class="hljs-keyword">array</span>(<span class="hljs-string">'maxLength'</span>, <span class="hljs-number">50</span>)
+    ),
+    <span class="hljs-string">'message'</span> =&gt; <span class="hljs-string">'内容は1文字以上50文字以内で入力してください'</span>
+  )
+);</code></pre>
+
+<p>バリデーションのルールは <br>
+email, url, ip, numeric, between, minLength, maxLength, regex <br>
+等が定義されています。</p>
+
+<h4 id="独自ルールの作成">独自ルールの作成</h4>
+
+<p>自分でバリデーションルールを作成する場合は、コントローラ内に <code>validate</code> という接頭辞をつけてメソッドを定義します。 </p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PunyApp_Controller</span> {</span>  
+
+  <span class="hljs-keyword">public</span> <span class="hljs-variable">$validationRules</span> = <span class="hljs-keyword">array</span>(
+    <span class="hljs-string">'content'</span> =&gt; <span class="hljs-keyword">array</span>(
+      <span class="hljs-string">'required'</span> =&gt; <span class="hljs-keyword">true</span>,
+      <span class="hljs-string">'rule'</span> =&gt; <span class="hljs-keyword">array</span>(<span class="hljs-string">'MyContent'</span>),
+      <span class="hljs-string">'message'</span> =&gt; <span class="hljs-string">'内容は1文字以上50文字以内で入力してください'</span>
+    )
+  );
+
+  <span class="hljs-comment">/**
+   * Custom validator
+   *
+   *<span class="hljs-phpdoc"> @param</span> mixed $value
+   *<span class="hljs-phpdoc"> @return</span> bool
+   */</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">validateMyContent</span><span class="hljs-params">(<span class="hljs-variable">$value</span>)</span> {</span>
+    <span class="hljs-keyword">return</span> (bool)preg_match(<span class="hljs-string">'/^.{1,50}$/u'</span>, <span class="hljs-variable">$value</span>);
+  }
+}</code></pre>
+
+<h4 id="バリデーションを実行">バリデーションを実行</h4>
+
+<p>バリデーションは、<code>$this-&gt;validate()</code> で実行します。</p>
+
+<p>引数を省略すると $validationRules に対して実行します。  <br>
+任意のルールを配列で引数に渡すこともできます。</p>
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PunyApp_Controller</span> {</span>
+
+  <span class="hljs-keyword">public</span> <span class="hljs-variable">$validationRules</span> = <span class="hljs-keyword">array</span>( ... )
+
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postItem</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+    <span class="hljs-keyword">if</span> (!<span class="hljs-variable">$this</span>-&gt;validate()) {
+      <span class="hljs-comment">// invalid</span>
+    }
+    <span class="hljs-variable">$this</span>-&gt;view-&gt;render(<span class="hljs-string">'todo/index'</span>);
+  }
+}</code></pre>
+
+<h4 id="メッセージを取得">メッセージを取得</h4>
+
+<p>バリデーションエラーメッセージは以下のビューメソッドから取得できます。</p>
 
 <ul>
-<li>There is a sample login form in <code>/sample/</code>.</li>
-</ul><hr><h3>
-<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h3>
+<li><p>名前を指定して取得: <br>
+<em>string</em> <strong>getValidationError</strong> ( <em>string</em> $name )</p></li>
+<li><p>最後のメッセージを取得: <br>
+<em>string</em> <strong>getLastValidationError</strong> ( )</p></li>
+<li><p>全部取得: <br>
+<em>array</em> <strong>getValidationErrors</strong> ( )</p></li>
+<li><p>HTML リスト要素で全部取得: <br>
+<em>string</em> <strong>getValidationErrorMessages</strong> ( )</p></li>
+</ul>
 
-<p>The PunyApp is open-sourced software licensed under the <a href="http://opensource.org/licenses/MIT">MIT license</a></p>
-      </section>
-    </div>
+<p>コントローラ内では <code>$this-&gt;view-&gt;getValidationError('hoge')</code> のように取得できます。</p>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Punyapp maintained by <a href="https://github.com/polygonplanet">polygonplanet</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
+<p>ビュー内では以下のように表示できます。</p>
 
-    
 
-  </body>
+
+<pre class="prettyprint"><code class="language-html hljs "><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span>Add ToDo<span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"error"</span>&gt;</span>
+      <span class="php"><span class="hljs-preprocessor">&lt;?php</span> <span class="hljs-keyword">echo</span> <span class="hljs-variable">$this</span>-&gt;getValidationError(<span class="hljs-string">'content'</span>) <span class="hljs-preprocessor">?&gt;</span></span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">form</span> <span class="hljs-attribute">action</span>=<span class="hljs-value">"item"</span> <span class="hljs-attribute">method</span>=<span class="hljs-value">"post"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">input</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"text"</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"content"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">input</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"submit"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">form</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></code></pre>
+
+
+
+<h3 id="フォームトークン">フォームトークン</h3>
+
+<p>CSRF 対策として、フォームリクエストのトークンが生成できます。</p>
+
+<p>ビュー内の form の中に以下のように記述します。</p>
+
+
+
+<pre class="prettyprint"><code class="language-html hljs "><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span>Add ToDo<span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">form</span> <span class="hljs-attribute">action</span>=<span class="hljs-value">"item"</span> <span class="hljs-attribute">method</span>=<span class="hljs-value">"post"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">input</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"hidden"</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"token"</span> <span class="hljs-attribute">value</span>=<span class="hljs-value">"&lt;?php
+        echo $this-&gt;generateToken() ?&gt;"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">input</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"text"</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"content"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">input</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"submit"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">form</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></code></pre>
+
+<p>コントローラ内で、トークンのバリデーションを行います。</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postItem</span><span class="hljs-params">(<span class="hljs-variable">$params</span>)</span> {</span>
+  <span class="hljs-keyword">if</span> (!<span class="hljs-variable">$this</span>-&gt;token-&gt;validate(<span class="hljs-variable">$this</span>-&gt;request-&gt;params-&gt;token)) {
+    <span class="hljs-comment">// 不正なリクエスト</span>
+    <span class="hljs-variable">$this</span>-&gt;view-&gt;error = <span class="hljs-string">'Bad request'</span>;
+  }
+  <span class="hljs-comment">// ...</span>
+}</code></pre>
+
+<h3 id="イベント">イベント</h3>
+
+<p>任意にアプリケーションイベントを設定します。 <br>
+イベントはどこからでも定義できますが、一番最初に実行される <br>
+<code>/application/settings/app-initialize.php</code> に記述すると確実です。</p>
+
+
+
+<pre class="prettyprint"><code class="language-php hljs "><span class="hljs-comment">// データベースエラーを表示する</span>
+<span class="hljs-variable">$this</span>-&gt;event-&gt;on(<span class="hljs-string">'app-database-error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable">$app</span>, <span class="hljs-variable">$error</span>)</span> {</span>
+  <span class="hljs-keyword">if</span> (<span class="hljs-variable">$app</span>-&gt;isDebug()) {
+    <span class="hljs-comment">// デバッグモードのみ表示</span>
+    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$app</span>-&gt;escapeHTML(<span class="hljs-variable">$error</span>);
+  }
+});</code></pre>
+
+<h3 id="インストールと実行">インストールと実行</h3>
+
+<ul>
+<li><p>展開したファイルをサーバの任意のディレクトリに置きます </p></li>
+<li><p><code>application/settings/app-settings.php</code> を編集してアプリケーションの設定をします</p></li>
+<li><p>データベーススキーマを作成するか、<code>application/settings/app-schema.php</code> に記述します</p></li>
+<li><p><code>application/storage</code> 配下のファイルとディレクトリを「書き込み可」にします</p></li>
+<li><p>最初に展開したディレクトリにブラウザでアクセスします</p></li>
+</ul>
+
+
+
+<h3 id="サンプルコード">サンプルコード</h3>
+
+<p>サンプルのログインフォームが <code>/sample/</code> に入っています。 <br>
+不要な場合は、</p>
+
+<ul>
+<li>/application/controllers</li>
+<li>/application/models</li>
+<li>/application/views/contents</li>
+<li>/application/public/css</li>
+</ul>
+
+<p>配下のファイルまたはディレクトリをそれぞれ削除してください。</p></div></body>
 </html>
