@@ -3,6 +3,9 @@ PunyApp
 
 [![Build Status](https://travis-ci.org/polygonplanet/PunyApp.svg?branch=master)](https://travis-ci.org/polygonplanet/PunyApp)
 
+* [PunyApp Reference (Japanese)](http://polygonplanet.github.io/PunyApp/)
+
+
 PunyApp is a lightweight MVC PHP framework that does not require the external PHP extensions, it's based the CakePHP framework.  
   
 Requires PHP 5.2.0 or newer.  
