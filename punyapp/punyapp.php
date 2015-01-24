@@ -12,7 +12,7 @@
  * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
- * @version    1.0.21
+ * @version    1.0.22
  */
 
 /**
@@ -688,12 +688,7 @@ class PunyApp extends PunyApp_Settings {
         $headers = array();
         return true;
       case 'delete':
-        if (function_exists('header_remove')) {
-          header_remove($name);
-          unset($headers[$name]);
-        } else {
-          PunyApp::header('set', $name, null);
-        }
+        PunyApp::header('set', $name, null);
         return true;
     }
   }
