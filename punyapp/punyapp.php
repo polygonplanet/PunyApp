@@ -12,7 +12,7 @@
  * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
  * @copyright  Copyright (c) 2014 polygon planet
- * @version    1.0.20
+ * @version    1.0.21
  */
 
 /**
@@ -175,7 +175,9 @@ class PunyApp extends PunyApp_Settings {
 
     $this->validator = new PunyApp_Validator($this);
     $this->session = new PunyApp_Session($this);
-    $this->session->start();
+    if ($this->sessionSettings->engine != null) {
+      $this->session->start();
+    }
     $this->cookie = new PunyApp_Cookie($this);
 
     register_shutdown_function(array($this, 'handleLastError'));
