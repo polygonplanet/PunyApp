@@ -12,8 +12,13 @@ $settings = array(
     /**
      * Debug mode
      *
-     * true = show errors
-     * false = hide errors
+     * true:
+     *  - Show errors
+     *  - Use 'database.debug'
+     *
+     * false:
+     *  - Hide errors
+     *  - Use 'database.default'
      */
     'debug' => true,
     /**
@@ -54,35 +59,54 @@ $settings = array(
    */
   'database' => array(
     /**
-     * Database engine
-     *
-     * Available engines: "mysql", "pgsql", "sqlite" and "posql".
+     * Default configurations
+     * This settings to use 'system.debug'=false.
      */
-    'engine' => 'sqlite',
+    'default' => array(
+      /**
+       * Database engine
+       *
+       * Available engines: "mysql", "pgsql", "sqlite" and "posql".
+       */
+      'engine' => 'sqlite',
+      /**
+       * Database internal encoding (default = 'utf8')
+       */
+      'encoding' => 'utf8',
+      /**
+       * Database username
+       */
+      'user' => '',
+      /**
+       * Database password
+       */
+      'pass' => '',
+      /**
+       * Database name
+       */
+      'dbname' => 'database_name',
+      /**
+       * Database host
+       */
+      'host' => 'localhost',
+      /**
+       * Database port
+       */
+      'port'=> ''
+    ),
     /**
-     * Database internal encoding (default = 'utf8')
+     * Debug configurations
+     * This settings to use 'system.debug'=true.
      */
-    'encoding' => 'utf8',
-    /**
-     * Database username
-     */
-    'user' => '',
-    /**
-     * Database password
-     */
-    'pass' => '',
-    /**
-     * Database name
-     */
-    'dbname' => 'database_name',
-    /**
-     * Database host
-     */
-    'host' => 'localhost',
-    /**
-     * Database port
-     */
-    'port'=> '',
+    'debug' => array(
+      'engine' => 'sqlite',
+      'encoding' => 'utf8',
+      'user' => '',
+      'pass' => '',
+      'dbname' => 'database_name',
+      'host' => 'localhost',
+      'port'=> ''
+    ),
     /**
      * Log SQL query to 'application/storage/logs'
      */
