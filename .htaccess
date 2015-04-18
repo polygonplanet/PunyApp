@@ -1,7 +1,3 @@
-# --------
-# PunyApp
-# --------
-
 <IfModule mod_rewrite.c>
   RewriteEngine on
   RewriteRule   ^$   application/public/    [L]
