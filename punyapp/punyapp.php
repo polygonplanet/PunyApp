@@ -11,8 +11,8 @@
  * @author     polygon planet <polygon.planet.aqua@gmail.com>
  * @link       https://github.com/polygonplanet/PunyApp
  * @license    MIT
- * @copyright  Copyright (c) 2014 polygon planet
- * @version    1.0.22
+ * @copyright  Copyright (c) 2014-2015 polygon planet
+ * @version    1.0.23
  */
 
 /**
