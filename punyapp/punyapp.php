@@ -210,7 +210,25 @@ class PunyApp extends PunyApp_Settings {
           break;
         case 'database':
           foreach ($values as $key => $val) {
-            $this->databaseSettings->{$key} = $val;
+            switch ($key) {
+              case 'default':
+                if (!$this->isDebug()) {
+                  foreach ($val as $k => $v) {
+                    $this->databaseSettings->{$k} = $v;
+                  }
+                }
+                break;
+              case 'debug':
+                if ($this->isDebug()) {
+                  foreach ($val as $k => $v) {
+                    $this->databaseSettings->{$k} = $v;
+                  }
+                }
+                break;
+              default:
+                $this->databaseSettings->{$key} = $val;
+                break;
+            }
           }
           break;
         case 'session':
@@ -383,10 +401,8 @@ class PunyApp extends PunyApp_Settings {
       );
     }
 
-    $name = PunyApp_Util::underscore(basename($name)) . '.php';
     $parts = explode($sep, $path);
     $const = sprintf('PUNYAPP_%s_DIR', strtoupper(array_shift($parts)));
-
     if (!defined($const)) {
       return false;
     }
@@ -396,14 +412,20 @@ class PunyApp extends PunyApp_Settings {
       $dir .= $sep . implode($sep, $parts);
     }
 
-    $filename = PunyApp_Util::fullPath($dir . $sep . $name);
-    if (!empty($parts) && !file_exists($filename)) {
-      $dir .= $sep . implode($sep, $parts);
-      $filename = PunyApp_Util::fullPath($dir . $sep . $name);
-    }
+    $ext = '.php';
+    $basename = basename($name);
+    $filenames = array(
+      $basename . $ext,
+      strtolower($basename) . $ext,
+      PunyApp_Util::underscore($basename) . $ext,
+      PunyApp_Util::camelize($basename) . $ext
+    );
 
-    if ($filename != null && file_exists($filename)) {
-      return $filename;
+    foreach ($filenames as $filename) {
+      $pathname = PunyApp_Util::fullPath($dir . $sep . $filename);
+      if (file_exists($pathname)) {
+        return $pathname;
+      }
     }
 
     return false;
@@ -677,7 +699,7 @@ class PunyApp extends PunyApp_Settings {
         }
         return true;
       case 'send':
-        if (headers_sent()) {
+        if (empty($headers) || headers_sent()) {
           return false;
         }
 
@@ -750,12 +772,45 @@ class PunyApp extends PunyApp_Settings {
     }
   }
 
-
   /**
    * Remove X-Powered-By: PHP x.x.x header
    */
   public static function removePoweredByHeader() {
     self::header('delete', 'X-Powered-By');
+  }
+
+  /**
+   * Send responce
+   *
+   * @param string $message message
+   * @return bool
+   */
+  public static function send($message) {
+    $sent = false;
+    $args = func_get_args();
+
+    if (!empty($args)) {
+      self::header('send');
+      foreach ($args as $arg) {
+        echo $arg;
+      }
+      $sent = true;
+    }
+
+    return $sent;
+  }
+
+  /**
+   * Send responce as JSON
+   *
+   * @param array $data json data
+   * @return bool
+   */
+  public static function sendJSON($data = array()) {
+    if (!is_array($data) || empty($data)) {
+      return self::send('{}');
+    }
+    return self::send(json_encode($data));
   }
 
   /**

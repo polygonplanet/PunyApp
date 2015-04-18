@@ -157,6 +157,27 @@ class PunyApp_Controller {
   }
 
   /**
+   * Send responce
+   *
+   * @param string $message message
+   * @return bool
+   */
+  protected function send($message) {
+    $args = func_get_args();
+    return PunyApp::send($args);
+  }
+
+  /**
+   * Send responce as JSON
+   *
+   * @param array $data json data
+   * @return bool
+   */
+  protected function sendJSON($data = array()) {
+    return PunyApp::sendJSON($data);
+  }
+
+  /**
    * Validate request parameters
    *
    * @param array $rules

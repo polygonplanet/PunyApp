@@ -68,22 +68,35 @@ class PunyApp_Dispatcher {
 
     self::$app->event->trigger('app-before-filter', array($params));
     if (is_callable(array(self::$app->controller, 'beforeFilter'))) {
-      call_user_func(array(self::$app->controller, 'beforeFilter'), $params);
+      self::_executeMethod(array(self::$app->controller, 'beforeFilter'), $params);
     }
 
     if ($methods->before != null) {
-      call_user_func(array(self::$app->controller, $methods->before), $params);
+      self::_executeMethod(array(self::$app->controller, $methods->before), $params);
     }
 
-    call_user_func(array(self::$app->controller, $methods->method), $params);
+    self::_executeMethod(array(self::$app->controller, $methods->method), $params);
 
     if ($methods->after != null) {
-      call_user_func(array(self::$app->controller, $methods->after), $params);
+      self::_executeMethod(array(self::$app->controller, $methods->after), $params);
     }
 
     self::$app->event->trigger('app-after-filter', array($params));
     if (is_callable(array(self::$app->controller, 'afterFilter'))) {
-      call_user_func(array(self::$app->controller, 'afterFilter'), $params);
+      self::_executeMethod(array(self::$app->controller, 'afterFilter'), $params);
+    }
+  }
+
+  /**
+   * Execute method
+   *
+   * @param callback $method
+   * @param array $args
+   */
+  private static function _executeMethod($method, $args = array()) {
+    $result = call_user_func($method, $args);
+    if ($result != null && is_string($result)) {
+      self::$app->send($result);
     }
   }
 
