@@ -228,6 +228,14 @@ class PunyApp_Request {
     return (bool)preg_match($pattern, $this->app->env->HTTP_USER_AGENT);
   }
 
+  /**
+   * Check whether requested with XMLHttpRequest
+   *
+   * @return bool
+   */
+  public function isAjax() {
+    return 0 === strcasecmp($this->headers->{'X-Requested-With'}, 'XMLHttpRequest');
+  }
 
   /**
    * Parse request URI
@@ -484,10 +492,6 @@ class PunyApp_Request_Headers implements Iterator {
    */
   private function _parseRequestHeaders() {
     $this->_headers = array();
-
-    if (function_exists('apache_request_headers')) {
-      $this->_headers = apache_request_headers();
-    }
 
     if ((empty($this->_headers) || !is_array($this->_headers)) &&
         isset($_SERVER) && is_array($_SERVER)) {
