@@ -912,30 +912,46 @@ class PunyApp_Model {
     $value = reset($operators);
     $operator = key($operators);
 
-    switch (strtolower($operator)) {
-      case '$gt':
+    switch (strtolower(ltrim(trim($operator), '$'))) {
+      case '=':
+      case '==':
+      case '===':
+      case 'eq':
+        return ' = ' . $value;
+      case '>':
+      case 'gt':
         return ' > ' . $value;
-      case '$gte':
+      case '>=':
+      case 'gte':
         return ' >= ' . $value;
-      case '$lt':
+      case '<':
+      case 'lt':
         return ' < ' . $value;
-      case '$lte':
+      case '<=':
+      case 'lte':
         return ' <= ' . $value;
-      case '$ne':
+      case '<>':
+      case '!=':
+      case '!==':
+      case 'ne':
         return ' <> ' . $value;
-      case '$in':
+      case 'in':
         return ' IN (' . $this->_joinValues($value) . ')';
-      case '$nin':
+      case 'not in':
+      case 'notin':
+      case 'nin':
         return ' NOT IN (' . $this->_joinValues($value) . ')';
-      case '$or':
+      case 'or':
         return ' OR ' . $value;
-      case '$and':
+      case 'and':
         return ' AND ' . $value;
-      case '$not':
+      case 'not':
         return ' NOT ' . $value;
-      case '$like':
+      case 'like':
         return ' LIKE ' . $value;
-      case '$nlike':
+      case 'not like':
+      case 'notlike':
+      case 'nlike':
         return ' NOT LIKE ' . $value;
     }
   }
