@@ -161,8 +161,14 @@ index.php
   <span class="hljs-string">'system'</span> =&gt; <span class="hljs-keyword">array</span>(
     <span class="hljs-comment">/**
      * Debug mode
-     * true にするとエラーが起きた時、表示します
-     * false にするとエラーが起きても何も表示しません
+     *
+     * true:
+     *   - エラーが起きた時、表示します
+     *   - 'database.debug' が適応されます
+     *
+     * false:
+     *   - エラーが起きても何も表示しません
+     *   - 'database.default' が適応されます
      */</span>
     <span class="hljs-string">'debug'</span> =&gt; <span class="hljs-keyword">true</span>,
     <span class="hljs-comment">/**
@@ -197,34 +203,55 @@ index.php
    */</span>
   <span class="hljs-string">'database'</span> =&gt; <span class="hljs-keyword">array</span>(
     <span class="hljs-comment">/**
-     * Database engine
-     * "mysql", "pgsql", "sqlite" または "posql" が利用可能です
+     * default設定
+     *
+     * 'system.debug' が false の場合に適応されます
      */</span>
-    <span class="hljs-string">'engine'</span> =&gt; <span class="hljs-string">''</span>,
+    <span class="hljs-string">'default'</span> =&gt; <span class="hljs-keyword">array</span>(
+      <span class="hljs-comment">/**
+       * Database engine
+       * "mysql", "pgsql", "sqlite" または "posql" が利用可能です
+       */</span>
+      <span class="hljs-string">'engine'</span> =&gt; <span class="hljs-string">''</span>,
+      <span class="hljs-comment">/**
+       * データベースの内部文字コード (default = 'utf8')
+       */</span>
+      <span class="hljs-string">'encoding'</span> =&gt; <span class="hljs-string">'utf8'</span>,
+      <span class="hljs-comment">/**
+       * Database ユーザ名
+       */</span>
+      <span class="hljs-string">'user'</span> =&gt; <span class="hljs-string">''</span>,
+      <span class="hljs-comment">/**
+       * Database パスワード
+       */</span>
+      <span class="hljs-string">'pass'</span> =&gt; <span class="hljs-string">''</span>,
+      <span class="hljs-comment">/**
+       * Database name
+       */</span>
+      <span class="hljs-string">'dbname'</span> =&gt; <span class="hljs-string">'database_name'</span>,
+      <span class="hljs-comment">/**
+       * Database host
+       */</span>
+      <span class="hljs-string">'host'</span> =&gt; <span class="hljs-string">'localhost'</span>,
+      <span class="hljs-comment">/**
+       * Database port
+       */</span>
+      <span class="hljs-string">'port'</span>=&gt; <span class="hljs-string">''</span>
+    ),
     <span class="hljs-comment">/**
-     * データベースの内部文字コード (default = 'utf8')
+     * debug設定
+     *
+     * 'system.debug' が true の場合に適応されます
      */</span>
-    <span class="hljs-string">'encoding'</span> =&gt; <span class="hljs-string">'utf8'</span>,
-    <span class="hljs-comment">/**
-     * Database ユーザ名
-     */</span>
-    <span class="hljs-string">'user'</span> =&gt; <span class="hljs-string">''</span>,
-    <span class="hljs-comment">/**
-     * Database パスワード
-     */</span>
-    <span class="hljs-string">'pass'</span> =&gt; <span class="hljs-string">''</span>,
-    <span class="hljs-comment">/**
-     * Database name
-     */</span>
-    <span class="hljs-string">'dbname'</span> =&gt; <span class="hljs-string">'database_name'</span>,
-    <span class="hljs-comment">/**
-     * Database host
-     */</span>
-    <span class="hljs-string">'host'</span> =&gt; <span class="hljs-string">'localhost'</span>,
-    <span class="hljs-comment">/**
-     * Database port
-     */</span>
-    <span class="hljs-string">'port'</span>=&gt; <span class="hljs-string">''</span>,
+    <span class="hljs-string">'debug'</span> =&gt; <span class="hljs-keyword">array</span>(
+      <span class="hljs-string">'engine'</span> =&gt; <span class="hljs-string">''</span>,
+      <span class="hljs-string">'encoding'</span> =&gt; <span class="hljs-string">'utf8'</span>,
+      <span class="hljs-string">'user'</span> =&gt; <span class="hljs-string">''</span>,
+      <span class="hljs-string">'pass'</span> =&gt; <span class="hljs-string">''</span>,
+      <span class="hljs-string">'dbname'</span> =&gt; <span class="hljs-string">'database_name'</span>,
+      <span class="hljs-string">'host'</span> =&gt; <span class="hljs-string">'localhost'</span>,
+      <span class="hljs-string">'port'</span>=&gt; <span class="hljs-string">''</span>
+    ),
     <span class="hljs-comment">/**
      * SQL クエリをログ保存するかどうか
      * ログは 'application/storage/logs' に保存されます
