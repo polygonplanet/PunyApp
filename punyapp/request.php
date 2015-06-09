@@ -256,6 +256,7 @@ class PunyApp_Request {
    * @return array
    */
   private function _parseURI($uri) {
+    $uri = ltrim($uri, '/');
     $parts = explode('?', $uri);
     $path = array_shift($parts);
     $paths = explode('/', $path);
