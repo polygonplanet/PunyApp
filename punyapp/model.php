@@ -311,6 +311,26 @@ class PunyApp_Model {
     return $this->insert($fields, $params);
   }
 
+  /**
+   * Escape characters that work as wildcard string in a LIKE pattern.
+   * The wildcard characters "%" and "_" should be escaped.
+   *
+   * @param string
+   * @return string
+   */
+  public function escapeLike($pattern) {
+    static $translates = array(
+      '%' => '\%',
+      '_' => '\_'
+    );
+
+    $bs = '\\';
+    $pattern = str_replace($bs, $bs . $bs, $pattern);
+    $pattern = strtr($pattern, $translates);
+
+    return $pattern;
+  }
+
 
   /**
    * Magic methods
@@ -886,17 +906,58 @@ class PunyApp_Model {
       return preg_replace('{^\s*WHERE\b\s*}i', '', $conditions);
     }
 
+    $key = key($conditions);
+    if (!$this->_isOperator($key)) {
+      $conditions = array('AND' => $conditions);
+    }
+
+    $result = $this->_joinByOperator($conditions, $key);
+    if (substr($result, 0, 1) === '(' && substr($result, -1) === ')') {
+      $result = substr($result, 1, -1);
+    }
+    return $result;
+  }
+
+  /**
+   *
+   * @param array $items
+   * @param string $operator
+   */
+  private function _joinByOperator($items, $operator) {
     $exprs = array();
-    foreach ($conditions as $key => $val) {
+
+    foreach ($items as $key => $val) {
       if (is_array($val)) {
-        $val = $key . $this->_createOperators($val);
+        if ($this->_isOperator($key)) {
+          $val = '(' . $this->_joinByOperator($val, $key) . ')';
+        } else {
+          $val = $key . $this->_createOperators($val);
+        }
       } else {
         $val = $key . ' = ' . $val;
       }
       $exprs[] = $val;
     }
 
-    return implode(' AND ', $exprs);
+    return implode(' ' . strtoupper($operator) . ' ', $exprs);
+  }
+
+  /**
+   * Check whether argument is operator
+   *
+   * @param string $operator
+   * @return bool
+   */
+  private function _isOperator($operator) {
+    switch (strtolower(trim($operator))) {
+      case 'and':
+      case 'or':
+      case 'xor':
+      case 'not':
+        return true;
+      default:
+        return false;
+    }
   }
 
   /**
