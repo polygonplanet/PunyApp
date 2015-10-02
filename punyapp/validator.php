@@ -274,6 +274,20 @@ class PunyApp_Validator {
   }
 
   /**
+   * Validate byte length
+   *
+   * @param mixed $value
+   * @param int $bytes
+   * @return bool
+   */
+  protected function _validate_bytes($value, $bytes) {
+    if (!is_numeric($bytes)) {
+      return false;
+    }
+    return strlen($value) === (int)$bytes;
+  }
+
+  /**
    * Validate a value is between a set of values
    *
    * @param mixed $value
@@ -330,6 +344,18 @@ class PunyApp_Validator {
   }
 
   /**
+   * Validate the byte length of value is between a set of values
+   *
+   * @param mixed $value
+   * @param int $min
+   * @param int $max
+   * @return bool
+   */
+  protected function _validate_bytes_between($value, $min, $max) {
+    return $this->_validate_between(strlen($value), $min, $max);
+  }
+
+  /**
    * Validate the length of value is greater than a minimum value
    *
    * @param mixed $value
@@ -341,6 +367,17 @@ class PunyApp_Validator {
   }
 
   /**
+   * Validate the byte length of value is greater than a minimum value
+   *
+   * @param mixed $value
+   * @param int $min
+   * @return bool
+   */
+  protected function _validate_min_bytes($value, $min) {
+    return $this->_validate_min(strlen($value), $min);
+  }
+
+  /**
    * Validate the length of value is less than a maximum value
    *
    * @param mixed $value
@@ -349,6 +386,17 @@ class PunyApp_Validator {
    */
   protected function _validate_max_length($value, $max) {
     return $this->_validate_max($this->app->length($value), $max);
+  }
+
+  /**
+   * Validate the byte length of value is less than a maximum value
+   *
+   * @param mixed $value
+   * @param int $max
+   * @return bool
+   */
+  protected function _validate_max_bytes($value, $max) {
+    return $this->_validate_max(strlen($value), $max);
   }
 
   /**
