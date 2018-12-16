@@ -191,6 +191,9 @@ class PunyApp_View {
       throw new PunyApp_Error('Missing template');
     }
 
+    $this->app->sendResponseCode(200);
+    PunyApp::header('send');
+
     self::$_template = $template;
     $this->app->event->trigger('app-before-render', array($template));
     $this->_render();
