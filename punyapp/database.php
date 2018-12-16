@@ -1,17 +1,7 @@
 <?php
 /**
- * PunyApp:
- *   The puny developer framework for rapid compiling.
- *
- * PHP version 5
- *
- * @package    PunyApp
- * @subpackage -
- * @category   Database
- * @author     polygon planet <polygon.planet.aqua@gmail.com>
- * @link       https://github.com/polygonplanet/PunyApp
- * @license    MIT
- * @copyright  Copyright (c) 2014-2015 polygon planet
+ * PunyApp: https://github.com/polygonplanet/PunyApp
+ * @license MIT
  */
 
 /**

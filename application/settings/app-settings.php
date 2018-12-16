@@ -1,7 +1,7 @@
 <?php
 /**
- * PunyApp:
- *   The puny developer framework for rapid compiling.
+ * PunyApp: https://github.com/polygonplanet/PunyApp
+ * @license MIT
  */
 
 $settings = array(

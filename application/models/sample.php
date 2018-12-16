@@ -1,8 +1,5 @@
 <?php
-/**
- * PunyApp:
- *   The puny developer framework for rapid compiling.
- */
+// PunyApp sample model
 
 class SampleModel extends PunyApp_Model {
 
