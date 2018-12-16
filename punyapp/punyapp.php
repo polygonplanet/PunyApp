@@ -556,14 +556,15 @@ class PunyApp extends PunyApp_Settings {
         if (!array_key_exists($name, $secrets) || $secrets[$name] !== $secret_key) {
           return null;
         }
-
         return $store[$name];
+
       case 'set':
         $store[$name] = $value;
         if ($secret_key != null) {
           $secrets[$name] = $secret_key;
         }
         return true;
+
       case 'delete':
         if ($num_args === 3) {
           $secret_key = $value;
@@ -643,6 +644,19 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
+   * PHPがCGIモードで動いてるか調べる
+   *
+   * @return bool CGIモードで動いてるならtrue、そうでないならfalseが返る
+   */
+  public function isCGI() {
+    static $is_cgi = null;
+    if ($is_cgi === null) {
+      $is_cgi = strtolower(substr(php_sapi_name(), 0, 3)) === 'cgi';
+    }
+    return $is_cgi;
+  }
+
+  /**
    * Return string length
    *
    * @param string $string
@@ -673,31 +687,41 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * header
+   * headerを設定・取得・送信・削除する
    *
    * @param string $action
    * @param string $name
    * @param string $value
    * @param bool $replace
    * @param int $code
+   * @param bool $is_response_code
    * @return bool
    */
   public static function header($action, $name = null, $value = null,
-                                $replace = true, $code = null) {
+                                $replace = true, $code = null,
+                                $is_response_code = false) {
     static $headers = array();
 
     switch (strtolower($action)) {
+      case 'get':
+        return $headers;
+
       case 'set':
         if (!$replace && array_key_exists($name, $headers)) {
           return false;
         }
 
-        $header = $name . ': ' . $value;
+        if ($is_response_code) {
+          $header = $name;
+        } else {
+          $header = $name . ': ' . $value;
+        }
         $headers[$name] = array($header, $replace, $code);
         if ($code === null) {
           array_pop($headers[$name]);
         }
         return true;
+
       case 'send':
         if (empty($headers) || headers_sent()) {
           return false;
@@ -709,18 +733,27 @@ class PunyApp extends PunyApp_Settings {
         }
         $headers = array();
         return true;
+
       case 'delete':
-        PunyApp::header('set', $name, null);
+        if (function_exists('header_remove')) {
+          header_remove($name);
+        } else {
+          PunyApp::header('set', $name, null);
+        }
         return true;
     }
   }
 
 
   /**
-   * Send HTTP response code
+   * HTTPレスポンスコードを送信する
+   * FastCGIやPHP-FPMでPHPを実行してる場合、ステータスコードが正しく送信できないバグがある
+   *
+   * PHP: How to send HTTP response code? - Stack Overflow
+   * https://stackoverflow.com/questions/3258634/php-how-to-send-http-response-code
    *
    * @param int $code
-   * @return bool
+   * @return void
    */
   public function sendResponseCode($code) {
     if (headers_sent()) {
@@ -728,28 +761,36 @@ class PunyApp extends PunyApp_Settings {
     }
 
     $code = (int)$code;
-    $response = null;
+    $message = null;
+
     switch ($code) {
+      case 200:
+        $message = 'OK';
+        break;
       case 403:
-        $response = 'Forbidden';
+        $message = 'Forbidden';
         break;
       case 404:
-        $response = 'Not Found';
+        $message = 'Not Found';
         break;
       case 500:
-        $response = 'Internal Server Error';
+        $message = 'Internal Server Error';
         break;
+      default:
+        throw new PunyApp_Error("ResponseCode '{$code}' is not defined");
     }
 
-    if ($response != null) {
+    if (self::isCGI()) {
+      $response = sprintf('%d %s', $code, $message);
+      self::header('set', 'Status', $response, true, $code);
+    } else {
       $protocol = 'HTTP/1.0';
       if (isset($this->env->SERVER_PROTOCOL)) {
         $protocol = $this->env->SERVER_PROTOCOL;
       }
-      self::header('set', sprintf('%s %d %s', $protocol, $code, $response), null, true, $code);
-      return true;
+      $response = sprintf('%s %d %s', $protocol, $code, $message);
+      self::header('set', $response, null, true, $code, true);
     }
-    return false;
   }
 
   /**
@@ -780,7 +821,7 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * Send responce
+   * Send response
    *
    * @param string $message message
    * @return bool
@@ -801,7 +842,7 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * Send responce as JSON
+   * Send response as JSON
    *
    * @param array $data json data
    * @return bool
