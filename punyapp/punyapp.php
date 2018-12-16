@@ -698,6 +698,7 @@ class PunyApp extends PunyApp_Settings {
                                 $replace = true, $code = null,
                                 $is_response_code = false) {
     static $headers = array();
+    static $removable_headers = array();
 
     switch (strtolower($action)) {
       case 'get':
@@ -729,11 +730,16 @@ class PunyApp extends PunyApp_Settings {
           unset($headers[$key]);
         }
         $headers = array();
+
+        foreach ($removable_headers as $key => $val) {
+          header_remove($key);
+        }
+        $removable_headers = array();
         return true;
 
       case 'delete':
         if (function_exists('header_remove')) {
-          header_remove($name);
+          $removable_headers[$name] = true;
         } else {
           PunyApp::header('set', $name, null);
         }
