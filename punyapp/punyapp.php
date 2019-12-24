@@ -133,6 +133,11 @@ class PunyApp extends PunyApp_Settings {
   public $controller = null;
 
   /**
+   * @var boolean whether preventDefault() was executed
+   */
+  private $_isPreventDefaulted = false;
+
+  /**
    * Initialization
    */
   public function initialize() {
@@ -904,7 +909,7 @@ class PunyApp extends PunyApp_Settings {
   }
 
   /**
-   * Generate hash.
+   * Generate hash
    * The returned value is a 40-character hexadecimal number.
    *
    * @param string $value
@@ -912,6 +917,24 @@ class PunyApp extends PunyApp_Settings {
    */
   public static function hash($value) {
     return sha1($value);
+  }
+
+  /**
+   * Prevent to call next event actions
+   *
+   * @return void
+   */
+  public function preventDefault() {
+    $this->_isPreventDefaulted = true;
+  }
+
+  /**
+   * Prevent to call next event actions
+   *
+   * @return boolean whether preventDefault() was executed
+   */
+  public function isPreventDefaulted() {
+    return $this->_isPreventDefaulted;
   }
 
   /**

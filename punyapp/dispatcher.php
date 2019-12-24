@@ -57,6 +57,9 @@ class PunyApp_Dispatcher {
     $params = self::_getParams();
 
     self::$app->event->trigger('app-before-filter', array($params));
+    if (self::$app->isPreventDefaulted()) {
+      return;
+    }
     if (is_callable(array(self::$app->controller, 'beforeFilter'))) {
       self::_executeMethod(array(self::$app->controller, 'beforeFilter'), $params);
     }
@@ -72,6 +75,9 @@ class PunyApp_Dispatcher {
     }
 
     self::$app->event->trigger('app-after-filter', array($params));
+    if (self::$app->isPreventDefaulted()) {
+      return;
+    }
     if (is_callable(array(self::$app->controller, 'afterFilter'))) {
       self::_executeMethod(array(self::$app->controller, 'afterFilter'), $params);
     }

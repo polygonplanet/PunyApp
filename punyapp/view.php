@@ -186,6 +186,9 @@ class PunyApp_View {
 
     self::$_template = $template;
     $this->app->event->trigger('app-before-render', array($template));
+    if ($this->app->isPreventDefaulted()) {
+      return;
+    }
     $this->_render();
     $this->app->event->trigger('app-after-render', array($template));
   }
@@ -212,6 +215,9 @@ class PunyApp_View {
 
     self::$_template = (string)$code;
     $this->app->event->trigger('app-before-render-error', array($code));
+    if ($this->app->isPreventDefaulted()) {
+      return;
+    }
     $this->_renderError();
     $this->app->event->trigger('app-after-render-error', array($code));
   }
