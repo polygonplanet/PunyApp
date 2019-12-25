@@ -1,5 +1,3 @@
-# [PunyApp](https://github.com/polygonplanet/PunyApp) リファレンス
-
 ## これはなに？
 
 PunyApp は、MVC モデルの軽量 PHP フレームワーク (マイクロフレームワーク) です。
@@ -9,7 +7,7 @@ PunyApp は、MVC モデルの軽量 PHP フレームワーク (マイクロフ�
 
 他の PHP 拡張等は必要ありません。
 
-ファイルサイズ: 約 62KB (v1.0.26)
+ファイルサイズ: 約 62KB (v1.0.26 時点)
 
 ## ダウンロード
 
@@ -60,8 +58,6 @@ index.php
 ```
 
 application ディレクトリ配下にソースコードを置きます。
-
-----
 
 ## アプリケーション設定
 
@@ -206,8 +202,6 @@ $settings = array(
 );
 ```
 
-----
-
 ## コントローラ
 
 ここではサンプルとして ToDo アプリケーションの例で解説します。
@@ -245,17 +239,18 @@ class TodoController extends PunyApp_Controller {
 }
 ```
 
-### メソッド名の付け方
+### メソッド名の付け方、URL ルーティング
 
-コントローラのメソッド名は、`リクエストメソッド名` + `アクション名` になります。  
-GET リクエストに対応する hoge アクションの場合、`getHoge` と定義します。  
-アクション名は、リクエストメソッド名を外した名前です。
+コントローラのメソッド名は、`リクエストメソッド名` + `アクション名` として付けます。
+
+例えば、GET リクエストに対応する Item アクションの場合、`getItem` と定義してください。
+アクション名は、リクエストメソッド名を外した名前になります。
 
 URL は `http://www.example.com/コントローラ名/アクション名` となり、 TodoController で getItem の場合は、`http://www.example.com/todo/item` になります。
 
 大文字小文字は区別されません。
 
-### before(前処理), after(後処理)
+### 前処理（before）、後処理（after）
 
 リクエストメソッド名の部分を `before` にすると前処理、`after` で後処理が設定できます。
 
@@ -275,7 +270,7 @@ URL は `http://www.example.com/コントローラ名/アクション名` とな
   }
 ```
 
-### any (すべてのリクエストメソッド)
+### すべてのリクエストメソッド（any）
 
 `any` は、すべてのリクエストメソッドに対応します。
 
@@ -312,19 +307,18 @@ class AnyController extends PunyApp_Controller {
 
 AnyController の中に any メソッドを定義すると、あらゆるリクエストに対して実行することになります。
 
-### パラメータ
+### メソッドに渡ってくるパラメータ（$params）
 
-引数の $params は、リクエストされたパラメータが配列で渡されます。  
+引数の `$params` は、リクエストされたパラメータが配列で渡されます。  
 パラメータがない場合は空の配列が渡されます。  
 このパラメータは、`$this->request->params->xxx` で取得できるものと同じです。
 
-GET リクエストからのパラメータは、  
-`http://www.example.com/コントローラ名/アクション名/1/2/3` のように渡すことができます。  
+GET リクエストからのパラメータは、`http://www.example.com/コントローラ名/アクション名/1/2/3` のように渡すことができます。  
 この場合、`$params = array(1, 2, 3)` となります。  
 名前付きのパラメータは `/foo:1/bar:2` のように `:` で区切って渡します。  
 これは、 `$params = array('foo' => 1, 'bar' => 2)` となります。
 
-### beforeFilter, afterFilter, beforeRender
+### すべての処理の前後になにかする（beforeFilter, afterFilter, beforeRender）
 
 メソッド名を `beforeFilter` にすると、すべての処理の前に行う処理、  
 `afterFilter` ですべての後に実行される処理が設定できます。  
@@ -346,9 +340,10 @@ public function beforeRender($params) {
 
 ## スキーマ
 
-### テーブル定義
+### テーブルを定義する
 
-データベースのテーブル定義を作成します。  
+データベースのテーブル定義を作成します。
+
 事前にデータベースに定義しない場合、フレームワーク内で定義することができます。
 
 `/application/settings/app-schema.php` に記述しておくと、一度だけ実行されます。  
