@@ -1,6 +1,7 @@
 <?php
+use PHPUnit\Framework\TestCase;
 
-class PunyAppTest extends PHPUnit_Framework_TestCase {
+class PunyAppTest extends TestCase {
 
   public function setUp() {
     require_once dirname(dirname(__FILE__)) . '/punyapp/bootstrap.php';
