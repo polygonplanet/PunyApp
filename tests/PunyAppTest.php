@@ -3,7 +3,7 @@
 class PunyAppTest extends PHPUnit_Framework_TestCase {
 
   public function setUp() {
-    require dirname(dirname(__FILE__)) . '/bootstrap.php';
+    require_once dirname(dirname(__FILE__)) . '/punyapp/bootstrap.php';
     $this->assertTrue(true);
   }
 
