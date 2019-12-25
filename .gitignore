@@ -1,0 +1,18 @@
+# composer
+/vendor/
+
+# PunyApp
+/application/storage/cache/*
+!/application/storage/cache/empty
+
+/application/storage/databases/*
+!/application/storage/databases/empty
+
+/application/storage/logs/*
+!/application/storage/logs/empty
+
+/application/storage/sessions/*
+!/application/storage/sessions/empty
+
+/vendors/*
+!/vendors/empty
