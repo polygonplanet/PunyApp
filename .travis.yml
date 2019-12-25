@@ -1,12 +1,19 @@
 language: php
-php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
-  - nightly
+dist: trusty
 
-before_script:
+matrix:
+  include:
+    - php: 5.6
+      env: PHP5=true
+    - php: 7.0
+    - php: 7.1
+    - php: 7.2
+    - php: nightly
+
+install:
   - composer install
+  - if [[ $PHP5 == true ]]; then composer require "phpunit/phpunit:5.7"; fi
 
-script: vendor/bin/phpunit
+script:
+  - if [[ $PHP5 == true ]]; then ./vendor/bin/phpunit .; fi
+  - if [[ $PHP5 != true ]]; then phpunit .; fi
