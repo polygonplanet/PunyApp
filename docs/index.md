@@ -21,7 +21,7 @@ PunyApp は、MVC モデルの軽量 PHP フレームワーク (マイクロフ�
 
 ## 必要な環境
 
-* PHP 7.0.0+
+* PHP 5.5.0+, PHP 7.0.0+
 * mod_rewrite が有効 (Apache Server の場合)
 
 ## ライセンス
